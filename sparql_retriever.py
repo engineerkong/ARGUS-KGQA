@@ -10,9 +10,6 @@ from __future__ import annotations
 from typing import Any
 from rdflib import Graph
 
-PAN_NS  = "http://www.argus-project.eu/"
-INST_NS = "http://www.argus-project.eu/instance/"
-
 PREFIXES = """\
 PREFIX pan:  <http://www.argus-project.eu/>
 PREFIX inst: <http://www.argus-project.eu/instance/>
@@ -21,23 +18,31 @@ PREFIX rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
 """
 
-# Properties that are object properties (point to another named instance)
+# Properties that are object links (need OPTIONAL block, not simple literal bind)
 OBJECT_PROPS = {
     "hasEvent", "isTriggeredBy", "assessesRiskFor", "relatedThreat",
     "generatesThreat", "measures", "documents", "usesPrediction",
     "hasSpatiotemporalRepresentation", "hasMeasurement", "quantifies",
+    "hasSensorLocation", "hasGeometry",
 }
+
+# Properties that live in the geo: namespace rather than pan:
+GEO_PROPS = {"asWKT", "hasGeometry", "sfWithin"}
+
+
+def _prop(name: str) -> str:
+    return f"geo:{name}" if name in GEO_PROPS else f"pan:{name}"
 
 
 def build_sparql(intent: dict) -> str:
-    target_class   = intent.get("target_class", "Asset")
-    filters        = intent.get("filters", [])
-    return_props   = intent.get("return_properties", ["name"])
-    joins          = intent.get("joins", [])
+    target_class = intent.get("target_class", "Asset")
+    filters      = intent.get("filters", [])
+    return_props = intent.get("return_properties", ["name"])
+    joins        = intent.get("joins", [])
 
     target_var = "?" + target_class.lower()
 
-    # SELECT variables
+    # ── SELECT variables ──────────────────────────────────────────────────────
     select_vars = [target_var]
     for p in return_props:
         select_vars.append(f"?{_var(p)}")
@@ -49,58 +54,54 @@ def build_sparql(intent: dict) -> str:
 
     select_clause = "SELECT DISTINCT " + " ".join(select_vars)
 
-    # WHERE body
+    # ── WHERE body ────────────────────────────────────────────────────────────
     lines = [f"  {target_var} a pan:{target_class} ."]
 
-    # Return properties as OPTIONALs
+    # Return properties (OPTIONALs so missing values don't drop rows)
     for p in return_props:
-        if p in OBJECT_PROPS:
-            lines.append(f"  OPTIONAL {{ {target_var} pan:{p} ?{_var(p)} . }}")
-        else:
-            lines.append(f"  OPTIONAL {{ {target_var} pan:{p} ?{_var(p)} . }}")
+        if p not in OBJECT_PROPS:
+            lines.append(f"  OPTIONAL {{ {target_var} {_prop(p)} ?{_var(p)} . }}")
 
-    # Filters on the target
+    # Filters on target
     for f in filters:
         prop = f.get("property", "")
         val  = f.get("value", "")
         op   = f.get("op", "contains")
         fvar = f"?_f_{_var(prop)}"
-        lines.append(f"  {target_var} pan:{prop} {fvar} .")
+        lines.append(f"  {target_var} {_prop(prop)} {fvar} .")
         lines.append(_filter_expr(fvar, op, val))
 
     # Joins
     for j in joins:
-        jclass = j.get("class", "")
-        via    = j.get("via", "")
+        jclass    = j.get("class", "")
+        via       = j.get("via", "")
         direction = j.get("direction", "outgoing")
-        jvar   = "?" + jclass.lower()
-        jfilters = j.get("filters", [])
-        jreturn  = j.get("return_properties", [])
+        jvar      = "?" + jclass.lower()
+        jreturn   = j.get("return_properties", [])
+        jfilters  = j.get("filters", [])
 
+        lines.append("  OPTIONAL {")
         if direction == "outgoing":
-            lines.append(f"  OPTIONAL {{")
-            lines.append(f"    {target_var} pan:{via} {jvar} .")
-        else:  # incoming
-            lines.append(f"  OPTIONAL {{")
-            lines.append(f"    {jvar} pan:{via} {target_var} .")
-
+            lines.append(f"    {target_var} {_prop(via)} {jvar} .")
+        else:
+            lines.append(f"    {jvar} {_prop(via)} {target_var} .")
         lines.append(f"    {jvar} a pan:{jclass} .")
 
         for p in jreturn:
-            lines.append(f"    OPTIONAL {{ {jvar} pan:{p} ?{_var(jclass, p)} . }}")
+            if p not in OBJECT_PROPS:
+                lines.append(f"    OPTIONAL {{ {jvar} {_prop(p)} ?{_var(jclass, p)} . }}")
 
         for f in jfilters:
             prop = f.get("property", "")
             val  = f.get("value", "")
             op   = f.get("op", "contains")
             fvar = f"?_jf_{_var(prop)}"
-            lines.append(f"    {jvar} pan:{prop} {fvar} .")
+            lines.append(f"    {jvar} {_prop(prop)} {fvar} .")
             lines.append("    " + _filter_expr(fvar, op, val))
 
         lines.append("  }")
 
     where_clause = "WHERE {\n" + "\n".join(lines) + "\n}"
-
     return PREFIXES + "\n" + select_clause + "\n" + where_clause
 
 
@@ -122,19 +123,23 @@ def execute(graph: Graph, sparql: str) -> list[dict[str, Any]]:
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
 def _var(*parts: str) -> str:
-    """Make a safe SPARQL variable name from one or more strings."""
     return "_".join(p.replace("-", "_").replace(" ", "_") for p in parts if p)
 
 
 def _filter_expr(fvar: str, op: str, val: str) -> str:
-    val_escaped = val.replace('"', '\\"')
+    v = val.replace('"', '\\"')
     if op == "contains":
-        return f'  FILTER(CONTAINS(LCASE(STR({fvar})), LCASE("{val_escaped}")))'
+        return f'  FILTER(CONTAINS(LCASE(STR({fvar})), LCASE("{v}")))'
     elif op == "equals":
-        return f'  FILTER(LCASE(STR({fvar})) = LCASE("{val_escaped}"))'
+        return f'  FILTER(LCASE(STR({fvar})) = LCASE("{v}"))'
     elif op == "gt":
-        return f'  FILTER(xsd:float({fvar}) > {val_escaped})'
+        return f'  FILTER(xsd:float({fvar}) > "{v}"^^xsd:float)'
     elif op == "lt":
-        return f'  FILTER(xsd:float({fvar}) < {val_escaped})'
+        return f'  FILTER(xsd:float({fvar}) < "{v}"^^xsd:float)'
+    elif op == "after":
+        # Works for both xsd:dateTime and xsd:date
+        return f'  FILTER(STR({fvar}) > "{v}")'
+    elif op == "before":
+        return f'  FILTER(STR({fvar}) < "{v}")'
     else:
-        return f'  FILTER(CONTAINS(LCASE(STR({fvar})), LCASE("{val_escaped}")))'
+        return f'  FILTER(CONTAINS(LCASE(STR({fvar})), LCASE("{v}")))'

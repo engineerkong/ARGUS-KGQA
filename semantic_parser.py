@@ -23,69 +23,97 @@ Classes:
   Event               — a real-world occurrence affecting an asset (earthquake, flood, fire…)
   Threat              — a risk scenario related to an asset
   RiskAssessment      — quantified risk analysis for an asset
-  Measurement         — a sensor observation linked to an asset
+  Measurement         — a single on-site sensor reading at a specific time and location
   Quantity            — the numeric value + unit of a measurement
-  Prediction          — a forecast about an asset
   CulturalDocumentation — document or report about an asset
-  Policy              — a management or protection policy
-  Decision            — a management decision
   Instrument          — a sensor or measurement device
 
-Key datatype properties of Asset:
-  name, country, coordinates, construction_period,
-  architectural_style, material_used, current_condition
+Datatype properties of Asset:
+  name, country, latitude (float), longitude (float), coordinates,
+  construction_period, architectural_style, material_used, current_condition
 
-Key datatype properties of Event:
-  name (description), event_date
+Datatype properties of Event:
+  name (description), event_date  (xsd:date, e.g. "2023-02-06")
 
-Key datatype properties of Threat:
+Datatype properties of Threat:
   threat_description, threat_level   (high / medium / low)
 
-Key datatype properties of RiskAssessment:
+Datatype properties of RiskAssessment:
   FrequencyA, LossB, FractionC, MagnitudeOfRisk
 
-Key datatype properties of Measurement / Quantity:
-  name (type of measurement), quantity_value, quantity_unit
+Datatype properties of Measurement:
+  observation_time  (xsd:dateTime, e.g. "2023-02-06T14:30:00") — WHEN the reading was taken
+  sensor_lat        (float) — latitude of the sensor
+  sensor_lon        (float) — longitude of the sensor
 
-Key object properties:
-  Asset  → hasEvent      → Event
-  Asset  → isTriggeredBy → Threat
-  Asset  → (via RiskAssessment.assessesRiskFor) → RiskAssessment
-  Event  → generatesThreat → Threat
-  Measurement → measures → Asset
+Datatype properties of Quantity (linked from Measurement via pan:quantifies):
+  name   — type of measurement (e.g. "seismic activity", "relative humidity", "surface temperature")
+  quantity_value  (float)
+  quantity_unit   — e.g. "Richter", "%", "°C", "degrees", "AQI"
+
+Object properties:
+  Asset       → hasEvent          → Event
+  Asset       → isTriggeredBy     → Threat
+  RiskAssessment.assessesRiskFor  → Asset
+  Event       → generatesThreat   → Threat
+  Measurement → measures          → Asset       (incoming from Asset's perspective)
+  Measurement → quantifies        → Quantity    (outgoing from Measurement)
   CulturalDocumentation → documents → Asset
 """
 
-PARSE_SYSTEM = """You are a semantic parser for a cultural-heritage knowledge graph.
+PARSE_SYSTEM = """You are a semantic parser for a cultural-heritage sensor knowledge graph.
 
 Given a natural-language query, output ONLY a valid JSON object (no markdown fences)
 with this exact schema:
 
 {
-  "target_class": "<Panoptes class name, e.g. Asset>",
+  "target_class": "<Panoptes class name>",
   "filters": [
-    {"property": "<datatype property>", "op": "contains|equals|gt|lt", "value": "<string>"}
+    {"property": "<datatype property>", "op": "contains|equals|gt|lt|after|before", "value": "<string>"}
   ],
   "return_properties": ["<list of datatype properties to SELECT>"],
   "joins": [
     {
       "class": "<related class>",
-      "via": "<object property from target to related class, e.g. hasEvent>",
+      "via": "<object property name>",
       "direction": "outgoing|incoming",
       "return_properties": ["<properties of the related class>"],
-      "filters": []
+      "filters": [
+        {"property": "<property>", "op": "contains|equals|gt|lt|after|before", "value": "<string>"}
+      ]
     }
   ],
   "explanation": "<one sentence>"
 }
 
+Operator guide:
+  contains  — case-insensitive substring match on string literals
+  equals    — exact case-insensitive match
+  gt / lt   — numeric greater-than / less-than (for float properties)
+  after     — datetime is after the given ISO value (for observation_time, event_date)
+  before    — datetime is before the given ISO value
+
+Temporal queries:
+  - Use "after" / "before" with ISO 8601 values.
+  - Example: readings after 2023-01-01 → {"property": "observation_time", "op": "after", "value": "2023-01-01T00:00:00"}
+  - For event_date (xsd:date), still use "after"/"before" with "YYYY-MM-DD" values.
+
+Spatial / location queries:
+  - To filter by country: {"property": "country", "op": "equals", "value": "Italy"}
+  - To return sensor position: include "sensor_lat" and "sensor_lon" in return_properties
+    of the Measurement join (or as target if target_class is Measurement).
+  - To return asset position: include "latitude" and "longitude" in Asset return_properties.
+
+Measurement queries:
+  - target_class = "Measurement" when asking about sensor readings directly.
+  - Join to Asset (direction="outgoing", via="measures") to get asset name/country.
+  - Join to Quantity (direction="outgoing", via="quantifies") to get value/unit/type.
+
 Rules:
-- Use only class names and property names from the ontology schema provided.
-- For Asset queries, always include "name" and "country" in return_properties.
-- For joins, "direction": "incoming" means the related class points TO the target
-  (e.g. Measurement.measures → Asset, so to get measurements of an asset use
-   direction="incoming", via="measures").
-- Keep it minimal: only add joins that are needed to answer the question.
+  - Use only class names and property names from the ontology schema above.
+  - For Asset queries include "name" and "country" in return_properties.
+  - For Measurement queries always include "observation_time", "sensor_lat", "sensor_lon".
+  - direction="incoming" means the related class's property points TO the target.
 """
 
 
@@ -104,7 +132,6 @@ def parse(query: str) -> dict:
     )
     raw = response.choices[0].message.content.strip()
 
-
     # Strip accidental markdown fences
     if raw.startswith("```"):
         raw = raw.split("```")[1]
@@ -115,7 +142,6 @@ def parse(query: str) -> dict:
     try:
         return json.loads(raw)
     except json.JSONDecodeError as e:
-        # Best-effort: return a fallback intent
         print(f"[SemanticParser] JSON parse error: {e}. Raw: {raw[:200]}")
         return {
             "target_class": "Asset",

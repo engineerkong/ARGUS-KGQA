@@ -17,8 +17,17 @@ from answer_generator import generate
 
 
 class Pipeline:
-    def __init__(self, verbose: bool = True):
-        self.verbose = verbose
+    def __init__(
+        self,
+        verbose: bool = True,
+        pilot_lat: float = 37.9715,
+        pilot_lon: float = 23.7267,
+        pilot_name: str = "Parthenon (pilot site)",
+    ):
+        self.verbose    = verbose
+        self.pilot_lat  = pilot_lat
+        self.pilot_lon  = pilot_lon
+        self.pilot_name = pilot_name
         if self.verbose:
             print("[Pipeline] Loading KG store (panoptes3.owl + instances)…")
         self.graph = build_graph()
@@ -60,7 +69,10 @@ class Pipeline:
         if v:
             print(f"\n{sep}")
             print("[Step 4] Generating natural language answer…")
-        answer = generate(query, sparql, results)
+        answer = generate(query, sparql, results,
+                          pilot_lat=self.pilot_lat,
+                          pilot_lon=self.pilot_lon,
+                          pilot_name=self.pilot_name)
         if v:
             print("[Step 4] Answer:")
             print(answer)

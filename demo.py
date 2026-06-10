@@ -13,10 +13,17 @@ Run:
 from pipeline import Pipeline
 
 QUERIES = [
+    # General asset queries
     "Show me all cultural heritage sites in Italy and their current condition.",
-    "Which assets are at risk from earthquakes and what is their risk magnitude?",
     "Find Byzantine-style heritage sites and list any threats associated with them.",
-    "What measurements have been taken for the Parthenon?",
+    # Temporal queries
+    "Show all seismic measurements recorded after 2023-01-01, including their timestamps and sensor locations.",
+    "Which sensor readings were taken at the Colosseum in 2022? Include dates and values.",
+    # Spatial / location queries
+    "List all sensors deployed in Greece with their coordinates and what they measured.",
+    "Which measurements were taken at sites in Italy? Show sensor positions and observation times.",
+    # Combined temporal + spatial
+    "Show me all on-site measurements taken after 2022-01-01 at sites in Turkey or Croatia, with timestamps and sensor coordinates.",
 ]
 
 
