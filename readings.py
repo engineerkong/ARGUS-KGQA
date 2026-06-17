@@ -25,6 +25,7 @@ from requests.exceptions import RequestException
 from urllib3.util.retry import Retry
 from rdflib import Graph, Literal, Namespace, RDF, URIRef
 from rdflib.namespace import RDFS, XSD
+from ontology_schema import SOSA, ARGUS, EX
 
 
 # ---------------------------------------------------------------------------
@@ -48,15 +49,6 @@ API_HEADERS = {"Accept": "application/json"}
 REQUEST_TIMEOUT = (10, 180)
 PAGE_SLEEP_SECONDS = 0.5
 MAX_CONSECUTIVE_FAILURES = 20
-
-
-# ---------------------------------------------------------------------------
-# RDF namespaces
-# ---------------------------------------------------------------------------
-
-SOSA = Namespace("http://www.w3.org/ns/sosa/")
-ARGUS = Namespace("http://www.argus-project.eu/ontology/")
-EX = Namespace("http://www.argus-project.eu/resource/")
 
 
 # ---------------------------------------------------------------------------

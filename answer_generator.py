@@ -25,6 +25,7 @@ Rules:
 - Include key numbers from the results (counts, values, site names).
 - If results are tabular, present them as a compact list or table.
 - If results are empty or contain an error, say so in one sentence and suggest a rephrased query.
+- Do NOT output URIs or internal identifiers — use human-readable names and labels only.
 - Do NOT explain the SPARQL query, the ontology, or how the system works.
 - Do NOT add follow-up suggestions or next steps.
 """

@@ -18,7 +18,7 @@ from typing import Any
 from rdflib import Graph
 
 from semantic_parser import parse
-from sparql_retriever import build_sparql, execute
+from sparql_retriever import build_sparql, execute, unfold_results
 from answer_generator import generate
 
 DEFAULT_TTL = Path(__file__).resolve().parent / "data" / "argus_readings.ttl"
@@ -112,11 +112,21 @@ class Pipeline:
                 if v:
                     print(f"\n[Pipeline] Query failed after {self.max_retries} retries — {failure}")
 
+        # ── Step 3.5: Unfold results ─────────────────────────────────
+        unfolded = unfold_results(self.graph, results)
+        if v and unfolded != results:
+            print(f"\n{sep}")
+            print("[Step 3.5] Unfolded results (URIs resolved to linked properties):")
+            for r in unfolded[:5]:
+                print("  ", r)
+            if len(unfolded) > 5:
+                print(f"  … and {len(unfolded) - 5} more.")
+
         # ── Step 4: Natural Language Answer ──────────────────────────
         if v:
             print(f"\n{sep}")
             print("[Step 4] Generating natural language answer…")
-        answer = generate(query, sparql, results)
+        answer = generate(query, sparql, unfolded)
         if v:
             print("[Step 4] Answer:")
             print(answer)

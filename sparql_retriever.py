@@ -3,11 +3,18 @@ Step 3 — SPARQL Retriever.
 
 Converts a parsed intent (from semantic_parser) into a SPARQL SELECT query,
 executes it against the rdflib graph, and returns results as a list of dicts.
+
+All class/property mappings are derived from the OWL ontology files
+via ontology_schema — no hardcoded schema knowledge here.
 """
 
 from __future__ import annotations
 from typing import Any
 from rdflib import Graph
+from ontology_schema import (
+    extract_class_map, extract_prop_map,
+    extract_object_props, extract_prop_domain,
+)
 
 PREFIXES = """\
 PREFIX sosa:  <http://www.w3.org/ns/sosa/>
@@ -18,50 +25,13 @@ PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
 PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 """
 
-# Map short class names to full prefixed forms
-CLASS_MAP = {
-    "ObservationCollection": "sosa:ObservationCollection",
-    "Observation": "sosa:Observation",
-    "Sensor": "sosa:Sensor",
-    "Site": "argus:Site",
-    "Node": "argus:Node",
-    "ObservedProperty": "argus:ObservedProperty",
-    "EngineeringUnit": "argus:EngineeringUnit",
-}
-
-# Map short property names to full prefixed forms
-PROP_MAP = {
-    "resultTime": "sosa:resultTime",
-    "hasSite": "argus:hasSite",
-    "madeBySensor": "sosa:madeBySensor",
-    "hasNode": "argus:hasNode",
-    "hasObservation": "argus:hasObservation",
-    "hasEngineeringUnit": "argus:hasEngineeringUnit",
-    "observedProperty": "sosa:observedProperty",
-    "hasSimpleResult": "sosa:hasSimpleResult",
-    "readingType": "argus:readingType",
-    "label": "rdfs:label",
-    "sensorId": "argus:sensorId",
-    "sensorModel": "argus:sensorModel",
-    "nodeId": "argus:nodeId",
-    "nodeName": "argus:nodeName",
-    "topic": "argus:topic",
-    "topicId": "argus:topicId",
-    "unit": "argus:unit",
-    "engineeringUnitId": "argus:engineeringUnitId",
-    "rawJson": "argus:rawJson",
-}
-
-OBJECT_PROPS = {
-    "hasSite", "madeBySensor", "hasNode", "hasObservation",
-    "hasEngineeringUnit", "observedProperty",
-    "argus:hasSite", "sosa:madeBySensor", "argus:hasNode", "argus:hasObservation",
-    "argus:hasEngineeringUnit", "sosa:observedProperty",
-}
+CLASS_MAP = extract_class_map()
+PROP_MAP = extract_prop_map()
+OBJECT_PROPS = extract_object_props()
+PROP_DOMAIN = extract_prop_domain()
 
 
 def _strip_prefix(name: str) -> str:
-    """Strip namespace prefix if the LLM included one (e.g. 'argus:hasSite' → 'hasSite')."""
     if ":" in name:
         return name.split(":", 1)[1]
     return name
@@ -84,7 +54,7 @@ def _var(*parts: str) -> str:
             continue
         p = _strip_prefix(p)
         cleaned.append(p.replace("-", "_").replace(" ", "_"))
-    return "_".join(cleaned)
+    return "_".join(cleaned).lower()
 
 
 def _filter_expr(fvar: str, op: str, val: str) -> str:
@@ -141,8 +111,7 @@ def build_sparql(intent: dict) -> str:
         lines.append(f"  {target_var} {_prop(prop)} {fvar} .")
         lines.append(_filter_expr(fvar, op, val))
 
-    # Determine which join classes are referenced in aggregation group_by,
-    # so we make them non-optional (required for GROUP BY to bind).
+    # Determine which join classes are referenced in aggregation group_by
     agg_group_refs = set()
     if aggregation:
         gb = _var(aggregation.get("group_by", ""))
@@ -154,6 +123,17 @@ def build_sparql(intent: dict) -> str:
             if jc.lower() == gb.lower():
                 agg_group_refs.add(jc)
 
+    # Pre-scan: find which join classes are depended on by later joins
+    required_join_classes = set()
+    for j in joins:
+        via_short = _strip_prefix(j.get("via", ""))
+        prop_domain = PROP_DOMAIN.get(via_short)
+        if prop_domain and prop_domain != target_class:
+            required_join_classes.add(prop_domain)
+
+    # Track join variables so later joins can reference earlier ones
+    join_vars = {target_class: target_var}
+
     for j in joins:
         jclass    = j.get("class", "")
         via       = j.get("via", "")
@@ -162,16 +142,27 @@ def build_sparql(intent: dict) -> str:
         jreturn   = j.get("return_properties", [])
         jfilters  = j.get("filters", [])
 
-        # Use OPTIONAL unless this join is needed for GROUP BY or has filters
-        use_optional = jclass not in agg_group_refs and not jfilters
+        # Route through the correct anchor variable based on property domain
+        via_short = _strip_prefix(via)
+        prop_domain = PROP_DOMAIN.get(via_short)
+        if prop_domain and prop_domain != target_class and prop_domain in join_vars:
+            anchor_var = join_vars[prop_domain]
+        else:
+            anchor_var = target_var
+
+        use_optional = (jclass not in agg_group_refs
+                        and not jfilters
+                        and jclass not in required_join_classes)
 
         if use_optional:
             lines.append("  OPTIONAL {")
         if direction == "outgoing":
-            lines.append(f"    {target_var} {_prop(via)} {jvar} .")
+            lines.append(f"    {anchor_var} {_prop(via)} {jvar} .")
         else:
-            lines.append(f"    {jvar} {_prop(via)} {target_var} .")
+            lines.append(f"    {jvar} {_prop(via)} {anchor_var} .")
         lines.append(f"    {jvar} a {_class(jclass)} .")
+
+        join_vars[jclass] = jvar
 
         for p in jreturn:
             if p not in OBJECT_PROPS:
@@ -188,24 +179,36 @@ def build_sparql(intent: dict) -> str:
         if use_optional:
             lines.append("  }")
 
-    where_clause = "WHERE {\n" + "\n".join(lines) + "\n}"
-
     # ── Aggregation ──────────────────────────────────────────────────────
     if aggregation:
         agg_type = aggregation.get("type", "count").upper()
 
-        # The LLM may say target="reading" but the actual variable is ?observationcollection.
-        # Map any unknown target name back to the target_var from the WHERE clause.
         raw_agg_target = _var(aggregation.get("target", ""))
-        known_vars = {target_class.lower()}
+        known_class_vars = {target_class.lower()}
         for j in joins:
-            known_vars.add(j["class"].lower())
-        if raw_agg_target.lower() not in known_vars:
-            agg_target = target_var
-        else:
-            agg_target = "?" + raw_agg_target
+            known_class_vars.add(j["class"].lower())
 
-        # group_by may reference a join variable like "Site_label" or just "site"
+        known_prop_vars = {_var(p) for p in return_props}
+        for j in joins:
+            for p in j.get("return_properties", []):
+                known_prop_vars.add(_var(j["class"], p))
+                known_prop_vars.add(_var(p))
+
+        if raw_agg_target in known_class_vars:
+            agg_target = "?" + raw_agg_target
+        elif raw_agg_target in known_prop_vars:
+            agg_target = "?" + raw_agg_target
+            prop_full = _prop(aggregation.get("target", ""))
+            required_line = f"  {target_var} {prop_full} {agg_target} ."
+            if required_line not in lines:
+                lines.append(required_line)
+        elif _strip_prefix(aggregation.get("target", "")) in PROP_MAP:
+            agg_target = "?" + raw_agg_target
+            prop_full = _prop(aggregation.get("target", ""))
+            lines.append(f"  {target_var} {prop_full} {agg_target} .")
+        else:
+            agg_target = target_var
+
         raw_group = aggregation.get("group_by", "")
         group_var = "?" + _var(raw_group)
 
@@ -216,6 +219,8 @@ def build_sparql(intent: dict) -> str:
     else:
         select_clause = "SELECT DISTINCT " + " ".join(select_vars)
         group_clause = ""
+
+    where_clause = "WHERE {\n" + "\n".join(lines) + "\n}"
 
     # ── ORDER BY / LIMIT ─────────────────────────────────────────────────
     order_clause = ""
@@ -245,3 +250,119 @@ def execute(graph: Graph, sparql: str) -> list[dict[str, Any]]:
     except Exception as e:
         results = [{"error": str(e)}]
     return results
+
+
+# ── URI unfolding ────────────────────────────────────────────────────────
+
+from rdflib import URIRef
+from rdflib.namespace import RDFS, RDF
+
+import re
+
+_RESOURCE_PREFIX = "http://www.argus-project.eu/resource/"
+_SKIP_PREDS = {str(RDF.type)}
+_MAX_VALUE_LEN = 200
+_UUID_RE = re.compile(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$', re.I)
+_HEX_ID_RE = re.compile(r'^[0-9a-f]{16,}$', re.I)
+
+
+def _is_resource_uri(val: str | None) -> bool:
+    return val is not None and val.startswith(_RESOURCE_PREFIX)
+
+
+def _is_id_value(val: str) -> bool:
+    if _UUID_RE.match(val) or _HEX_ID_RE.match(val):
+        return True
+    parts = val.split("/")
+    if len(parts) >= 2:
+        uuid_count = sum(1 for p in parts if _UUID_RE.match(p) or _HEX_ID_RE.match(p))
+        if uuid_count >= 1 and uuid_count >= len(parts) - 1:
+            return True
+    return False
+
+
+def _pred_short(pred_str: str) -> str:
+    return pred_str.rsplit("/", 1)[-1].rsplit("#", 1)[-1]
+
+
+def _resolve_uri(graph: Graph, uri_str: str, cache: dict, depth: int = 0) -> dict[str, str]:
+    if uri_str in cache:
+        return cache[uri_str]
+
+    uri = URIRef(uri_str)
+    info = {}
+
+    for pred, obj in graph.predicate_objects(uri):
+        pred_str = str(pred)
+        if pred_str in _SKIP_PREDS:
+            continue
+        key = _pred_short(pred_str)
+        if key in info:
+            continue
+
+        obj_str = str(obj)
+        if len(obj_str) > _MAX_VALUE_LEN:
+            continue
+        if _is_resource_uri(obj_str):
+            if depth < 1:
+                nested = _resolve_uri(graph, obj_str, cache, depth + 1)
+                resolved = nested.get("label")
+                if resolved:
+                    info[key] = resolved
+            else:
+                for lbl in graph.objects(URIRef(obj_str), RDFS.label):
+                    info[key] = str(lbl)
+                    break
+        elif _is_id_value(obj_str):
+            continue
+        else:
+            info[key] = obj_str
+
+    cache[uri_str] = info
+    return info
+
+
+
+def _clean_value(val: str | None) -> str | None:
+    if val is None:
+        return None
+    if len(val) > _MAX_VALUE_LEN:
+        return None
+    if _is_resource_uri(val):
+        short = val.replace(_RESOURCE_PREFIX, "")
+        if _is_id_value(short):
+            return None
+        return short
+    if _is_id_value(val):
+        return None
+    return val
+
+
+def unfold_results(graph: Graph, results: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Unfold resource URIs in results by following all their properties in the graph."""
+    if not results or "error" in results[0]:
+        return results
+
+    cache: dict[str, dict] = {}
+    unfolded = []
+
+    for row in results:
+        new_row = {}
+        for key, val in row.items():
+            if _is_resource_uri(val):
+                info = _resolve_uri(graph, val, cache)
+                for info_key, info_val in info.items():
+                    cleaned = _clean_value(info_val)
+                    if cleaned is not None:
+                        new_row[f"{key}_{info_key}"] = cleaned
+                if not info:
+                    cleaned = _clean_value(val)
+                    if cleaned is not None:
+                        new_row[key] = cleaned
+            else:
+                cleaned = _clean_value(val)
+                if cleaned is not None:
+                    new_row[key] = cleaned
+        unfolded.append(new_row)
+
+    return unfolded

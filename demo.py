@@ -11,37 +11,72 @@ Prerequisites:
        export OLLAMA_MODEL=gpt-oss:120b
 
 Run:
-    python demo.py
+    python demo.py              # batch mode: run preset queries
+    python demo.py --online     # interactive mode: type queries in terminal
 """
 
+import argparse
 from pipeline import Pipeline
 
 QUERIES = [
-    # Per-site overview
     "How many readings are available per site?",
     "Which sensors are available at the baltanas site?",
-    # Specific quantities
     "What are the temperature values recorded at each site?",
     "Which displacement measurements are available?",
-    # Temporal queries
     "What are the latest 10 readings?",
     "What is the most recent reading timestamp for each site?",
-    # Sensor / node inventory
     "How many sensors are deployed per site?",
     "Which physical quantities are measured at the delos site?",
 ]
 
 
-def main():
-    pipeline = Pipeline(verbose=True)
-
+def run_batch(pipeline: Pipeline):
     for query in QUERIES:
         print("\n" + "=" * 70)
         print(f"QUERY: {query}")
         print("=" * 70)
-
         pipeline.run(query)
         print()
+
+
+def run_online(pipeline: Pipeline):
+    print("ARGUS KGQA — Interactive Mode")
+    print("Type a question and press Enter. Type 'quit' or Ctrl+C to exit.\n")
+
+    while True:
+        try:
+            query = input("Question: ").strip()
+        except (EOFError, KeyboardInterrupt):
+            print("\nBye.")
+            break
+
+        if not query:
+            continue
+        if query.lower() in ("quit", "exit", "q"):
+            print("Bye.")
+            break
+
+        print()
+        result = pipeline.run(query)
+        print("\n" + "─" * 60)
+        print(f"Answer: {result['answer']}")
+        print("─" * 60 + "\n")
+
+
+def main():
+    parser = argparse.ArgumentParser(description="ARGUS KGQA demo")
+    parser.add_argument("--online", action="store_true",
+                        help="Interactive mode: type queries in terminal")
+    parser.add_argument("--quiet", action="store_true",
+                        help="Hide intermediate pipeline steps")
+    args = parser.parse_args()
+
+    pipeline = Pipeline(verbose=not args.quiet)
+
+    if args.online:
+        run_online(pipeline)
+    else:
+        run_batch(pipeline)
 
 
 if __name__ == "__main__":
