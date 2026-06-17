@@ -1,20 +1,75 @@
-"""Client for the ARGUS readings API."""
+"""
+ARGUS KGQA — Readings API client + RDF Knowledge Graph builder.
+
+Fetches sensor readings from the ARGUS API, converts them to RDF triples
+using SOSA/ARGUS vocabularies, and stores the result as a Turtle file.
+
+Usage:
+    python readings.py                        # fetch all, full run
+    python readings.py --max-records 500      # limit records
+    python readings.py --resume               # incremental update
+    python readings.py --resume --overlap-pages 3
+"""
+
+import argparse
+import hashlib
+import json
+import time
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any, Dict, Iterable, Iterator, List, Optional, Tuple
 
 import requests
-from typing import Iterator, Optional
+from requests.adapters import HTTPAdapter
+from requests.exceptions import RequestException
+from urllib3.util.retry import Retry
+from rdflib import Graph, Literal, Namespace, RDF, URIRef
+from rdflib.namespace import RDFS, XSD
+
+
+# ---------------------------------------------------------------------------
+# Paths — all output goes to ARGUS-KGQA/data/
+# ---------------------------------------------------------------------------
+
+DATA_DIR = Path(__file__).resolve().parent / "data"
+
+TTL_FILE = DATA_DIR / "argus_readings.ttl"
+STATE_FILE = DATA_DIR / "argus_readings_state.json"
+BACKUP_FILE = DATA_DIR / "argus_readings.backup.ttl"
+
+
+# ---------------------------------------------------------------------------
+# ARGUS API
+# ---------------------------------------------------------------------------
 
 BASE_URL = "http://api.argusservices.athenarc.gr/api/readings"
 
+API_HEADERS = {"Accept": "application/json"}
+REQUEST_TIMEOUT = (10, 180)
+PAGE_SLEEP_SECONDS = 0.5
+MAX_CONSECUTIVE_FAILURES = 20
+
+
+# ---------------------------------------------------------------------------
+# RDF namespaces
+# ---------------------------------------------------------------------------
+
+SOSA = Namespace("http://www.w3.org/ns/sosa/")
+ARGUS = Namespace("http://www.argus-project.eu/ontology/")
+EX = Namespace("http://www.argus-project.eu/resource/")
+
+
+# ---------------------------------------------------------------------------
+# Simple API client (original readings.py functionality)
+# ---------------------------------------------------------------------------
 
 def fetch_page(page: int = 1, **params) -> dict:
-    """Fetch a single page of readings. Returns the raw JSON response."""
     response = requests.get(BASE_URL, params={"page": page, **params}, timeout=30)
     response.raise_for_status()
     return response.json()
 
 
-def fetch_readings(max_pages: Optional[int] = None, **params) -> Iterator[dict]:
-    """Yield individual reading records across all pages (or up to max_pages)."""
+def fetch_readings_iter(max_pages: Optional[int] = None, **params) -> Iterator[dict]:
     page = 1
     while True:
         data = fetch_page(page, **params)
@@ -28,11 +83,474 @@ def fetch_readings(max_pages: Optional[int] = None, **params) -> Iterator[dict]:
 
 
 def fetch_all(max_pages: Optional[int] = None, **params) -> list[dict]:
-    """Return all reading records as a list."""
-    return list(fetch_readings(max_pages=max_pages, **params))
+    return list(fetch_readings_iter(max_pages=max_pages, **params))
+
+
+# ---------------------------------------------------------------------------
+# Robust paginated fetcher (with retry + resume support)
+# ---------------------------------------------------------------------------
+
+def _make_session() -> requests.Session:
+    retry_strategy = Retry(
+        total=5, connect=5, read=5, status=5,
+        backoff_factor=2,
+        status_forcelist=[429, 500, 502, 503, 504],
+        allowed_methods=["GET"],
+        raise_on_status=False,
+    )
+    session = requests.Session()
+    adapter = HTTPAdapter(max_retries=retry_strategy)
+    session.mount("http://", adapter)
+    session.mount("https://", adapter)
+    return session
+
+
+def _fetch_page_robust(session: requests.Session, page: int) -> Dict[str, Any]:
+    response = session.get(
+        BASE_URL, headers=API_HEADERS,
+        params={"page": page}, timeout=REQUEST_TIMEOUT,
+    )
+    response.raise_for_status()
+    payload = response.json()
+    if not isinstance(payload, dict):
+        raise ValueError("Expected paginated API response to be a JSON object.")
+    return payload
+
+
+def _parse_paginated(payload: Dict[str, Any], fallback_page: int) -> Tuple[List[Dict], int, int, Optional[int]]:
+    data = payload.get("data", [])
+    meta = payload.get("meta", {})
+    if not isinstance(data, list):
+        data = []
+    if not isinstance(meta, dict):
+        meta = {}
+    current_page = int(meta.get("current_page", fallback_page))
+    last_page = int(meta.get("last_page", current_page))
+    total = meta.get("total")
+    records = [item for item in data if isinstance(item, dict)]
+    return records, current_page, last_page, total
+
+
+def fetch_readings_paginated(
+    max_records: Optional[int] = None,
+    start_page: int = 1,
+) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
+    print(f"Fetching paginated readings from: {BASE_URL}")
+    print(f"Starting from page: {start_page}")
+
+    session = _make_session()
+    readings: List[Dict[str, Any]] = []
+    page = max(1, start_page)
+    consecutive_failures = 0
+    last_successful_page = start_page - 1
+    last_page = None
+    total = None
+
+    while True:
+        try:
+            payload = _fetch_page_robust(session, page)
+            records, current_page, last_page_value, total_value = _parse_paginated(payload, page)
+            if total_value is not None:
+                total = total_value
+            last_page = last_page_value
+            readings.extend(records)
+            last_successful_page = current_page
+
+            print(
+                f"Page {current_page}/{last_page} | "
+                f"page records: {len(records)} | "
+                f"downloaded: {len(readings)}"
+                + (f" / total: {total}" if total is not None else "")
+            )
+
+            if max_records is not None and len(readings) >= max_records:
+                readings = readings[:max_records]
+                print(f"Stopped after max_records={max_records}")
+                break
+            if current_page >= last_page:
+                break
+
+            page = current_page + 1
+            consecutive_failures = 0
+            time.sleep(PAGE_SLEEP_SECONDS)
+
+        except RequestException as exc:
+            consecutive_failures += 1
+            wait_seconds = min(300, 10 * consecutive_failures)
+            print(
+                f"Failed on page {page}. "
+                f"Consecutive failures: {consecutive_failures}/{MAX_CONSECUTIVE_FAILURES}. "
+                f"Waiting {wait_seconds}s. Error: {repr(exc)}"
+            )
+            if consecutive_failures >= MAX_CONSECUTIVE_FAILURES:
+                print("Stopping to avoid hammering the API. Re-run later to resume.")
+                break
+            time.sleep(wait_seconds)
+
+    progress = {
+        "last_successful_page": last_successful_page,
+        "last_page": last_page,
+        "total": total,
+        "records_downloaded_this_run": len(readings),
+    }
+    print(f"Fetched readings total this run: {len(readings)}")
+    return readings, progress
+
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+def _now_utc_iso() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
+
+def _safe_text(value: Any, fallback: str = "unknown") -> str:
+    if value is None:
+        return fallback
+    text = str(value).strip()
+    return text if text else fallback
+
+
+def _make_hash(value: Any) -> str:
+    raw = json.dumps(value, sort_keys=True, ensure_ascii=False, default=str)
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:24]
+
+
+def _make_uri_part(value: Any) -> str:
+    text = _safe_text(value)
+    allowed = []
+    for ch in text:
+        if ch.isalnum() or ch in ("-", "_"):
+            allowed.append(ch)
+        else:
+            allowed.append("_")
+    return "".join(allowed)[:120]
+
+
+# ---------------------------------------------------------------------------
+# State persistence
+# ---------------------------------------------------------------------------
+
+def _load_state() -> Dict[str, Any]:
+    if not STATE_FILE.exists():
+        return {
+            "seen_reading_ids": [],
+            "last_update": None,
+            "total_seen": 0,
+            "last_successful_page": 0,
+            "last_page": None,
+            "total": None,
+            "records_downloaded": 0,
+        }
+    with open(STATE_FILE, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def _save_state(state: Dict[str, Any]) -> None:
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    with open(STATE_FILE, "w", encoding="utf-8") as f:
+        json.dump(state, f, ensure_ascii=False, indent=2)
+
+
+# ---------------------------------------------------------------------------
+# RDF conversion
+# ---------------------------------------------------------------------------
+
+def _bind_namespaces(g: Graph) -> None:
+    g.bind("sosa", SOSA)
+    g.bind("argus", ARGUS)
+    g.bind("ex", EX)
+    g.bind("rdfs", RDFS)
+    g.bind("xsd", XSD)
+
+
+def _add_literal(g: Graph, subject: URIRef, predicate: URIRef, value: Any, datatype: Optional[URIRef] = None) -> None:
+    if value is None:
+        return
+    if datatype is not None:
+        g.add((subject, predicate, Literal(value, datatype=datatype)))
+    else:
+        g.add((subject, predicate, Literal(value)))
+
+
+def reading_stable_id(reading: Dict[str, Any]) -> str:
+    key = {
+        "ts": reading.get("ts"),
+        "site": reading.get("site"),
+        "sensor_id": reading.get("sensor_id"),
+        "node_id": reading.get("node_id"),
+        "topic_id": reading.get("topic_id"),
+        "reading_type": reading.get("reading_type"),
+        "payload": reading.get("payload"),
+    }
+    return _make_hash(key)
+
+
+def _extract_observations(payload: Any) -> Iterable[Dict[str, Any]]:
+    if payload is None:
+        return []
+
+    observations = []
+
+    if isinstance(payload, dict):
+        for key, value in payload.items():
+            if isinstance(value, (dict, list)):
+                continue
+            observations.append({"quantity": key, "value": value, "unit": None})
+        return observations
+
+    if isinstance(payload, list):
+        for item in payload:
+            if not isinstance(item, dict):
+                continue
+            observations.append({
+                "quantity": item.get("n") or item.get("name") or item.get("quantity"),
+                "value": item.get("v") or item.get("value"),
+                "unit": item.get("u") or item.get("unit"),
+            })
+        return observations
+
+    return []
+
+
+def _add_observation_value(g: Graph, obs_uri: URIRef, value: Any) -> None:
+    if isinstance(value, bool):
+        g.add((obs_uri, SOSA.hasSimpleResult, Literal(value, datatype=XSD.boolean)))
+        return
+    if isinstance(value, int):
+        g.add((obs_uri, SOSA.hasSimpleResult, Literal(value, datatype=XSD.integer)))
+        return
+    if isinstance(value, float):
+        g.add((obs_uri, SOSA.hasSimpleResult, Literal(value, datatype=XSD.decimal)))
+        return
+    if isinstance(value, str):
+        text = value.strip()
+        try:
+            if "." in text:
+                float(text)
+                g.add((obs_uri, SOSA.hasSimpleResult, Literal(text, datatype=XSD.decimal)))
+                return
+            int(text)
+            g.add((obs_uri, SOSA.hasSimpleResult, Literal(text, datatype=XSD.integer)))
+            return
+        except ValueError:
+            pass
+    g.add((obs_uri, SOSA.hasSimpleResult, Literal(value)))
+
+
+def add_reading_to_graph(g: Graph, reading: Dict[str, Any]) -> str:
+    rid = reading_stable_id(reading)
+
+    site_name = _safe_text(reading.get("site"), "unknown_site")
+    sensor_id = _safe_text(reading.get("sensor_id"), "unknown_sensor")
+    node_id = _safe_text(reading.get("node_id"), "unknown_node")
+    reading_type = _safe_text(reading.get("reading_type"), "unknown_reading_type")
+
+    reading_uri = EX[f"reading/{rid}"]
+    site_uri = EX[f"site/{_make_uri_part(site_name)}"]
+    sensor_uri = EX[f"sensor/{_make_uri_part(sensor_id)}"]
+    node_uri = EX[f"node/{_make_uri_part(node_id)}"]
+
+    # Reading as observation collection
+    g.add((reading_uri, RDF.type, SOSA.ObservationCollection))
+    g.add((reading_uri, ARGUS.hasSite, site_uri))
+    g.add((reading_uri, SOSA.madeBySensor, sensor_uri))
+    g.add((reading_uri, ARGUS.hasNode, node_uri))
+    _add_literal(g, reading_uri, ARGUS.readingType, reading_type)
+
+    ts = reading.get("ts")
+    if ts is not None:
+        _add_literal(g, reading_uri, SOSA.resultTime, ts, XSD.dateTime)
+
+    _add_literal(g, reading_uri, ARGUS.topic, reading.get("topic"))
+    _add_literal(g, reading_uri, ARGUS.topicId, reading.get("topic_id"))
+    _add_literal(g, reading_uri, ARGUS.deviceGroupId, reading.get("device_group_id"))
+
+    # Site
+    g.add((site_uri, RDF.type, ARGUS.Site))
+    g.add((site_uri, RDFS.label, Literal(site_name)))
+
+    # Sensor
+    sensor_label = reading.get("sensor_name") or sensor_id
+    g.add((sensor_uri, RDF.type, SOSA.Sensor))
+    g.add((sensor_uri, RDFS.label, Literal(_safe_text(sensor_label))))
+    _add_literal(g, sensor_uri, ARGUS.sensorId, sensor_id)
+    _add_literal(g, sensor_uri, ARGUS.sensorModel, reading.get("sensor_model"))
+
+    # Node
+    node_label = reading.get("node_label") or reading.get("node_name") or node_id
+    g.add((node_uri, RDF.type, ARGUS.Node))
+    g.add((node_uri, RDFS.label, Literal(_safe_text(node_label))))
+    _add_literal(g, node_uri, ARGUS.nodeId, node_id)
+    _add_literal(g, node_uri, ARGUS.nodeName, reading.get("node_name"))
+    _add_literal(g, node_uri, ARGUS.nodeModel, reading.get("node_model"))
+
+    # Engineering unit
+    eng_unit_id = reading.get("eng_unit_id")
+    eng_unit_name = reading.get("eng_unit_name") or reading.get("eng_unit_custom")
+
+    if eng_unit_id is not None or eng_unit_name is not None:
+        unit_key = eng_unit_id if eng_unit_id is not None else eng_unit_name
+        unit_uri = EX[f"engineering-unit/{_make_uri_part(unit_key)}"]
+        g.add((unit_uri, RDF.type, ARGUS.EngineeringUnit))
+        g.add((reading_uri, ARGUS.hasEngineeringUnit, unit_uri))
+        if eng_unit_name is not None:
+            g.add((unit_uri, RDFS.label, Literal(_safe_text(eng_unit_name))))
+        _add_literal(g, unit_uri, ARGUS.engineeringUnitId, eng_unit_id)
+        _add_literal(g, unit_uri, ARGUS.engineeringUnitCustom, reading.get("eng_unit_custom"))
+
+    # Payload observations
+    payload = reading.get("payload")
+    for index, obs in enumerate(_extract_observations(payload)):
+        quantity = obs.get("quantity")
+        value = obs.get("value")
+        unit = obs.get("unit")
+        if quantity is None or value is None:
+            continue
+
+        q_label = _safe_text(quantity)
+        obs_hash = _make_hash({
+            "reading_id": rid, "index": index,
+            "quantity": q_label, "value": value, "unit": unit,
+        })
+
+        obs_uri = EX[f"observation/{obs_hash}"]
+        quantity_uri = EX[f"quantity/{_make_uri_part(q_label)}"]
+
+        g.add((obs_uri, RDF.type, SOSA.Observation))
+        g.add((reading_uri, ARGUS.hasObservation, obs_uri))
+        g.add((obs_uri, SOSA.observedProperty, quantity_uri))
+        g.add((quantity_uri, RDF.type, ARGUS.ObservedProperty))
+        g.add((quantity_uri, RDFS.label, Literal(q_label)))
+
+        _add_observation_value(g, obs_uri, value)
+
+        if ts is not None:
+            _add_literal(g, obs_uri, SOSA.resultTime, ts, XSD.dateTime)
+        if unit is not None:
+            _add_literal(g, obs_uri, ARGUS.unit, unit)
+
+    g.add((reading_uri, ARGUS.rawJson, Literal(json.dumps(reading, ensure_ascii=False, default=str))))
+    return rid
+
+
+# ---------------------------------------------------------------------------
+# Graph I/O
+# ---------------------------------------------------------------------------
+
+def load_graph() -> Graph:
+    g = Graph()
+    _bind_namespaces(g)
+    if TTL_FILE.exists():
+        print(f"Loading existing TTL: {TTL_FILE}")
+        g.parse(str(TTL_FILE), format="turtle")
+        print(f"Existing triples: {len(g)}")
+    else:
+        print("No existing TTL found. Creating new graph.")
+    return g
+
+
+def save_graph(g: Graph) -> None:
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    if TTL_FILE.exists():
+        print(f"Creating backup: {BACKUP_FILE}")
+        BACKUP_FILE.write_text(TTL_FILE.read_text(encoding="utf-8"), encoding="utf-8")
+    print(f"Saving TTL: {TTL_FILE}")
+    g.serialize(destination=str(TTL_FILE), format="turtle")
+    print(f"Saved triples: {len(g)}")
+
+
+# ---------------------------------------------------------------------------
+# Main update procedure
+# ---------------------------------------------------------------------------
+
+def update_kg(
+    max_records: Optional[int] = None,
+    start_page: int = 1,
+    resume: bool = False,
+    overlap_pages: int = 2,
+) -> None:
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+    state = _load_state()
+    seen_ids = set(state.get("seen_reading_ids", []))
+
+    if resume:
+        previous_last = int(state.get("last_successful_page") or 0)
+        start_page = max(1, previous_last - overlap_pages + 1)
+        print(
+            f"Resume mode. Previous last page: {previous_last}. "
+            f"Overlap: {overlap_pages}. Starting from page: {start_page}."
+        )
+
+    g = load_graph()
+    readings, progress = fetch_readings_paginated(
+        max_records=max_records,
+        start_page=start_page,
+    )
+
+    added = 0
+    skipped = 0
+    for reading in readings:
+        rid = reading_stable_id(reading)
+        if rid in seen_ids:
+            skipped += 1
+            continue
+        add_reading_to_graph(g, reading)
+        seen_ids.add(rid)
+        added += 1
+
+    state["seen_reading_ids"] = sorted(seen_ids)
+    state["last_update"] = _now_utc_iso()
+    state["total_seen"] = len(seen_ids)
+    state["last_successful_page"] = max(
+        int(state.get("last_successful_page") or 0),
+        int(progress.get("last_successful_page") or 0),
+    )
+    state["last_page"] = progress.get("last_page")
+    state["total"] = progress.get("total")
+    state["records_downloaded"] = int(state.get("records_downloaded") or 0) + int(
+        progress.get("records_downloaded_this_run") or 0
+    )
+
+    save_graph(g)
+    _save_state(state)
+
+    print()
+    print("Update complete.")
+    print(f"Fetched this run: {len(readings)}")
+    print(f"Added new: {added}")
+    print(f"Skipped duplicates: {skipped}")
+    print(f"Total seen: {len(seen_ids)}")
+    print(f"Last successful page: {state['last_successful_page']}")
+    print(f"API last page: {state['last_page']}")
+    print(f"API total records: {state['total']}")
+    print(f"TTL file: {TTL_FILE}")
+    print(f"State file: {STATE_FILE}")
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(
+        description="Fetch ARGUS sensor readings and build an RDF knowledge graph."
+    )
+    parser.add_argument("--max-records", type=int, default=None,
+                        help="Max number of API readings to process.")
+    parser.add_argument("--start-page", type=int, default=1,
+                        help="API page to start from (default: 1).")
+    parser.add_argument("--resume", action="store_true",
+                        help="Resume near the previous last successful page.")
+    parser.add_argument("--overlap-pages", type=int, default=2,
+                        help="Pages to re-fetch when resuming (default: 2).")
+    args = parser.parse_args()
+
+    update_kg(
+        max_records=args.max_records,
+        start_page=args.start_page,
+        resume=args.resume,
+        overlap_pages=args.overlap_pages,
+    )
+
 
 if __name__ == "__main__":
-    records = fetch_all(max_pages=1)  # Example: fetch first 1 pages of readings
-    print(f"Fetched {len(records)} records:")
-    for record in records:
-        print(record)
+    main()

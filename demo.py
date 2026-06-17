@@ -1,10 +1,14 @@
 """
 Demo — ARGUS KGQA Pipeline (4-step NL→KG→SPARQL→Answer).
 
-Setup:
-    export OPENAI_API_KEY=<your_fraunhofer_key>
-    export OLLAMA_BASE_URL=https://ollama.fit.fraunhofer.de/api   # default
-    export OLLAMA_MODEL=gpt-oss:120b                               # default
+Prerequisites:
+    1. Fetch data first:
+       python readings.py --max-records 500
+
+    2. Set LLM endpoint:
+       export OPENAI_API_KEY=<your_fraunhofer_key>
+       export OLLAMA_BASE_URL=https://ollama.fit.fraunhofer.de/api
+       export OLLAMA_MODEL=gpt-oss:120b
 
 Run:
     python demo.py
@@ -13,17 +17,18 @@ Run:
 from pipeline import Pipeline
 
 QUERIES = [
-    # General asset queries
-    "Show me all cultural heritage sites in Italy and their current condition.",
-    "Find Byzantine-style heritage sites and list any threats associated with them.",
+    # Per-site overview
+    "How many readings are available per site?",
+    "Which sensors are available at the baltanas site?",
+    # Specific quantities
+    "What are the temperature values recorded at each site?",
+    "Which displacement measurements are available?",
     # Temporal queries
-    "Show all seismic measurements recorded after 2023-01-01, including their timestamps and sensor locations.",
-    "Which sensor readings were taken at the Colosseum in 2022? Include dates and values.",
-    # Spatial / location queries
-    "List all sensors deployed in Greece with their coordinates and what they measured.",
-    "Which measurements were taken at sites in Italy? Show sensor positions and observation times.",
-    # Combined temporal + spatial
-    "Show me all on-site measurements taken after 2022-01-01 at sites in Turkey or Croatia, with timestamps and sensor coordinates.",
+    "What are the latest 10 readings?",
+    "What is the most recent reading timestamp for each site?",
+    # Sensor / node inventory
+    "How many sensors are deployed per site?",
+    "Which physical quantities are measured at the delos site?",
 ]
 
 
@@ -35,10 +40,7 @@ def main():
         print(f"QUERY: {query}")
         print("=" * 70)
 
-        result = pipeline.run(query)
-
-        print("\n── FINAL ANSWER ──")
-        print(result["answer"])
+        pipeline.run(query)
         print()
 
 

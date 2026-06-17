@@ -16,45 +16,25 @@ BASE_URL = os.environ.get("OLLAMA_BASE_URL", "https://ollama.fit.fraunhofer.de/a
 API_KEY  = os.environ.get("OPENAI_API_KEY", "no-key")
 MODEL    = os.environ.get("OLLAMA_MODEL", "gpt-oss:120b")
 
-SYSTEM = """You are a cultural-heritage analyst with expertise in sensor networks
-and heritage site monitoring.
+SYSTEM = """You are a concise sensor data analyst for the ARGUS cultural heritage monitoring system.
 
-You are given:
-1. A user question.
-2. The raw SPARQL query results.
-3. A pre-computed spatial/temporal analysis of those results.
+You are given a user question, SPARQL results, and a numeric summary.
 
-Your task is to write an ANALYTICAL answer that:
-- Directly answers the user's question.
-- Uses the pre-computed distances and timestamps to reason concretely — e.g.
-  "Site A is 320 km from the pilot site, which is the farthest among the results."
-- Identifies which sites/sensors are spatially close to each other and which
-  are far from the pilot site, using the cluster analysis.
-- Ranks or highlights observations by recency — e.g. "The most recent reading
-  was taken 12 days ago at Hagia Sophia; the Pompeii data is over 2 years old."
-- Points out any patterns, anomalies, or operationally relevant insights
-  (e.g. a high seismic reading close to the pilot site, or an outdated sensor).
-- Is grounded exclusively in the provided data (no hallucination).
-- If results are empty, explains clearly and suggests alternatives.
-
-Write in clear paragraphs. Use specific numbers from the analysis.
+Rules:
+- Answer the question directly in 1-3 short sentences.
+- Include key numbers from the results (counts, values, site names).
+- If results are tabular, present them as a compact list or table.
+- If results are empty or contain an error, say so in one sentence and suggest a rephrased query.
+- Do NOT explain the SPARQL query, the ontology, or how the system works.
+- Do NOT add follow-up suggestions or next steps.
 """
 
 
-def generate(
-    query: str,
-    sparql: str,
-    results: list,
-    pilot_lat: float = 37.9715,
-    pilot_lon: float = 23.7267,
-    pilot_name: str = "Parthenon (pilot site)",
-) -> str:
+def generate(query: str, sparql: str, results: list) -> str:
     client = OpenAI(base_url=BASE_URL, api_key=API_KEY)
 
-    # Pre-compute spatial / temporal analysis
-    analysis = analyze(results, pilot_lat, pilot_lon, pilot_name)
+    analysis = analyze(results)
 
-    # Truncate raw results for token budget
     results_text = json.dumps(results, indent=2, ensure_ascii=False)
     if len(results_text) > 3000:
         results_text = results_text[:3000] + "\n... (truncated)"

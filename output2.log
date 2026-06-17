@@ -1,0 +1,1056 @@
+[Pipeline] Loading KG from /home/lingxiao/workspace/ARGUS-KGQA/data/argus_readings.ttl…
+[Pipeline] Graph ready — 13122 triples.
+
+======================================================================
+QUERY: How many readings are available per site?
+======================================================================
+
+────────────────────────────────────────────────────────────
+[Step 1] Semantic parsing: 'How many readings are available per site?'
+[Step 1] Intent: {
+  "target_class": "ObservationCollection",
+  "filters": [],
+  "return_properties": [],
+  "joins": [
+    {
+      "class": "Site",
+      "via": "argus:hasSite",
+      "direction": "outgoing",
+      "return_properties": [
+        "rdfs:label"
+      ],
+      "filters": []
+    }
+  ],
+  "aggregation": {
+    "type": "count",
+    "group_by": "site",
+    "target": "reading"
+  },
+  "order_by": null,
+  "limit": null,
+  "explanation": "Counts the number of ObservationCollection records for each Site."
+}
+
+────────────────────────────────────────────────────────────
+[Step 3] SPARQL query:
+PREFIX sosa:  <http://www.w3.org/ns/sosa/>
+PREFIX argus: <http://www.argus-project.eu/ontology/>
+PREFIX ex:    <http://www.argus-project.eu/resource/>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+SELECT ?site (COUNT(?observationcollection) AS ?count)
+WHERE {
+  ?observationcollection a sosa:ObservationCollection .
+    ?observationcollection argus:hasSite ?site .
+    ?site a argus:Site .
+    OPTIONAL { ?site rdfs:label ?Site_label . }
+}
+GROUP BY ?site
+[Step 3] 4 result(s) returned.
+   {'site': 'http://www.argus-project.eu/resource/site/baltanas', 'count': '320'}
+   {'site': 'http://www.argus-project.eu/resource/site/lucretili', 'count': '104'}
+   {'site': 'http://www.argus-project.eu/resource/site/ranverso', 'count': '24'}
+   {'site': 'http://www.argus-project.eu/resource/site/delos', 'count': '52'}
+
+────────────────────────────────────────────────────────────
+[Step 4] Generating natural language answer…
+[Step 4] Answer:
+- Baltanas – 320 readings  
+- Lucretili – 104 readings  
+- Ranverso – 24 readings  
+- Delos – 52 readings.
+
+
+======================================================================
+QUERY: Which sensors are available at the baltanas site?
+======================================================================
+
+────────────────────────────────────────────────────────────
+[Step 1] Semantic parsing: 'Which sensors are available at the baltanas site?'
+[Step 1] Intent: {
+  "target_class": "Sensor",
+  "filters": [],
+  "return_properties": [
+    "rdfs:label"
+  ],
+  "joins": [
+    {
+      "class": "ObservationCollection",
+      "via": "sosa:madeBySensor",
+      "direction": "incoming",
+      "return_properties": [],
+      "filters": []
+    },
+    {
+      "class": "Site",
+      "via": "argus:hasSite",
+      "direction": "outgoing",
+      "return_properties": [
+        "rdfs:label"
+      ],
+      "filters": [
+        {
+          "property": "rdfs:label",
+          "op": "equals",
+          "value": "baltanas"
+        }
+      ]
+    }
+  ],
+  "aggregation": null,
+  "order_by": null,
+  "limit": null,
+  "explanation": "Sensors that have made observations at the site labeled 'baltanas'."
+}
+
+────────────────────────────────────────────────────────────
+[Step 3] SPARQL query:
+PREFIX sosa:  <http://www.w3.org/ns/sosa/>
+PREFIX argus: <http://www.argus-project.eu/ontology/>
+PREFIX ex:    <http://www.argus-project.eu/resource/>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+SELECT DISTINCT ?sensor ?label ?observationcollection ?site ?Site_label
+WHERE {
+  ?sensor a sosa:Sensor .
+  OPTIONAL { ?sensor rdfs:label ?label . }
+  OPTIONAL {
+    ?observationcollection sosa:madeBySensor ?sensor .
+    ?observationcollection a sosa:ObservationCollection .
+  }
+    ?sensor argus:hasSite ?site .
+    ?site a argus:Site .
+    OPTIONAL { ?site rdfs:label ?Site_label . }
+    ?site rdfs:label ?_jf_label .
+      FILTER(LCASE(STR(?_jf_label)) = LCASE("baltanas"))
+}
+[Step 3] 0 result(s) returned.
+
+[Pipeline] Query failed — The SPARQL query returned 0 results. The query may be too restrictive or using wrong class/property names.
+[Pipeline] Retrying with feedback…
+
+────────────────────────────────────────────────────────────
+[Step 1] Retry 1/2 — re-parsing with feedback
+[Step 1] Intent: {
+  "target_class": "Sensor",
+  "filters": [],
+  "return_properties": [
+    "label"
+  ],
+  "joins": [
+    {
+      "class": "ObservationCollection",
+      "via": "madeBySensor",
+      "direction": "incoming",
+      "return_properties": [],
+      "filters": []
+    },
+    {
+      "class": "Site",
+      "via": "hasSite",
+      "direction": "outgoing",
+      "return_properties": [
+        "label"
+      ],
+      "filters": [
+        {
+          "property": "label",
+          "op": "equals",
+          "value": "baltanas"
+        }
+      ]
+    }
+  ],
+  "aggregation": null,
+  "order_by": null,
+  "limit": null,
+  "explanation": "Sensors that have made observations at the site labeled 'baltanas'."
+}
+
+────────────────────────────────────────────────────────────
+[Step 3] SPARQL query:
+PREFIX sosa:  <http://www.w3.org/ns/sosa/>
+PREFIX argus: <http://www.argus-project.eu/ontology/>
+PREFIX ex:    <http://www.argus-project.eu/resource/>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+SELECT DISTINCT ?sensor ?label ?observationcollection ?site ?Site_label
+WHERE {
+  ?sensor a sosa:Sensor .
+  OPTIONAL { ?sensor rdfs:label ?label . }
+  OPTIONAL {
+    ?observationcollection sosa:madeBySensor ?sensor .
+    ?observationcollection a sosa:ObservationCollection .
+  }
+    ?sensor argus:hasSite ?site .
+    ?site a argus:Site .
+    OPTIONAL { ?site rdfs:label ?Site_label . }
+    ?site rdfs:label ?_jf_label .
+      FILTER(LCASE(STR(?_jf_label)) = LCASE("baltanas"))
+}
+[Step 3] 0 result(s) returned.
+
+[Pipeline] Query failed — The SPARQL query returned 0 results. The query may be too restrictive or using wrong class/property names.
+[Pipeline] Retrying with feedback…
+
+────────────────────────────────────────────────────────────
+[Step 1] Retry 2/2 — re-parsing with feedback
+[Step 1] Intent: {
+  "target_class": "Sensor",
+  "filters": [],
+  "return_properties": [
+    "label"
+  ],
+  "joins": [
+    {
+      "class": "ObservationCollection",
+      "via": "madeBySensor",
+      "direction": "incoming",
+      "return_properties": [],
+      "filters": []
+    },
+    {
+      "class": "Site",
+      "via": "hasSite",
+      "direction": "outgoing",
+      "return_properties": [
+        "label"
+      ],
+      "filters": [
+        {
+          "property": "label",
+          "op": "equals",
+          "value": "baltanas"
+        }
+      ]
+    }
+  ],
+  "aggregation": null,
+  "order_by": null,
+  "limit": null,
+  "explanation": "Sensors that have made observations at the site labeled 'baltanas'."
+}
+
+────────────────────────────────────────────────────────────
+[Step 3] SPARQL query:
+PREFIX sosa:  <http://www.w3.org/ns/sosa/>
+PREFIX argus: <http://www.argus-project.eu/ontology/>
+PREFIX ex:    <http://www.argus-project.eu/resource/>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+SELECT DISTINCT ?sensor ?label ?observationcollection ?site ?Site_label
+WHERE {
+  ?sensor a sosa:Sensor .
+  OPTIONAL { ?sensor rdfs:label ?label . }
+  OPTIONAL {
+    ?observationcollection sosa:madeBySensor ?sensor .
+    ?observationcollection a sosa:ObservationCollection .
+  }
+    ?sensor argus:hasSite ?site .
+    ?site a argus:Site .
+    OPTIONAL { ?site rdfs:label ?Site_label . }
+    ?site rdfs:label ?_jf_label .
+      FILTER(LCASE(STR(?_jf_label)) = LCASE("baltanas"))
+}
+[Step 3] 0 result(s) returned.
+
+[Pipeline] Query failed after 2 retries — The SPARQL query returned 0 results. The query may be too restrictive or using wrong class/property names.
+
+────────────────────────────────────────────────────────────
+[Step 4] Generating natural language answer…
+[Step 4] Answer:
+No sensors were found for the “baltanas” site; please check the site name spelling or rephrase the query.
+
+
+======================================================================
+QUERY: What are the temperature values recorded at each site?
+======================================================================
+
+────────────────────────────────────────────────────────────
+[Step 1] Semantic parsing: 'What are the temperature values recorded at each site?'
+[Step 1] Intent: {
+  "target_class": "ObservationCollection",
+  "filters": [],
+  "return_properties": [
+    "sosa:resultTime"
+  ],
+  "joins": [
+    {
+      "class": "Observation",
+      "via": "argus:hasObservation",
+      "direction": "outgoing",
+      "return_properties": [
+        "sosa:hasSimpleResult"
+      ],
+      "filters": []
+    },
+    {
+      "class": "ObservedProperty",
+      "via": "sosa:observedProperty",
+      "direction": "outgoing",
+      "return_properties": [
+        "rdfs:label"
+      ],
+      "filters": [
+        {
+          "property": "rdfs:label",
+          "op": "contains",
+          "value": "temperature"
+        }
+      ]
+    },
+    {
+      "class": "Site",
+      "via": "argus:hasSite",
+      "direction": "outgoing",
+      "return_properties": [
+        "rdfs:label"
+      ],
+      "filters": []
+    }
+  ],
+  "aggregation": null,
+  "order_by": null,
+  "limit": null,
+  "explanation": "Retrieve temperature observation values and their site labels from each reading."
+}
+
+────────────────────────────────────────────────────────────
+[Step 3] SPARQL query:
+PREFIX sosa:  <http://www.w3.org/ns/sosa/>
+PREFIX argus: <http://www.argus-project.eu/ontology/>
+PREFIX ex:    <http://www.argus-project.eu/resource/>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+SELECT DISTINCT ?observationcollection ?resultTime ?observation ?Observation_hasSimpleResult ?observedproperty ?ObservedProperty_label ?site ?Site_label
+WHERE {
+  ?observationcollection a sosa:ObservationCollection .
+  OPTIONAL { ?observationcollection sosa:resultTime ?resultTime . }
+  OPTIONAL {
+    ?observationcollection argus:hasObservation ?observation .
+    ?observation a sosa:Observation .
+    OPTIONAL { ?observation sosa:hasSimpleResult ?Observation_hasSimpleResult . }
+  }
+    ?observationcollection sosa:observedProperty ?observedproperty .
+    ?observedproperty a argus:ObservedProperty .
+    OPTIONAL { ?observedproperty rdfs:label ?ObservedProperty_label . }
+    ?observedproperty rdfs:label ?_jf_label .
+      FILTER(CONTAINS(LCASE(STR(?_jf_label)), LCASE("temperature")))
+  OPTIONAL {
+    ?observationcollection argus:hasSite ?site .
+    ?site a argus:Site .
+    OPTIONAL { ?site rdfs:label ?Site_label . }
+  }
+}
+[Step 3] 0 result(s) returned.
+
+[Pipeline] Query failed — The SPARQL query returned 0 results. The query may be too restrictive or using wrong class/property names.
+[Pipeline] Retrying with feedback…
+
+────────────────────────────────────────────────────────────
+[Step 1] Retry 1/2 — re-parsing with feedback
+[Step 1] Intent: {
+  "target_class": "ObservationCollection",
+  "filters": [],
+  "return_properties": [
+    "resultTime"
+  ],
+  "joins": [
+    {
+      "class": "Observation",
+      "via": "hasObservation",
+      "direction": "outgoing",
+      "return_properties": [
+        "hasSimpleResult"
+      ],
+      "filters": []
+    },
+    {
+      "class": "ObservedProperty",
+      "via": "observedProperty",
+      "direction": "outgoing",
+      "return_properties": [
+        "label"
+      ],
+      "filters": [
+        {
+          "property": "label",
+          "op": "contains",
+          "value": "temperature"
+        }
+      ]
+    },
+    {
+      "class": "Site",
+      "via": "hasSite",
+      "direction": "outgoing",
+      "return_properties": [
+        "label"
+      ],
+      "filters": []
+    }
+  ],
+  "aggregation": null,
+  "order_by": null,
+  "limit": null,
+  "explanation": "Retrieve temperature observation values and their site labels from each reading."
+}
+
+────────────────────────────────────────────────────────────
+[Step 3] SPARQL query:
+PREFIX sosa:  <http://www.w3.org/ns/sosa/>
+PREFIX argus: <http://www.argus-project.eu/ontology/>
+PREFIX ex:    <http://www.argus-project.eu/resource/>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+SELECT DISTINCT ?observationcollection ?resultTime ?observation ?Observation_hasSimpleResult ?observedproperty ?ObservedProperty_label ?site ?Site_label
+WHERE {
+  ?observationcollection a sosa:ObservationCollection .
+  OPTIONAL { ?observationcollection sosa:resultTime ?resultTime . }
+  OPTIONAL {
+    ?observationcollection argus:hasObservation ?observation .
+    ?observation a sosa:Observation .
+    OPTIONAL { ?observation sosa:hasSimpleResult ?Observation_hasSimpleResult . }
+  }
+    ?observationcollection sosa:observedProperty ?observedproperty .
+    ?observedproperty a argus:ObservedProperty .
+    OPTIONAL { ?observedproperty rdfs:label ?ObservedProperty_label . }
+    ?observedproperty rdfs:label ?_jf_label .
+      FILTER(CONTAINS(LCASE(STR(?_jf_label)), LCASE("temperature")))
+  OPTIONAL {
+    ?observationcollection argus:hasSite ?site .
+    ?site a argus:Site .
+    OPTIONAL { ?site rdfs:label ?Site_label . }
+  }
+}
+[Step 3] 0 result(s) returned.
+
+[Pipeline] Query failed — The SPARQL query returned 0 results. The query may be too restrictive or using wrong class/property names.
+[Pipeline] Retrying with feedback…
+
+────────────────────────────────────────────────────────────
+[Step 1] Retry 2/2 — re-parsing with feedback
+[Step 1] Intent: {
+  "target_class": "ObservationCollection",
+  "filters": [],
+  "return_properties": [
+    "resultTime"
+  ],
+  "joins": [
+    {
+      "class": "Observation",
+      "via": "hasObservation",
+      "direction": "outgoing",
+      "return_properties": [
+        "hasSimpleResult",
+        "resultTime"
+      ],
+      "filters": []
+    },
+    {
+      "class": "ObservedProperty",
+      "via": "observedProperty",
+      "direction": "outgoing",
+      "return_properties": [
+        "label"
+      ],
+      "filters": [
+        {
+          "property": "label",
+          "op": "contains",
+          "value": "temperature"
+        }
+      ]
+    },
+    {
+      "class": "Site",
+      "via": "hasSite",
+      "direction": "outgoing",
+      "return_properties": [
+        "label"
+      ],
+      "filters": []
+    }
+  ],
+  "aggregation": null,
+  "order_by": null,
+  "limit": null,
+  "explanation": "Retrieve temperature observation values and their site labels from each reading."
+}
+
+────────────────────────────────────────────────────────────
+[Step 3] SPARQL query:
+PREFIX sosa:  <http://www.w3.org/ns/sosa/>
+PREFIX argus: <http://www.argus-project.eu/ontology/>
+PREFIX ex:    <http://www.argus-project.eu/resource/>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+SELECT DISTINCT ?observationcollection ?resultTime ?observation ?Observation_hasSimpleResult ?Observation_resultTime ?observedproperty ?ObservedProperty_label ?site ?Site_label
+WHERE {
+  ?observationcollection a sosa:ObservationCollection .
+  OPTIONAL { ?observationcollection sosa:resultTime ?resultTime . }
+  OPTIONAL {
+    ?observationcollection argus:hasObservation ?observation .
+    ?observation a sosa:Observation .
+    OPTIONAL { ?observation sosa:hasSimpleResult ?Observation_hasSimpleResult . }
+    OPTIONAL { ?observation sosa:resultTime ?Observation_resultTime . }
+  }
+    ?observationcollection sosa:observedProperty ?observedproperty .
+    ?observedproperty a argus:ObservedProperty .
+    OPTIONAL { ?observedproperty rdfs:label ?ObservedProperty_label . }
+    ?observedproperty rdfs:label ?_jf_label .
+      FILTER(CONTAINS(LCASE(STR(?_jf_label)), LCASE("temperature")))
+  OPTIONAL {
+    ?observationcollection argus:hasSite ?site .
+    ?site a argus:Site .
+    OPTIONAL { ?site rdfs:label ?Site_label . }
+  }
+}
+[Step 3] 0 result(s) returned.
+
+[Pipeline] Query failed after 2 retries — The SPARQL query returned 0 results. The query may be too restrictive or using wrong class/property names.
+
+────────────────────────────────────────────────────────────
+[Step 4] Generating natural language answer…
+[Step 4] Answer:
+No temperature observations were found; please try rephrasing the query.
+
+
+======================================================================
+QUERY: Which displacement measurements are available?
+======================================================================
+
+────────────────────────────────────────────────────────────
+[Step 1] Semantic parsing: 'Which displacement measurements are available?'
+[Step 1] Intent: {
+  "target_class": "Observation",
+  "filters": [],
+  "return_properties": [
+    "sosa:hasSimpleResult",
+    "sosa:resultTime"
+  ],
+  "joins": [
+    {
+      "class": "ObservedProperty",
+      "via": "sosa:observedProperty",
+      "direction": "outgoing",
+      "return_properties": [
+        "rdfs:label"
+      ],
+      "filters": [
+        {
+          "property": "rdfs:label",
+          "op": "contains",
+          "value": "displacement"
+        }
+      ]
+    }
+  ],
+  "aggregation": null,
+  "order_by": null,
+  "limit": null,
+  "explanation": "List all observations whose observed property is displacement, returning their values and timestamps."
+}
+
+────────────────────────────────────────────────────────────
+[Step 3] SPARQL query:
+PREFIX sosa:  <http://www.w3.org/ns/sosa/>
+PREFIX argus: <http://www.argus-project.eu/ontology/>
+PREFIX ex:    <http://www.argus-project.eu/resource/>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+SELECT DISTINCT ?observation ?hasSimpleResult ?resultTime ?observedproperty ?ObservedProperty_label
+WHERE {
+  ?observation a sosa:Observation .
+  OPTIONAL { ?observation sosa:hasSimpleResult ?hasSimpleResult . }
+  OPTIONAL { ?observation sosa:resultTime ?resultTime . }
+    ?observation sosa:observedProperty ?observedproperty .
+    ?observedproperty a argus:ObservedProperty .
+    OPTIONAL { ?observedproperty rdfs:label ?ObservedProperty_label . }
+    ?observedproperty rdfs:label ?_jf_label .
+      FILTER(CONTAINS(LCASE(STR(?_jf_label)), LCASE("displacement")))
+}
+[Step 3] 3 result(s) returned.
+   {'observation': 'http://www.argus-project.eu/resource/observation/71d29b73a39f4cbe15293ead', 'hasSimpleResult': '7.90322423', 'resultTime': '2026-05-13T01:00:00+00:00', 'observedproperty': 'http://www.argus-project.eu/resource/quantity/potentiometer_displacement', 'ObservedProperty_label': 'potentiometer_displacement'}
+   {'observation': 'http://www.argus-project.eu/resource/observation/7ed0ae336514182f3957a685', 'hasSimpleResult': '-4.14708585158109', 'resultTime': '2026-05-13T02:00:00+00:00', 'observedproperty': 'http://www.argus-project.eu/resource/quantity/eastwest_displacement_millimeters', 'ObservedProperty_label': 'eastwest_displacement_millimeters'}
+   {'observation': 'http://www.argus-project.eu/resource/observation/ca38fb43d035226d83ceb129', 'hasSimpleResult': '7.20917583', 'resultTime': '2026-05-13T01:00:00+00:00', 'observedproperty': 'http://www.argus-project.eu/resource/quantity/potentiometer_displacement', 'ObservedProperty_label': 'potentiometer_displacement'}
+
+────────────────────────────────────────────────────────────
+[Step 4] Generating natural language answer…
+[Step 4] Answer:
+Three displacement observations are available: two *potentiometer_displacement* measurements (values 7.90322423 and 7.20917583 recorded on 2026‑05‑13 01:00 UTC) and one *eastwest_displacement_millimeters* measurement (value ‑4.14708585158109 recorded on 2026‑05‑13 02:00 UTC).
+
+
+======================================================================
+QUERY: What are the latest 10 readings?
+======================================================================
+
+────────────────────────────────────────────────────────────
+[Step 1] Semantic parsing: 'What are the latest 10 readings?'
+[Step 1] Intent: {
+  "target_class": "ObservationCollection",
+  "filters": [],
+  "return_properties": [
+    "sosa:resultTime",
+    "argus:readingType"
+  ],
+  "joins": [
+    {
+      "class": "Site",
+      "via": "argus:hasSite",
+      "direction": "outgoing",
+      "return_properties": [
+        "rdfs:label"
+      ],
+      "filters": []
+    },
+    {
+      "class": "Sensor",
+      "via": "sosa:madeBySensor",
+      "direction": "outgoing",
+      "return_properties": [
+        "rdfs:label"
+      ],
+      "filters": []
+    }
+  ],
+  "aggregation": null,
+  "order_by": {
+    "variable": "sosa:resultTime",
+    "direction": "DESC"
+  },
+  "limit": 10,
+  "explanation": "Retrieve the 10 most recent ObservationCollection records ordered by resultTime."
+}
+
+────────────────────────────────────────────────────────────
+[Step 3] SPARQL query:
+PREFIX sosa:  <http://www.w3.org/ns/sosa/>
+PREFIX argus: <http://www.argus-project.eu/ontology/>
+PREFIX ex:    <http://www.argus-project.eu/resource/>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+SELECT DISTINCT ?observationcollection ?resultTime ?readingType ?site ?Site_label ?sensor ?Sensor_label
+WHERE {
+  ?observationcollection a sosa:ObservationCollection .
+  OPTIONAL { ?observationcollection sosa:resultTime ?resultTime . }
+  OPTIONAL { ?observationcollection argus:readingType ?readingType . }
+  OPTIONAL {
+    ?observationcollection argus:hasSite ?site .
+    ?site a argus:Site .
+    OPTIONAL { ?site rdfs:label ?Site_label . }
+  }
+  OPTIONAL {
+    ?observationcollection sosa:madeBySensor ?sensor .
+    ?sensor a sosa:Sensor .
+    OPTIONAL { ?sensor rdfs:label ?Sensor_label . }
+  }
+}
+ORDER BY DESC(?resultTime)
+LIMIT 10
+[Step 3] 10 result(s) returned.
+   {'observationcollection': 'http://www.argus-project.eu/resource/reading/0670753e3639d4c9981ca878', 'resultTime': '2026-05-13T02:20:00+00:00', 'readingType': 'eng_units', 'site': 'http://www.argus-project.eu/resource/site/lucretili', 'Site_label': 'lucretili', 'sensor': 'http://www.argus-project.eu/resource/sensor/9eefebd0-8191-11f0-9283-e956b63ef652', 'Sensor_label': 'ls-177237hw-voltsingle-1'}
+   {'observationcollection': 'http://www.argus-project.eu/resource/reading/08845e44b5a332f458767758', 'resultTime': '2026-05-13T02:20:00+00:00', 'readingType': 'reading', 'site': 'http://www.argus-project.eu/resource/site/baltanas', 'Site_label': 'baltanas', 'sensor': 'http://www.argus-project.eu/resource/sensor/7502fb00-c958-11f0-8484-ad77d9ec8692', 'Sensor_label': 'ls-149421hw-pulse-3'}
+   {'observationcollection': 'http://www.argus-project.eu/resource/reading/0c0cc047ad9fae82c4013a4a', 'resultTime': '2026-05-13T02:20:00+00:00', 'readingType': 'reading', 'site': 'http://www.argus-project.eu/resource/site/lucretili', 'Site_label': 'lucretili', 'sensor': 'http://www.argus-project.eu/resource/sensor/9eefebd0-8191-11f0-9283-e956b63ef652', 'Sensor_label': 'ls-177237hw-voltsingle-1'}
+   {'observationcollection': 'http://www.argus-project.eu/resource/reading/142131eb414d21bd7d6a559e', 'resultTime': '2026-05-13T02:20:00+00:00', 'readingType': 'reading', 'site': 'http://www.argus-project.eu/resource/site/lucretili', 'Site_label': 'lucretili', 'sensor': 'http://www.argus-project.eu/resource/sensor/56fa0d20-819a-11f0-9a67-6d25b7d467e7', 'Sensor_label': 'ls-174156hw-pulse-3'}
+   {'observationcollection': 'http://www.argus-project.eu/resource/reading/4093a79f45655153fc55ae7c', 'resultTime': '2026-05-13T02:20:00+00:00', 'readingType': 'eng_units', 'site': 'http://www.argus-project.eu/resource/site/lucretili', 'Site_label': 'lucretili', 'sensor': 'http://www.argus-project.eu/resource/sensor/7c201440-8196-11f0-9a67-6d25b7d467e7', 'Sensor_label': 'ls-177287hw-voltsingle-1'}
+  … and 5 more.
+
+────────────────────────────────────────────────────────────
+[Step 4] Generating natural language answer…
+[Step 4] Answer:
+The 10 most recent readings were all taken at 2026‑05‑13T02:20:00 UTC, from the sites **lucretili** and **baltanas**.  
+
+- lucretili | ls‑177237hw‑voltsingle‑1 | eng_units  
+- baltanas | ls‑149421hw‑pulse‑3 | reading  
+- lucretili | ls‑177237hw‑voltsingle‑1 | reading  
+- lucretili | ls‑174156hw‑pulse‑3 | reading  
+- lucretili | ls‑177287hw‑voltsingle‑1 | eng_units  
+- lucretili | ls‑174156hw‑voltsingle‑1 | eng_units  
+- baltanas | ls‑149402hw‑pulse‑3 | reading  
+- (remaining three entries follow the same pattern, all from 2026‑05‑13 02:20 UTC).
+
+
+======================================================================
+QUERY: What is the most recent reading timestamp for each site?
+======================================================================
+
+────────────────────────────────────────────────────────────
+[Step 1] Semantic parsing: 'What is the most recent reading timestamp for each site?'
+[Step 1] Intent: {
+  "target_class": "ObservationCollection",
+  "filters": [],
+  "return_properties": [],
+  "joins": [
+    {
+      "class": "argus:Site",
+      "via": "argus:hasSite",
+      "direction": "outgoing",
+      "return_properties": [
+        "rdfs:label"
+      ],
+      "filters": []
+    }
+  ],
+  "aggregation": {
+    "type": "max",
+    "group_by": "site",
+    "target": "resultTime"
+  },
+  "order_by": null,
+  "limit": null,
+  "explanation": "Finds the most recent reading timestamp for each site."
+}
+
+────────────────────────────────────────────────────────────
+[Step 3] SPARQL query:
+PREFIX sosa:  <http://www.w3.org/ns/sosa/>
+PREFIX argus: <http://www.argus-project.eu/ontology/>
+PREFIX ex:    <http://www.argus-project.eu/resource/>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+SELECT ?site (MAX(?observationcollection) AS ?max)
+WHERE {
+  ?observationcollection a sosa:ObservationCollection .
+  OPTIONAL {
+    ?observationcollection argus:hasSite ?argus:site .
+    ?argus:site a argus:Site .
+    OPTIONAL { ?argus:site rdfs:label ?Site_label . }
+  }
+}
+GROUP BY ?site
+[Step 3] 1 result(s) returned.
+   {'error': "Expected SelectQuery, found 'OPTIONAL'  (at char 433), (line:11, col:3)"}
+
+[Pipeline] Query failed — SPARQL execution error: Expected SelectQuery, found 'OPTIONAL'  (at char 433), (line:11, col:3)
+[Pipeline] Retrying with feedback…
+
+────────────────────────────────────────────────────────────
+[Step 1] Retry 1/2 — re-parsing with feedback
+[Step 1] Intent: {
+  "target_class": "ObservationCollection",
+  "filters": [],
+  "return_properties": [],
+  "joins": [
+    {
+      "class": "Site",
+      "via": "hasSite",
+      "direction": "outgoing",
+      "return_properties": [
+        "label"
+      ],
+      "filters": []
+    }
+  ],
+  "aggregation": {
+    "type": "max",
+    "group_by": "site",
+    "target": "resultTime"
+  },
+  "order_by": null,
+  "limit": null,
+  "explanation": "Finds the most recent reading timestamp for each site."
+}
+
+────────────────────────────────────────────────────────────
+[Step 3] SPARQL query:
+PREFIX sosa:  <http://www.w3.org/ns/sosa/>
+PREFIX argus: <http://www.argus-project.eu/ontology/>
+PREFIX ex:    <http://www.argus-project.eu/resource/>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+SELECT ?site (MAX(?observationcollection) AS ?max)
+WHERE {
+  ?observationcollection a sosa:ObservationCollection .
+    ?observationcollection argus:hasSite ?site .
+    ?site a argus:Site .
+    OPTIONAL { ?site rdfs:label ?Site_label . }
+}
+GROUP BY ?site
+[Step 3] 4 result(s) returned.
+   {'site': 'http://www.argus-project.eu/resource/site/baltanas', 'max': 'http://www.argus-project.eu/resource/reading/fe4587bb406b54a001a0818f'}
+   {'site': 'http://www.argus-project.eu/resource/site/lucretili', 'max': 'http://www.argus-project.eu/resource/reading/f8b3e5f49b8964c2cfbd922a'}
+   {'site': 'http://www.argus-project.eu/resource/site/ranverso', 'max': 'http://www.argus-project.eu/resource/reading/eb23597d6e3d466e5e369ee3'}
+   {'site': 'http://www.argus-project.eu/resource/site/delos', 'max': 'http://www.argus-project.eu/resource/reading/fe9759c3066df869fbb366a1'}
+
+────────────────────────────────────────────────────────────
+[Step 4] Generating natural language answer…
+[Step 4] Answer:
+The query returned only reading identifiers (e.g., fe4587bb406b54a001a0818f) for each site and does not include any timestamp values. To get the most recent reading timestamps, you’ll need to query the timestamp property of the readings instead.
+
+
+======================================================================
+QUERY: How many sensors are deployed per site?
+======================================================================
+
+────────────────────────────────────────────────────────────
+[Step 1] Semantic parsing: 'How many sensors are deployed per site?'
+[Step 1] Intent: {
+  "target_class": "ObservationCollection",
+  "filters": [],
+  "return_properties": [],
+  "joins": [
+    {
+      "class": "Site",
+      "via": "argus:hasSite",
+      "direction": "outgoing",
+      "return_properties": [
+        "rdfs:label"
+      ],
+      "filters": []
+    },
+    {
+      "class": "Sensor",
+      "via": "sosa:madeBySensor",
+      "direction": "outgoing",
+      "return_properties": [
+        "rdfs:label"
+      ],
+      "filters": []
+    }
+  ],
+  "aggregation": {
+    "type": "count",
+    "group_by": "site",
+    "target": "sensor"
+  },
+  "order_by": null,
+  "limit": null,
+  "explanation": "Counts the number of sensors deployed at each monitoring site."
+}
+
+────────────────────────────────────────────────────────────
+[Step 3] SPARQL query:
+PREFIX sosa:  <http://www.w3.org/ns/sosa/>
+PREFIX argus: <http://www.argus-project.eu/ontology/>
+PREFIX ex:    <http://www.argus-project.eu/resource/>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+SELECT ?site (COUNT(?sensor) AS ?count)
+WHERE {
+  ?observationcollection a sosa:ObservationCollection .
+    ?observationcollection argus:hasSite ?site .
+    ?site a argus:Site .
+    OPTIONAL { ?site rdfs:label ?Site_label . }
+  OPTIONAL {
+    ?observationcollection sosa:madeBySensor ?sensor .
+    ?sensor a sosa:Sensor .
+    OPTIONAL { ?sensor rdfs:label ?Sensor_label . }
+  }
+}
+GROUP BY ?site
+[Step 3] 4 result(s) returned.
+   {'site': 'http://www.argus-project.eu/resource/site/baltanas', 'count': '320'}
+   {'site': 'http://www.argus-project.eu/resource/site/lucretili', 'count': '104'}
+   {'site': 'http://www.argus-project.eu/resource/site/ranverso', 'count': '24'}
+   {'site': 'http://www.argus-project.eu/resource/site/delos', 'count': '52'}
+
+────────────────────────────────────────────────────────────
+[Step 4] Generating natural language answer…
+[Step 4] Answer:
+- Baltanas: 320 sensors  
+- Lucretili: 104 sensors  
+- Ranverso: 24 sensors  
+- Delos: 52 sensors.
+
+
+======================================================================
+QUERY: Which physical quantities are measured at the delos site?
+======================================================================
+
+────────────────────────────────────────────────────────────
+[Step 1] Semantic parsing: 'Which physical quantities are measured at the delos site?'
+[Step 1] Intent: {
+  "target_class": "sosa:ObservationCollection",
+  "filters": [],
+  "return_properties": [],
+  "joins": [
+    {
+      "class": "argus:Site",
+      "via": "argus:hasSite",
+      "direction": "outgoing",
+      "return_properties": [
+        "rdfs:label"
+      ],
+      "filters": [
+        {
+          "property": "rdfs:label",
+          "op": "equals",
+          "value": "delos"
+        }
+      ]
+    },
+    {
+      "class": "sosa:Observation",
+      "via": "argus:hasObservation",
+      "direction": "outgoing",
+      "return_properties": [],
+      "filters": []
+    },
+    {
+      "class": "argus:ObservedProperty",
+      "via": "sosa:observedProperty",
+      "direction": "outgoing",
+      "return_properties": [
+        "rdfs:label"
+      ],
+      "filters": []
+    }
+  ],
+  "aggregation": null,
+  "order_by": {
+    "variable": "rdfs:label",
+    "direction": "ASC"
+  },
+  "limit": null,
+  "explanation": "Physical quantities measured at the delos site."
+}
+
+────────────────────────────────────────────────────────────
+[Step 3] SPARQL query:
+PREFIX sosa:  <http://www.w3.org/ns/sosa/>
+PREFIX argus: <http://www.argus-project.eu/ontology/>
+PREFIX ex:    <http://www.argus-project.eu/resource/>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+SELECT DISTINCT ?sosa:observationcollection ?argus:site ?Site_label ?sosa:observation ?argus:observedproperty ?ObservedProperty_label
+WHERE {
+  ?sosa:observationcollection a sosa:ObservationCollection .
+    ?sosa:observationcollection argus:hasSite ?argus:site .
+    ?argus:site a argus:Site .
+    OPTIONAL { ?argus:site rdfs:label ?Site_label . }
+    ?argus:site rdfs:label ?_jf_label .
+      FILTER(LCASE(STR(?_jf_label)) = LCASE("delos"))
+  OPTIONAL {
+    ?sosa:observationcollection argus:hasObservation ?sosa:observation .
+    ?sosa:observation a sosa:Observation .
+  }
+  OPTIONAL {
+    ?sosa:observationcollection sosa:observedProperty ?argus:observedproperty .
+    ?argus:observedproperty a argus:ObservedProperty .
+    OPTIONAL { ?argus:observedproperty rdfs:label ?ObservedProperty_label . }
+  }
+}
+ORDER BY ASC(?label)
+[Step 3] 1 result(s) returned.
+   {'error': "Expected SelectQuery, found ':'  (at char 337), (line:8, col:22)"}
+
+[Pipeline] Query failed — SPARQL execution error: Expected SelectQuery, found ':'  (at char 337), (line:8, col:22)
+[Pipeline] Retrying with feedback…
+
+────────────────────────────────────────────────────────────
+[Step 1] Retry 1/2 — re-parsing with feedback
+[Step 1] Intent: {
+  "target_class": "ObservationCollection",
+  "filters": [],
+  "return_properties": [],
+  "joins": [
+    {
+      "class": "Site",
+      "via": "hasSite",
+      "direction": "outgoing",
+      "return_properties": [
+        "label"
+      ],
+      "filters": [
+        {
+          "property": "label",
+          "op": "equals",
+          "value": "delos"
+        }
+      ]
+    },
+    {
+      "class": "Observation",
+      "via": "hasObservation",
+      "direction": "outgoing",
+      "return_properties": [],
+      "filters": []
+    },
+    {
+      "class": "ObservedProperty",
+      "via": "observedProperty",
+      "direction": "outgoing",
+      "return_properties": [
+        "label"
+      ],
+      "filters": []
+    }
+  ],
+  "aggregation": null,
+  "order_by": {
+    "variable": "label",
+    "direction": "ASC"
+  },
+  "limit": null,
+  "explanation": "Physical quantities measured at the delos site."
+}
+
+────────────────────────────────────────────────────────────
+[Step 3] SPARQL query:
+PREFIX sosa:  <http://www.w3.org/ns/sosa/>
+PREFIX argus: <http://www.argus-project.eu/ontology/>
+PREFIX ex:    <http://www.argus-project.eu/resource/>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+SELECT DISTINCT ?observationcollection ?site ?Site_label ?observation ?observedproperty ?ObservedProperty_label
+WHERE {
+  ?observationcollection a sosa:ObservationCollection .
+    ?observationcollection argus:hasSite ?site .
+    ?site a argus:Site .
+    OPTIONAL { ?site rdfs:label ?Site_label . }
+    ?site rdfs:label ?_jf_label .
+      FILTER(LCASE(STR(?_jf_label)) = LCASE("delos"))
+  OPTIONAL {
+    ?observationcollection argus:hasObservation ?observation .
+    ?observation a sosa:Observation .
+  }
+  OPTIONAL {
+    ?observationcollection sosa:observedProperty ?observedproperty .
+    ?observedproperty a argus:ObservedProperty .
+    OPTIONAL { ?observedproperty rdfs:label ?ObservedProperty_label . }
+  }
+}
+ORDER BY ASC(?label)
+[Step 3] 92 result(s) returned.
+   {'observationcollection': 'http://www.argus-project.eu/resource/reading/01bd6463cb2e7c59b2b8efd7', 'site': 'http://www.argus-project.eu/resource/site/delos', 'Site_label': 'delos', 'observation': 'http://www.argus-project.eu/resource/observation/afa704f7f4bba418ba20459a', 'observedproperty': None, 'ObservedProperty_label': None}
+   {'observationcollection': 'http://www.argus-project.eu/resource/reading/0e4dbff5dcae738b879fc82d', 'site': 'http://www.argus-project.eu/resource/site/delos', 'Site_label': 'delos', 'observation': 'http://www.argus-project.eu/resource/observation/338fbb505eed9be5cf6d99eb', 'observedproperty': None, 'ObservedProperty_label': None}
+   {'observationcollection': 'http://www.argus-project.eu/resource/reading/0e4dbff5dcae738b879fc82d', 'site': 'http://www.argus-project.eu/resource/site/delos', 'Site_label': 'delos', 'observation': 'http://www.argus-project.eu/resource/observation/43b5f4c397a0cc1ec3109edb', 'observedproperty': None, 'ObservedProperty_label': None}
+   {'observationcollection': 'http://www.argus-project.eu/resource/reading/0e4dbff5dcae738b879fc82d', 'site': 'http://www.argus-project.eu/resource/site/delos', 'Site_label': 'delos', 'observation': 'http://www.argus-project.eu/resource/observation/9c5d3af802e01f8229778104', 'observedproperty': None, 'ObservedProperty_label': None}
+   {'observationcollection': 'http://www.argus-project.eu/resource/reading/0e4dbff5dcae738b879fc82d', 'site': 'http://www.argus-project.eu/resource/site/delos', 'Site_label': 'delos', 'observation': 'http://www.argus-project.eu/resource/observation/a2f5aba420ca71dd91a2da63', 'observedproperty': None, 'ObservedProperty_label': None}
+  … and 87 more.
+
+────────────────────────────────────────────────────────────
+[Step 4] Generating natural language answer…
+[Step 4] Answer:
+The query returned 92 observation rows for the delos site, but the observedProperty and ObservedProperty_label fields are all null. Therefore no physical quantities are recorded as being measured at delos.  (Consider checking the data linking observations to their properties.)
+
