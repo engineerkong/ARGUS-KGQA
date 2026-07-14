@@ -1,9 +1,9 @@
 """
-Demo — ARGUS KGQA Pipeline (4-step NL→KG→SPARQL→Answer).
+Demo — ARGUS KGQA Pipeline (Steps 0–3: KG → Parse → SPARQL → Answer).
 
 Prerequisites:
     1. Fetch data first:
-       python readings.py --max-records 500
+       python scripts/0_readings.py --max-records 500
 
     2. Set LLM endpoint:
        export OPENAI_API_KEY=<your_fraunhofer_key>
@@ -11,8 +11,8 @@ Prerequisites:
        export OLLAMA_MODEL=gpt-oss:120b
 
 Run:
-    python demo.py              # batch mode: run preset queries
-    python demo.py --online     # interactive mode: type queries in terminal
+    python scripts/demo.py              # batch mode: run preset queries
+    python scripts/demo.py --online     # interactive mode: type queries in terminal
 """
 
 import argparse

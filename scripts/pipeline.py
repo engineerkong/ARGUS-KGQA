@@ -1,27 +1,37 @@
 """
-ARGUS KGQA Pipeline — orchestrates the four steps:
+ARGUS KGQA Pipeline — orchestrates three steps per query:
 
-  1. Semantic parsing  (NL query → structured intent)
-  2. KG store          (SOSA/ARGUS readings graph, loaded once)
-  3. SPARQL retrieval  (intent → SPARQL → results)
-  4. NL answer         (results → natural-language response)
+  Step 0. KG store          (SOSA/ARGUS readings graph, loaded once at init)
+  Step 1. Semantic parsing  (NL query → structured intent)
+  Step 2. SPARQL retrieval  (intent → SPARQL → raw results → unfolded results)
+  Step 3. NL answer         (unfolded results → natural-language response)
 
-If Step 3 returns an error or empty results, the pipeline feeds the failure
+If Step 2 returns an error or empty results, the pipeline feeds the failure
 back to Step 1 and retries (up to max_retries times).
 """
 
 from __future__ import annotations
+import importlib
 import json
+import os
 from pathlib import Path
 from typing import Any
 
 from rdflib import Graph
 
-from semantic_parser import parse
-from sparql_retriever import build_sparql, execute, unfold_results
-from answer_generator import generate
+_sp = importlib.import_module("1_semantic_parser")
+parse = _sp.parse
 
-DEFAULT_TTL = Path(__file__).resolve().parent / "data" / "argus_readings.ttl"
+_sr = importlib.import_module("2_sparql_retriever")
+build_sparql = _sr.build_sparql
+execute      = _sr.execute
+unfold_results = _sr.unfold_results
+
+_ag = importlib.import_module("3_answer_generator")
+generate = _ag.generate
+
+_DEFAULT_TTL_PATH = Path(__file__).resolve().parent.parent / "data_500" / "argus_readings.ttl"
+DEFAULT_TTL = Path(os.environ.get("ARGUS_TTL_PATH", str(_DEFAULT_TTL_PATH)))
 MAX_RETRIES = 2
 
 
@@ -45,18 +55,19 @@ class Pipeline:
         self.max_retries = max_retries
         ttl = Path(ttl_path) if ttl_path else DEFAULT_TTL
 
+        # ── Step 0: Load KG store (once) ────────────────────────────────────
         if self.verbose:
-            print(f"[Pipeline] Loading KG from {ttl}…")
+            print(f"[Step 0] Loading KG from {ttl}…")
 
         self.graph = Graph()
         if ttl.exists():
             self.graph.parse(str(ttl), format="turtle")
         else:
-            print(f"[Pipeline] WARNING: TTL file not found: {ttl}")
-            print("[Pipeline] Run `python readings.py --max-records 500` to fetch data first.")
+            print(f"[Step 0] WARNING: TTL file not found: {ttl}")
+            print("[Step 0] Run `python scripts/0_readings.py --max-records 500` to fetch data first.")
 
         if self.verbose:
-            print(f"[Pipeline] Graph ready — {len(self.graph)} triples.")
+            print(f"[Step 0] Graph ready — {len(self.graph)} triples.")
 
     def run(self, query: str) -> dict[str, Any]:
         v = self.verbose
@@ -65,10 +76,10 @@ class Pipeline:
         feedback = None
         intent = None
         sparql = None
-        results = []
+        raw_results = []
 
         for attempt in range(1 + self.max_retries):
-            # ── Step 1: Semantic Parsing ─────────────────────────────
+            # ── Step 1: Semantic Parsing ─────────────────────────────────────
             if v:
                 print(f"\n{sep}")
                 if attempt == 0:
@@ -79,23 +90,19 @@ class Pipeline:
             if v:
                 print("[Step 1] Intent:", json.dumps(intent, indent=2))
 
-            # ── Step 3: SPARQL Retrieval ─────────────────────────────
+            # ── Step 2: SPARQL Retrieval + Result Unfolding ──────────────────
             sparql = build_sparql(intent)
             if v:
                 print(f"\n{sep}")
-                print("[Step 3] SPARQL query:")
+                print("[Step 2] SPARQL query:")
                 print(sparql)
 
-            results = execute(self.graph, sparql)
+            raw_results = execute(self.graph, sparql)
             if v:
-                print(f"[Step 3] {len(results)} result(s) returned.")
-                for r in results[:5]:
-                    print("  ", r)
-                if len(results) > 5:
-                    print(f"  … and {len(results) - 5} more.")
+                print(f"[Step 2] {len(raw_results)} raw result(s) returned.")
 
-            # ── Check if we need to retry ────────────────────────────
-            failure = _is_failed(results)
+            # ── Check if we need to retry ────────────────────────────────────
+            failure = _is_failed(raw_results)
             if failure is None:
                 break
 
@@ -107,34 +114,33 @@ class Pipeline:
                 )
                 if v:
                     print(f"\n[Pipeline] Query failed — {failure}")
-                    print(f"[Pipeline] Retrying with feedback…")
+                    print("[Pipeline] Retrying with feedback…")
             else:
                 if v:
                     print(f"\n[Pipeline] Query failed after {self.max_retries} retries — {failure}")
 
-        # ── Step 3.5: Unfold results ─────────────────────────────────
-        unfolded = unfold_results(self.graph, results)
-        if v and unfolded != results:
+        unfolded = unfold_results(self.graph, raw_results)
+        if v:
             print(f"\n{sep}")
-            print("[Step 3.5] Unfolded results (URIs resolved to linked properties):")
+            print("[Step 2] Unfolded results (URIs resolved to linked properties):")
             for r in unfolded[:5]:
                 print("  ", r)
             if len(unfolded) > 5:
                 print(f"  … and {len(unfolded) - 5} more.")
 
-        # ── Step 4: Natural Language Answer ──────────────────────────
+        # ── Step 3: Natural Language Answer ─────────────────────────────────
         if v:
             print(f"\n{sep}")
-            print("[Step 4] Generating natural language answer…")
+            print("[Step 3] Generating natural language answer…")
         answer = generate(query, sparql, unfolded)
         if v:
-            print("[Step 4] Answer:")
+            print("[Step 3] Answer:")
             print(answer)
 
         return {
             "query":   query,
             "intent":  intent,
             "sparql":  sparql,
-            "results": results,
+            "results": unfolded,
             "answer":  answer,
         }

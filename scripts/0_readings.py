@@ -1,19 +1,20 @@
 """
-ARGUS KGQA — Readings API client + RDF Knowledge Graph builder.
+Step 0 — ARGUS API client + RDF Knowledge Graph builder.
 
 Fetches sensor readings from the ARGUS API, converts them to RDF triples
 using SOSA/ARGUS vocabularies, and stores the result as a Turtle file.
 
 Usage:
-    python readings.py                        # fetch all, full run
-    python readings.py --max-records 500      # limit records
-    python readings.py --resume               # incremental update
-    python readings.py --resume --overlap-pages 3
+    python scripts/0_readings.py                        # fetch all, full run
+    python scripts/0_readings.py --max-records 500      # limit records
+    python scripts/0_readings.py --resume               # incremental update
+    python scripts/0_readings.py --resume --overlap-pages 3
 """
 
 import argparse
 import hashlib
 import json
+import os
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -32,10 +33,12 @@ from ontology_schema import SOSA, ARGUS, EX
 # Paths — all output goes to ARGUS-KGQA/data/
 # ---------------------------------------------------------------------------
 
-DATA_DIR = Path(__file__).resolve().parent / "data"
+_DEFAULT_DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+DATA_DIR = Path(os.environ.get("ARGUS_DATA_DIR", str(_DEFAULT_DATA_DIR)))
 
 TTL_FILE = DATA_DIR / "argus_readings.ttl"
 STATE_FILE = DATA_DIR / "argus_readings_state.json"
+SEEN_IDS_FILE = DATA_DIR / "argus_seen_ids.txt"
 BACKUP_FILE = DATA_DIR / "argus_readings.backup.ttl"
 
 
@@ -43,12 +46,13 @@ BACKUP_FILE = DATA_DIR / "argus_readings.backup.ttl"
 # ARGUS API
 # ---------------------------------------------------------------------------
 
-BASE_URL = "http://api.argusservices.athenarc.gr/api/readings"
+BASE_URL = os.environ.get("ARGUS_API_URL", "http://api.argusservices.athenarc.gr/api/readings")
 
 API_HEADERS = {"Accept": "application/json"}
 REQUEST_TIMEOUT = (10, 180)
 PAGE_SLEEP_SECONDS = 0.5
 MAX_CONSECUTIVE_FAILURES = 20
+SAVE_EVERY_PAGES = 50
 
 
 # ---------------------------------------------------------------------------
@@ -126,67 +130,69 @@ def _parse_paginated(payload: Dict[str, Any], fallback_page: int) -> Tuple[List[
 def fetch_readings_paginated(
     max_records: Optional[int] = None,
     start_page: int = 1,
-) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
-    print(f"Fetching paginated readings from: {BASE_URL}")
-    print(f"Starting from page: {start_page}")
-
-    session = _make_session()
-    readings: List[Dict[str, Any]] = []
-    page = max(1, start_page)
-    consecutive_failures = 0
-    last_successful_page = start_page - 1
-    last_page = None
-    total = None
-
-    while True:
-        try:
-            payload = _fetch_page_robust(session, page)
-            records, current_page, last_page_value, total_value = _parse_paginated(payload, page)
-            if total_value is not None:
-                total = total_value
-            last_page = last_page_value
-            readings.extend(records)
-            last_successful_page = current_page
-
-            print(
-                f"Page {current_page}/{last_page} | "
-                f"page records: {len(records)} | "
-                f"downloaded: {len(readings)}"
-                + (f" / total: {total}" if total is not None else "")
-            )
-
-            if max_records is not None and len(readings) >= max_records:
-                readings = readings[:max_records]
-                print(f"Stopped after max_records={max_records}")
-                break
-            if current_page >= last_page:
-                break
-
-            page = current_page + 1
-            consecutive_failures = 0
-            time.sleep(PAGE_SLEEP_SECONDS)
-
-        except RequestException as exc:
-            consecutive_failures += 1
-            wait_seconds = min(300, 10 * consecutive_failures)
-            print(
-                f"Failed on page {page}. "
-                f"Consecutive failures: {consecutive_failures}/{MAX_CONSECUTIVE_FAILURES}. "
-                f"Waiting {wait_seconds}s. Error: {repr(exc)}"
-            )
-            if consecutive_failures >= MAX_CONSECUTIVE_FAILURES:
-                print("Stopping to avoid hammering the API. Re-run later to resume.")
-                break
-            time.sleep(wait_seconds)
-
-    progress = {
-        "last_successful_page": last_successful_page,
-        "last_page": last_page,
-        "total": total,
-        "records_downloaded_this_run": len(readings),
+) -> Tuple[Iterator[List[Dict[str, Any]]], Dict[str, Any]]:
+    """Yields one list of records per page."""
+    progress: Dict[str, Any] = {
+        "last_successful_page": start_page - 1,
+        "last_page": None,
+        "total": None,
+        "records_downloaded_this_run": 0,
     }
-    print(f"Fetched readings total this run: {len(readings)}")
-    return readings, progress
+
+    def _iter_pages() -> Iterator[List[Dict[str, Any]]]:
+        print(f"Fetching paginated readings from: {BASE_URL}")
+        print(f"Starting from page: {start_page}")
+
+        session = _make_session()
+        page = max(1, start_page)
+        consecutive_failures = 0
+        downloaded = 0
+
+        while True:
+            try:
+                payload = _fetch_page_robust(session, page)
+                records, current_page, last_page_value, total_value = _parse_paginated(payload, page)
+                if total_value is not None:
+                    progress["total"] = total_value
+                progress["last_page"] = last_page_value
+                progress["last_successful_page"] = current_page
+
+                downloaded += len(records)
+                progress["records_downloaded_this_run"] = downloaded
+
+                print(
+                    f"Page {current_page}/{last_page_value} | "
+                    f"page records: {len(records)} | "
+                    f"downloaded: {downloaded}"
+                    + (f" / total: {progress['total']}" if progress["total"] is not None else "")
+                )
+
+                yield records
+
+                if max_records is not None and downloaded >= max_records:
+                    print(f"Stopped after max_records={max_records}")
+                    return
+                if current_page >= last_page_value:
+                    return
+
+                page = current_page + 1
+                consecutive_failures = 0
+                time.sleep(PAGE_SLEEP_SECONDS)
+
+            except RequestException as exc:
+                consecutive_failures += 1
+                wait_seconds = min(300, 10 * consecutive_failures)
+                print(
+                    f"Failed on page {page}. "
+                    f"Consecutive failures: {consecutive_failures}/{MAX_CONSECUTIVE_FAILURES}. "
+                    f"Waiting {wait_seconds}s. Error: {repr(exc)}"
+                )
+                if consecutive_failures >= MAX_CONSECUTIVE_FAILURES:
+                    print("Stopping to avoid hammering the API. Re-run later to resume.")
+                    return
+                time.sleep(wait_seconds)
+
+    return _iter_pages(), progress
 
 
 # ---------------------------------------------------------------------------
@@ -224,10 +230,39 @@ def _make_uri_part(value: Any) -> str:
 # State persistence
 # ---------------------------------------------------------------------------
 
+def _load_seen_ids() -> set:
+    if not SEEN_IDS_FILE.exists():
+        # Migrate from old state file if needed
+        if STATE_FILE.exists():
+            with open(STATE_FILE, "r", encoding="utf-8") as f:
+                old_state = json.load(f)
+            ids = set(old_state.get("seen_reading_ids", []))
+            if ids:
+                print(f"Migrating {len(ids)} seen IDs from state JSON to {SEEN_IDS_FILE}")
+                _save_seen_ids(ids)
+            return ids
+        return set()
+    with open(SEEN_IDS_FILE, "r", encoding="utf-8") as f:
+        return set(line.strip() for line in f if line.strip())
+
+
+def _save_seen_ids(seen_ids: set) -> None:
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    with open(SEEN_IDS_FILE, "w", encoding="utf-8") as f:
+        for rid in sorted(seen_ids):
+            f.write(rid + "\n")
+
+
+def _append_seen_ids(new_ids: Iterable[str]) -> None:
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    with open(SEEN_IDS_FILE, "a", encoding="utf-8") as f:
+        for rid in new_ids:
+            f.write(rid + "\n")
+
+
 def _load_state() -> Dict[str, Any]:
     if not STATE_FILE.exists():
         return {
-            "seen_reading_ids": [],
             "last_update": None,
             "total_seen": 0,
             "last_successful_page": 0,
@@ -236,7 +271,9 @@ def _load_state() -> Dict[str, Any]:
             "records_downloaded": 0,
         }
     with open(STATE_FILE, "r", encoding="utf-8") as f:
-        return json.load(f)
+        state = json.load(f)
+    state.pop("seen_reading_ids", None)
+    return state
 
 
 def _save_state(state: Dict[str, Any]) -> None:
@@ -363,8 +400,11 @@ def add_reading_to_graph(g: Graph, reading: Dict[str, Any]) -> str:
     g.add((site_uri, RDF.type, ARGUS.Site))
     g.add((site_uri, RDFS.label, Literal(site_name)))
 
-    # Sensor
-    sensor_label = reading.get("sensor_name") or sensor_id
+    # Sensor — prefer sensor_name, fall back to node_label/node_name, last resort UUID
+    sensor_label = (reading.get("sensor_name")
+                    or reading.get("node_label")
+                    or reading.get("node_name")
+                    or sensor_id)
     g.add((sensor_uri, RDF.type, SOSA.Sensor))
     g.add((sensor_uri, RDFS.label, Literal(_safe_text(sensor_label))))
     _add_literal(g, sensor_uri, ARGUS.sensorId, sensor_id)
@@ -466,7 +506,7 @@ def update_kg(
     DATA_DIR.mkdir(parents=True, exist_ok=True)
 
     state = _load_state()
-    seen_ids = set(state.get("seen_reading_ids", []))
+    seen_ids = _load_seen_ids()
 
     if resume:
         previous_last = int(state.get("last_successful_page") or 0)
@@ -477,41 +517,56 @@ def update_kg(
         )
 
     g = load_graph()
-    readings, progress = fetch_readings_paginated(
+    pages_iter, progress = fetch_readings_paginated(
         max_records=max_records,
         start_page=start_page,
     )
 
     added = 0
     skipped = 0
-    for reading in readings:
-        rid = reading_stable_id(reading)
-        if rid in seen_ids:
-            skipped += 1
-            continue
-        add_reading_to_graph(g, reading)
-        seen_ids.add(rid)
-        added += 1
+    pages_since_save = 0
+    records_downloaded_before = int(state.get("records_downloaded") or 0)
 
-    state["seen_reading_ids"] = sorted(seen_ids)
-    state["last_update"] = _now_utc_iso()
-    state["total_seen"] = len(seen_ids)
-    state["last_successful_page"] = max(
-        int(state.get("last_successful_page") or 0),
-        int(progress.get("last_successful_page") or 0),
-    )
-    state["last_page"] = progress.get("last_page")
-    state["total"] = progress.get("total")
-    state["records_downloaded"] = int(state.get("records_downloaded") or 0) + int(
-        progress.get("records_downloaded_this_run") or 0
-    )
+    def _checkpoint() -> None:
+        nonlocal pages_since_save
+        state["last_update"] = _now_utc_iso()
+        state["total_seen"] = len(seen_ids)
+        state["last_successful_page"] = max(
+            int(state.get("last_successful_page") or 0),
+            int(progress.get("last_successful_page") or 0),
+        )
+        state["last_page"] = progress.get("last_page")
+        state["total"] = progress.get("total")
+        state["records_downloaded"] = records_downloaded_before + added + skipped
+        save_graph(g)
+        _save_state(state)
+        pages_since_save = 0
+        print(f"  [checkpoint] saved {len(g)} triples, {len(seen_ids)} seen IDs")
 
-    save_graph(g)
-    _save_state(state)
+    for page_records in pages_iter:
+        new_ids = []
+        for reading in page_records:
+            rid = reading_stable_id(reading)
+            if rid in seen_ids:
+                skipped += 1
+                continue
+            add_reading_to_graph(g, reading)
+            seen_ids.add(rid)
+            new_ids.append(rid)
+            added += 1
+
+        if new_ids:
+            _append_seen_ids(new_ids)
+
+        pages_since_save += 1
+        if pages_since_save >= SAVE_EVERY_PAGES:
+            _checkpoint()
+
+    _checkpoint()
 
     print()
     print("Update complete.")
-    print(f"Fetched this run: {len(readings)}")
+    print(f"Fetched this run: {added + skipped}")
     print(f"Added new: {added}")
     print(f"Skipped duplicates: {skipped}")
     print(f"Total seen: {len(seen_ids)}")

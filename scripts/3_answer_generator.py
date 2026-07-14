@@ -1,8 +1,8 @@
 """
-Step 4 — Natural Language Answer Generator.
+Step 3 — Natural Language Answer Generator.
 
-Passes the original query, SPARQL, raw results, AND pre-computed spatial/
-temporal analysis to the LLM, asking it to reason — not just reformat.
+Passes the original query, SPARQL, unfolded results, and pre-computed
+spatial/temporal analysis to the LLM, asking it to reason — not just reformat.
 """
 
 from __future__ import annotations
@@ -15,6 +15,8 @@ from geo_analysis import analyze
 BASE_URL = os.environ.get("OLLAMA_BASE_URL", "https://ollama.fit.fraunhofer.de/api")
 API_KEY  = os.environ.get("OPENAI_API_KEY", "no-key")
 MODEL    = os.environ.get("OLLAMA_MODEL", "gpt-oss:120b")
+
+MAX_RESULT_CHARS = 6000
 
 SYSTEM = """You are a concise sensor data analyst for the ARGUS cultural heritage monitoring system.
 
@@ -36,9 +38,19 @@ def generate(query: str, sparql: str, results: list) -> str:
 
     analysis = analyze(results)
 
-    results_text = json.dumps(results, indent=2, ensure_ascii=False)
-    if len(results_text) > 3000:
-        results_text = results_text[:3000] + "\n... (truncated)"
+    # Deduplicate rows before serialising so repeated observations of the same
+    # entity don't dominate the MAX_RESULT_CHARS budget and hide other rows.
+    seen = set()
+    deduped = []
+    for row in results:
+        key = tuple(sorted(row.items()))
+        if key not in seen:
+            seen.add(key)
+            deduped.append(row)
+
+    results_text = json.dumps(deduped, indent=2, ensure_ascii=False)
+    if len(results_text) > MAX_RESULT_CHARS:
+        results_text = results_text[:MAX_RESULT_CHARS] + "\n... (truncated)"
 
     user_msg = (
         f"User question:\n{query}\n\n"

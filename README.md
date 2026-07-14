@@ -48,54 +48,44 @@ DUL ◄────────────────┘
 
 | Extraction | Used by | Purpose |
 |------------|---------|---------|
-| `CLASS_MAP` (short name → prefixed) | `sparql_retriever.py` | Map `"Site"` → `"argus:Site"` in SPARQL generation |
-| `PROP_MAP` (short name → prefixed) | `sparql_retriever.py` | Map `"hasSite"` → `"argus:hasSite"` |
-| `OBJECT_PROPS` | `sparql_retriever.py` | Distinguish object vs datatype properties |
-| `PROP_DOMAIN` | `sparql_retriever.py` | Route joins through correct anchor class |
-| Schema text | `semantic_parser.py` | LLM prompt: classes, properties, domain/range |
-| Graph connectivity | `semantic_parser.py` | LLM prompt: direct edges, property ownership, indirect paths |
-| Class list | `semantic_parser.py` | LLM prompt: valid `target_class` values |
-| `SOSA`, `ARGUS`, `EX` | `readings.py` | Shared RDF namespace definitions |
+| `CLASS_MAP` (short name → prefixed) | `2_sparql_retriever.py` | Map `"Site"` → `"argus:Site"` in SPARQL generation |
+| `PROP_MAP` (short name → prefixed) | `2_sparql_retriever.py` | Map `"hasSite"` → `"argus:hasSite"` |
+| `OBJECT_PROPS` | `2_sparql_retriever.py` | Distinguish object vs datatype properties |
+| `PROP_DOMAIN` | `2_sparql_retriever.py` | Route joins through correct anchor class |
+| Schema text | `1_semantic_parser.py` | LLM prompt: classes, properties, domain/range |
+| Graph connectivity | `1_semantic_parser.py` | LLM prompt: direct edges, property ownership, indirect paths |
+| Class list | `1_semantic_parser.py` | LLM prompt: valid `target_class` values |
+| `SOSA`, `ARGUS`, `EX` | `0_readings.py` | Shared RDF namespace definitions |
 
 ## Pipeline
 
 ```
-NL Query
+[Step 0] KG Store (loaded once at startup)
+         0_readings.py  — fetches ARGUS API → saves data/argus_readings.ttl
+         pipeline.py    — loads TTL into rdflib in-memory Graph (SOSA/ARGUS triples)
    │
-   ▼
+   ▼ (per query)
 [Step 1] Semantic Parser  (LLM)
-         semantic_parser.py
+         1_semantic_parser.py
          ontology schema + graph connectivity (auto-extracted from OWL)
          → structured intent JSON
          (target_class, filters, joins, aggregation)
    │
    ▼
-[Step 2] KG Store
-         data/argus_readings.ttl
-         → rdflib in-memory Graph (SOSA/ARGUS triples)
-   │
-   ▼
-[Step 3] SPARQL Retrieval
-         sparql_retriever.py
-         intent → SPARQL query → raw results
+[Step 2] SPARQL Retrieval + Result Unfolding
+         2_sparql_retriever.py
+         intent → SPARQL query → raw results → unfolded results
    │
    ├── results OK → continue
    └── empty / error → feedback to Step 1 (up to 2 retries)
    │
    ▼
-[Step 3.5] Result Unfolding
-           sparql_retriever.unfold_results()
-           Resolves URI references by following all linked properties
-           in the graph, replacing opaque URIs with human-readable
-           labels and values. Nested URIs are resolved one level deep.
-   │
-   ▼
-[Step 4] NL Answer Generator  (LLM)
-         answer_generator.py
-         query + unfolded results + analysis → concise answer
+[Step 3] NL Answer Generator  (LLM)
+         3_answer_generator.py
+         query + unfolded results + spatial/temporal analysis → concise answer
 ```
 
-### Step 3.5 unfolding example
+### Step 2 unfolding example
 
 Raw SPARQL result (contains opaque URIs and IDs):
 ```json
@@ -125,32 +115,32 @@ pip install openai rdflib requests
 
 export OPENAI_API_KEY="your_fraunhofer_api_key"
 
-# 1. Fetch sensor data from the ARGUS API
-python readings.py --max-records 500    # small test run
-python readings.py                       # full dataset (~420k records)
-python readings.py --resume              # incremental update
+# Step 0 — Fetch sensor data from the ARGUS API (run once to build the KG)
+python scripts/0_readings.py --max-records 500    # small test run
+python scripts/0_readings.py                       # full dataset (~420k records)
+python scripts/0_readings.py --resume              # incremental update
 
-# 2. Run the pipeline
-python demo.py              # batch mode: run preset queries
-python demo.py --online     # interactive mode: type queries in terminal
-python demo.py --online --quiet  # interactive without debug output
+# Steps 1–3 — Run the pipeline
+python scripts/demo.py              # batch mode: run preset queries
+python scripts/demo.py --online     # interactive mode: type queries in terminal
+python scripts/demo.py --online --quiet  # interactive without debug output
 ```
 
 ## File structure
 
-| File | Role |
-|------|------|
-| `readings.py` | ARGUS API client + RDF knowledge graph builder. Fetches sensor readings, converts to SOSA/ARGUS triples, saves to `data/argus_readings.ttl` |
-| `ontology_schema.py` | Single source of truth — parses OWL files and exports all schema knowledge: namespaces, class/property maps, graph connectivity, LLM prompt text |
-| `semantic_parser.py` | Step 1 — LLM parses NL query into a structured intent JSON |
-| `sparql_retriever.py` | Step 3 + 3.5 — builds SPARQL from intent, executes against the graph, unfolds URI results |
-| `answer_generator.py` | Step 4 — LLM generates a concise answer from unfolded results |
-| `geo_analysis.py` | Temporal and numeric analysis helpers for enriching LLM context |
-| `pipeline.py` | Orchestrates all steps with retry loop and result unfolding |
-| `demo.py` | Demo entry point — batch mode (preset queries) or `--online` interactive mode |
-| `panoptes3.owl` | Core ARGUS Panoptes ontology — integrates SOSA/SSN, PROV, CIDOC-CRM, GeoSPARQL, OWL-Time, DUL |
-| `panoptes3_extension.owl` | Sensor data extension — defines `argus:` classes/properties and declares SOSA properties with domain/range, bridging standard and project vocabularies |
-| `CIDOC_CRM_v7.1.3.rdf` | CIDOC-CRM v7.1.3 base ontology — reference only |
+| File | Step | Role |
+|------|------|------|
+| `scripts/0_readings.py` | Step 0 | ARGUS API client + RDF knowledge graph builder. Fetches sensor readings, converts to SOSA/ARGUS triples, saves to `data/argus_readings.ttl` |
+| `scripts/1_semantic_parser.py` | Step 1 | LLM parses NL query into a structured intent JSON using ontology schema |
+| `scripts/2_sparql_retriever.py` | Step 2 | Builds SPARQL from intent, executes against the graph, unfolds URI results to human-readable values |
+| `scripts/3_answer_generator.py` | Step 3 | LLM generates a concise answer from unfolded results and spatial/temporal analysis |
+| `scripts/ontology_schema.py` | — | Single source of truth — parses OWL files and exports all schema knowledge: namespaces, class/property maps, graph connectivity, LLM prompt text |
+| `scripts/geo_analysis.py` | — | Temporal and numeric analysis helpers for enriching LLM context |
+| `scripts/pipeline.py` | — | Orchestrates Steps 1–3 with retry loop; loads KG (Step 0 output) at startup |
+| `scripts/demo.py` | — | Entry point — batch mode (preset queries) or `--online` interactive mode |
+| `material/panoptes3.owl` | — | Core ARGUS Panoptes ontology — integrates SOSA/SSN, PROV, CIDOC-CRM, GeoSPARQL, OWL-Time, DUL |
+| `material/panoptes3_extension.owl` | — | Sensor data extension — defines `argus:` classes/properties and declares SOSA properties with domain/range |
+| `material/CIDOC_CRM_v7.1.3.rdf` | — | CIDOC-CRM v7.1.3 base ontology — reference only |
 
 ### Generated data (in `data/`, gitignored)
 
@@ -190,9 +180,9 @@ The `result` dict contains all intermediate outputs:
 | Key | Content |
 |-----|---------|
 | `result["intent"]` | Parsed intent JSON from Step 1 |
-| `result["sparql"]` | Generated SPARQL query from Step 3 |
-| `result["results"]` | Unfolded rows (URIs resolved to labels/values) |
-| `result["answer"]` | Final natural language answer from Step 4 |
+| `result["sparql"]` | Generated SPARQL query from Step 2 |
+| `result["results"]` | Unfolded rows (URIs resolved to labels/values) from Step 2 |
+| `result["answer"]` | Final natural language answer from Step 3 |
 
 ## Sample queries (demo.py)
 
@@ -213,21 +203,21 @@ The `result` dict contains all intermediate outputs:
 | `OPENAI_API_KEY` | `no-key` | API key for the LLM endpoint |
 | `OLLAMA_MODEL` | `gpt-oss:120b` | Model name |
 
-## readings.py usage
+## 0_readings.py usage (Step 0 — KG construction)
 
 ```bash
 # Full download (all ~420k API records, takes a while)
-python readings.py
+python scripts/0_readings.py
 
 # Limit to N records (for testing)
-python readings.py --max-records 500
+python scripts/0_readings.py --max-records 500
 
 # Resume from where you left off (incremental update)
-python readings.py --resume
+python scripts/0_readings.py --resume
 
 # Resume with more overlap to avoid missing records
-python readings.py --resume --overlap-pages 3
+python scripts/0_readings.py --resume --overlap-pages 3
 
 # Start from a specific page
-python readings.py --start-page 100
+python scripts/0_readings.py --start-page 100
 ```

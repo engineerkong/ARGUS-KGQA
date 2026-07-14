@@ -9,6 +9,8 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Any
 
+_MAX_RECENCY_ROWS = 20
+
 
 def _extract_time(row: dict) -> datetime | None:
     time_keys = [k for k in row if "time" in k.lower() or "date" in k.lower()]
@@ -66,10 +68,10 @@ def analyze(results: list[dict[str, Any]]) -> dict[str, Any]:
     lines.append(f"Total results: {len(results)}")
 
     if recency:
-        lines.append(f"\n=== Temporal recency (most recent first, showing up to 20) ===")
-        for r in recency[:20]:
+        lines.append(f"\n=== Temporal recency (most recent first, showing up to {_MAX_RECENCY_ROWS}) ===")
+        for r in recency[:_MAX_RECENCY_ROWS]:
             lines.append(f"  {r['label']:50s}  {r['timestamp']}  ({r['days_ago']} days ago)")
-        if len(recency) > 20:
+        if len(recency) > _MAX_RECENCY_ROWS:
             lines.append(f"  … and {len(recency) - 20} more.")
 
     # ── Numeric value summary ────────────────────────────────────────

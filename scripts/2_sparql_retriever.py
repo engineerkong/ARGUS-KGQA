@@ -1,8 +1,10 @@
 """
-Step 3 — SPARQL Retriever.
+Step 2 — SPARQL Retriever + Result Unfolding.
 
-Converts a parsed intent (from semantic_parser) into a SPARQL SELECT query,
+Converts a parsed intent (from 1_semantic_parser) into a SPARQL SELECT query,
 executes it against the rdflib graph, and returns results as a list of dicts.
+URI values are then unfolded by following their linked properties in the graph,
+replacing opaque resource URIs with human-readable labels and values.
 
 All class/property mappings are derived from the OWL ontology files
 via ontology_schema — no hardcoded schema knowledge here.
@@ -12,8 +14,9 @@ from __future__ import annotations
 from typing import Any
 from rdflib import Graph
 from ontology_schema import (
+    EX,
     extract_class_map, extract_prop_map,
-    extract_object_props, extract_prop_domain,
+    extract_object_props, extract_prop_domain, extract_prop_range,
 )
 
 PREFIXES = """\
@@ -29,6 +32,7 @@ CLASS_MAP = extract_class_map()
 PROP_MAP = extract_prop_map()
 OBJECT_PROPS = extract_object_props()
 PROP_DOMAIN = extract_prop_domain()
+PROP_RANGE = extract_prop_range()
 
 
 def _strip_prefix(name: str) -> str:
@@ -75,6 +79,135 @@ def _filter_expr(fvar: str, op: str, val: str) -> str:
         return f'  FILTER(CONTAINS(LCASE(STR({fvar})), LCASE("{v}")))'
 
 
+def _resolve_group_var(raw: str, joins: list) -> str:
+    """Resolve a group_by or order_by name to the SPARQL variable name.
+
+    Accepts both the qualified form ("Site.label" → "site_label") and the
+    legacy bare form ("label" — resolved by scanning join return_properties).
+    """
+    if "." in raw:
+        cls, prop = raw.split(".", 1)
+        return _var(cls, prop)
+    bare = _var(raw)
+    for j in joins:
+        for p in j.get("return_properties", []):
+            if _var(p) == bare:
+                return _var(j["class"], p)
+    return bare
+
+
+def _build_subquery_sparql(
+    target_class: str, target_var: str,
+    filters: list, return_props: list,
+    joins: list, order_by: dict | None, limit: int,
+) -> str:
+    """Build SPARQL using an inner subquery so LIMIT applies at the entity level.
+
+    Without a subquery, LIMIT N with one-to-many joins returns N observation
+    rows, not N target entities. The subquery pattern fixes this:
+      inner: SELECT target [+ its direct properties] ... ORDER BY ... LIMIT N
+      outer: join everything else OPTIONAL onto the subquery result.
+    """
+    # ── Inner subquery: target entity + its direct properties ────────────
+    inner_vars = [target_var]
+    inner_lines = [f"    {target_var} a {_class(target_class)} ."]
+
+    for p in return_props:
+        if p not in OBJECT_PROPS:
+            pvar = f"?{_var(p)}"
+            inner_lines.append(f"    OPTIONAL {{ {target_var} {_prop(p)} {pvar} . }}")
+            inner_vars.append(pvar)
+
+    for f in filters:
+        prop = f.get("property", "")
+        val  = f.get("value", "")
+        op   = f.get("op", "contains")
+        fvar = f"?_f_{_var(prop)}"
+        inner_lines.append(f"    {target_var} {_prop(prop)} {fvar} .")
+        inner_lines.append("    " + _filter_expr(fvar, op, val))
+
+    inner_order = ""
+    if order_by:
+        raw_ovar = order_by.get("variable", "")
+        if "." in raw_ovar:
+            cls, prop = raw_ovar.split(".", 1)
+            # Target-class properties are named with bare _var(prop) in the inner scope
+            ovar = "?" + (_var(prop) if cls.lower() == target_class.lower()
+                          else _var(cls, prop))
+        else:
+            ovar = "?" + _resolve_group_var(raw_ovar, joins)
+        if ovar in inner_vars:
+            inner_order = f"\n    ORDER BY {order_by.get('direction', 'DESC')}({ovar})"
+
+    inner_block = (
+        "  {\n"
+        f"  SELECT {' '.join(inner_vars)}\n"
+        f"  WHERE {{\n" + "\n".join(inner_lines) + "\n  }"
+        + inner_order
+        + f"\n  LIMIT {int(limit)}\n"
+        "  }"
+    )
+
+    # ── Outer query: OPTIONAL joins onto the subquery result ─────────────
+    outer_select_vars = [v for v in inner_vars if v != target_var]
+    outer_lines = [inner_block]
+    join_vars = {target_class: target_var}
+
+    for j in joins:
+        jclass    = j.get("class", "")
+        via       = j.get("via", "")
+        direction = j.get("direction", "outgoing")
+        jvar      = "?" + jclass.lower()
+        jreturn   = j.get("return_properties", [])
+        jfilters  = j.get("filters", [])
+
+        via_short = _strip_prefix(via)
+        if direction == "incoming":
+            prop_range = PROP_RANGE.get(via_short)
+            anchor_var = join_vars.get(prop_range, target_var) if prop_range else target_var
+        else:
+            prop_domain = PROP_DOMAIN.get(via_short)
+            anchor_var = (
+                join_vars[prop_domain]
+                if prop_domain and prop_domain != target_class and prop_domain in join_vars
+                else target_var
+            )
+
+        use_optional = not jfilters
+        if use_optional:
+            outer_lines.append("  OPTIONAL {")
+        if direction == "outgoing":
+            outer_lines.append(f"    {anchor_var} {_prop(via)} {jvar} .")
+        else:
+            outer_lines.append(f"    {jvar} {_prop(via)} {anchor_var} .")
+        outer_lines.append(f"    {jvar} a {_class(jclass)} .")
+        join_vars[jclass] = jvar
+
+        for p in jreturn:
+            if p not in OBJECT_PROPS:
+                pvar = f"?{_var(jclass, p)}"
+                outer_lines.append(f"    OPTIONAL {{ {jvar} {_prop(p)} {pvar} . }}")
+                outer_select_vars.append(pvar)
+
+        for f in jfilters:
+            prop = f.get("property", "")
+            val  = f.get("value", "")
+            op   = f.get("op", "contains")
+            fvar = f"?_jf_{_var(prop)}"
+            outer_lines.append(f"    {jvar} {_prop(prop)} {fvar} .")
+            outer_lines.append("    " + _filter_expr(fvar, op, val))
+
+        if use_optional:
+            outer_lines.append("  }")
+
+    if not outer_select_vars:
+        outer_select_vars = [target_var]
+
+    select_clause = "SELECT DISTINCT " + " ".join(outer_select_vars)
+    where_clause  = "WHERE {\n" + "\n".join(outer_lines) + "\n}"
+    return PREFIXES + "\n" + select_clause + "\n" + where_clause
+
+
 def build_sparql(intent: dict) -> str:
     target_class = intent.get("target_class", "ObservationCollection")
     filters      = intent.get("filters", [])
@@ -86,14 +219,31 @@ def build_sparql(intent: dict) -> str:
 
     target_var = "?" + target_class.lower()
 
+    # When LIMIT is requested without aggregation and there are joins, use a
+    # subquery so the LIMIT applies at the entity level, not the observation row level.
+    if limit and not aggregation and joins:
+        return _build_subquery_sparql(
+            target_class, target_var, filters, return_props, joins, order_by, limit
+        )
+
+    target_var = "?" + target_class.lower()
+
     # ── SELECT variables ─────────────────────────────────────────────────
-    select_vars = [target_var]
+    # For ObservationCollection the target URI is an opaque internal hash —
+    # exclude it from SELECT to avoid bloat and allow value-level DISTINCT.
+    # For entity classes (Sensor, Site, ObservedProperty, Node) always include
+    # the target URI so DISTINCT deduplicates by entity, matching COUNT queries.
+    _TRAVERSAL_CLASSES = {"ObservationCollection", "Observation"}
+    has_explicit_props = (
+        target_class in _TRAVERSAL_CLASSES
+        and (bool(return_props) or any(j.get("return_properties") for j in joins))
+    )
+    select_vars = [] if has_explicit_props else [target_var]
     for p in return_props:
         select_vars.append(f"?{_var(p)}")
     for j in joins:
-        jvar = "?" + j["class"].lower()
-        select_vars.append(jvar)
-        for p in j.get("return_properties", []):
+        jreturn = j.get("return_properties", [])
+        for p in jreturn:
             select_vars.append(f"?{_var(j['class'], p)}")
 
     # ── WHERE body ───────────────────────────────────────────────────────
@@ -114,7 +264,7 @@ def build_sparql(intent: dict) -> str:
     # Determine which join classes are referenced in aggregation group_by
     agg_group_refs = set()
     if aggregation:
-        gb = _var(aggregation.get("group_by", ""))
+        gb = _resolve_group_var(aggregation.get("group_by", ""), joins)
         for j in joins:
             jc = j.get("class", "")
             for p in j.get("return_properties", []):
@@ -142,13 +292,20 @@ def build_sparql(intent: dict) -> str:
         jreturn   = j.get("return_properties", [])
         jfilters  = j.get("filters", [])
 
-        # Route through the correct anchor variable based on property domain
+        # Route through the correct anchor variable.
+        # outgoing: anchor is the domain class (property comes FROM it).
+        # incoming: anchor is the range class (what the property points TO).
         via_short = _strip_prefix(via)
-        prop_domain = PROP_DOMAIN.get(via_short)
-        if prop_domain and prop_domain != target_class and prop_domain in join_vars:
-            anchor_var = join_vars[prop_domain]
+        if direction == "incoming":
+            prop_range = PROP_RANGE.get(via_short)
+            anchor_var = join_vars.get(prop_range, target_var) if prop_range else target_var
         else:
-            anchor_var = target_var
+            prop_domain = PROP_DOMAIN.get(via_short)
+            anchor_var = (
+                join_vars[prop_domain]
+                if prop_domain and prop_domain != target_class and prop_domain in join_vars
+                else target_var
+            )
 
         use_optional = (jclass not in agg_group_refs
                         and not jfilters
@@ -198,23 +355,30 @@ def build_sparql(intent: dict) -> str:
             agg_target = "?" + raw_agg_target
         elif raw_agg_target in known_prop_vars:
             agg_target = "?" + raw_agg_target
+            prop_key = _strip_prefix(aggregation.get("target", ""))
             prop_full = _prop(aggregation.get("target", ""))
-            required_line = f"  {target_var} {prop_full} {agg_target} ."
+            domain = PROP_DOMAIN.get(prop_key)
+            anchor = join_vars.get(domain, target_var) if domain else target_var
+            required_line = f"  {anchor} {prop_full} {agg_target} ."
             if required_line not in lines:
                 lines.append(required_line)
         elif _strip_prefix(aggregation.get("target", "")) in PROP_MAP:
             agg_target = "?" + raw_agg_target
+            prop_key = _strip_prefix(aggregation.get("target", ""))
             prop_full = _prop(aggregation.get("target", ""))
-            lines.append(f"  {target_var} {prop_full} {agg_target} .")
+            domain = PROP_DOMAIN.get(prop_key)
+            anchor = join_vars.get(domain, target_var) if domain else target_var
+            lines.append(f"  {anchor} {prop_full} {agg_target} .")
         else:
             agg_target = target_var
 
-        raw_group = aggregation.get("group_by", "")
-        group_var = "?" + _var(raw_group)
+        group_var = "?" + _resolve_group_var(aggregation.get("group_by", ""), joins)
 
         agg_var = f"?{agg_type.lower()}"
 
-        select_clause = f"SELECT {group_var} ({agg_type}({agg_target}) AS {agg_var})"
+        use_distinct = aggregation.get("distinct", agg_type == "COUNT")
+        distinct_kw = "DISTINCT " if use_distinct else ""
+        select_clause = f"SELECT {group_var} ({agg_type}({distinct_kw}{agg_target}) AS {agg_var})"
         group_clause = f"\nGROUP BY {group_var}"
     else:
         select_clause = "SELECT DISTINCT " + " ".join(select_vars)
@@ -225,7 +389,7 @@ def build_sparql(intent: dict) -> str:
     # ── ORDER BY / LIMIT ─────────────────────────────────────────────────
     order_clause = ""
     if order_by:
-        ovar = "?" + _var(order_by.get("variable", ""))
+        ovar = "?" + _resolve_group_var(order_by.get("variable", ""), joins)
         odir = order_by.get("direction", "ASC")
         order_clause = f"\nORDER BY {odir}({ovar})"
 
@@ -259,7 +423,7 @@ from rdflib.namespace import RDFS, RDF
 
 import re
 
-_RESOURCE_PREFIX = "http://www.argus-project.eu/resource/"
+_RESOURCE_PREFIX = str(EX)
 _SKIP_PREDS = {str(RDF.type)}
 _MAX_VALUE_LEN = 200
 _UUID_RE = re.compile(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$', re.I)
@@ -360,9 +524,11 @@ def unfold_results(graph: Graph, results: list[dict[str, Any]]) -> list[dict[str
                     if cleaned is not None:
                         new_row[key] = cleaned
             else:
-                cleaned = _clean_value(val)
-                if cleaned is not None:
-                    new_row[key] = cleaned
+                # Direct SPARQL binding — keep even if it looks like a UUID/ID,
+                # since the query explicitly requested it. Only drop None and
+                # values exceeding the length cap.
+                if val is not None and len(val) <= _MAX_VALUE_LEN:
+                    new_row[key] = val
         unfolded.append(new_row)
 
     return unfolded

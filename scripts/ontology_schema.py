@@ -20,7 +20,7 @@ ARGUS = Namespace("http://www.argus-project.eu/ontology/")
 EX = Namespace("http://www.argus-project.eu/resource/")
 PANOPTES = Namespace("http://www.argus-project.eu/panoptes#")
 
-OWL_DIR = Path(__file__).resolve().parent
+OWL_DIR = Path(__file__).resolve().parent.parent / "material"
 OWL_FILES = [
     OWL_DIR / "panoptes3.owl",
     OWL_DIR / "panoptes3_extension.owl",
@@ -157,6 +157,22 @@ def extract_prop_domain(g: Graph | None = None) -> dict[str, str]:
                 if isinstance(domain, URIRef):
                     result[local] = _local(domain)
                     break
+    return result
+
+
+def extract_prop_range(g: Graph | None = None) -> dict[str, str]:
+    """Map short property name → range class short name, e.g. {"hasObservation": "Observation"}."""
+    if g is None:
+        g = load_ontology_graph()
+    result = {}
+    for prop in g.subjects(RDF.type, OWL.ObjectProperty):
+        if not isinstance(prop, URIRef):
+            continue
+        local = _local(prop)
+        for range_cls in g.objects(prop, RDFS.range):
+            if isinstance(range_cls, URIRef):
+                result[local] = _local(range_cls)
+                break
     return result
 
 
