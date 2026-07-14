@@ -30,7 +30,7 @@ unfold_results = _sr.unfold_results
 _ag = importlib.import_module("3_answer_generator")
 generate = _ag.generate
 
-_DEFAULT_TTL_PATH = Path(__file__).resolve().parent.parent / "data_500" / "argus_readings.ttl"
+_DEFAULT_TTL_PATH = Path(__file__).resolve().parent.parent / "data" / "argus_readings.ttl"
 DEFAULT_TTL = Path(os.environ.get("ARGUS_TTL_PATH", str(_DEFAULT_TTL_PATH)))
 MAX_RETRIES = 2
 

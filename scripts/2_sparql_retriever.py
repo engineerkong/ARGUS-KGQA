@@ -79,6 +79,22 @@ def _filter_expr(fvar: str, op: str, val: str) -> str:
         return f'  FILTER(CONTAINS(LCASE(STR({fvar})), LCASE("{v}")))'
 
 
+def _type_check_redundant(jclass: str, via: str, direction: str) -> bool:
+    """True when the join edge itself already pins the join variable's class.
+
+    An outgoing edge constrains its object to the property's range; an incoming
+    edge constrains its subject to the domain. When that matches the join class,
+    an extra `?var a <Class>` triple filters nothing — but rdflib joins it as a
+    low-selectivity rdf:type pattern and the query cost explodes (measured: one
+    such triple took a 0.05s query to 19s on a 24k-triple graph, with an
+    identical result set).
+    """
+    via_short = _strip_prefix(via)
+    implied = (PROP_RANGE.get(via_short) if direction == "outgoing"
+               else PROP_DOMAIN.get(via_short))
+    return implied is not None and implied == _strip_prefix(jclass)
+
+
 def _resolve_group_var(raw: str, joins: list) -> str:
     """Resolve a group_by or order_by name to the SPARQL variable name.
 
@@ -180,7 +196,8 @@ def _build_subquery_sparql(
             outer_lines.append(f"    {anchor_var} {_prop(via)} {jvar} .")
         else:
             outer_lines.append(f"    {jvar} {_prop(via)} {anchor_var} .")
-        outer_lines.append(f"    {jvar} a {_class(jclass)} .")
+        if not _type_check_redundant(jclass, via, direction):
+            outer_lines.append(f"    {jvar} a {_class(jclass)} .")
         join_vars[jclass] = jvar
 
         for p in jreturn:
@@ -317,7 +334,8 @@ def build_sparql(intent: dict) -> str:
             lines.append(f"    {anchor_var} {_prop(via)} {jvar} .")
         else:
             lines.append(f"    {jvar} {_prop(via)} {anchor_var} .")
-        lines.append(f"    {jvar} a {_class(jclass)} .")
+        if not _type_check_redundant(jclass, via, direction):
+            lines.append(f"    {jvar} a {_class(jclass)} .")
 
         join_vars[jclass] = jvar
 

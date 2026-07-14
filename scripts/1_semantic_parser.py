@@ -15,7 +15,24 @@ BASE_URL = os.environ.get("OLLAMA_BASE_URL", "https://ollama.fit.fraunhofer.de/a
 API_KEY  = os.environ.get("OPENAI_API_KEY", "no-key")
 MODEL    = os.environ.get("OLLAMA_MODEL", "gpt-oss:120b")
 
+# The SDK default is a 600s timeout with silent retries, so a stalled endpoint
+# hangs the pipeline for many minutes with no output.
+LLM_TIMEOUT     = float(os.environ.get("ARGUS_LLM_TIMEOUT", "120"))
+LLM_MAX_RETRIES = int(os.environ.get("ARGUS_LLM_MAX_RETRIES", "2"))
+
 ONTOLOGY_SCHEMA = get_ontology_schema()
+
+_client: OpenAI | None = None
+
+
+def _get_client() -> OpenAI:
+    global _client
+    if _client is None:
+        _client = OpenAI(
+            base_url=BASE_URL, api_key=API_KEY,
+            timeout=LLM_TIMEOUT, max_retries=LLM_MAX_RETRIES,
+        )
+    return _client
 
 _GRAPH_PATHS = """\
 Key graph paths (direct edges — use these for joins):
@@ -182,7 +199,7 @@ Rules:
 
 
 def parse(query: str, feedback: str | None = None) -> dict:
-    client = OpenAI(base_url=BASE_URL, api_key=API_KEY)
+    client = _get_client()
 
     user_content = f"Query: {query}"
     if feedback:

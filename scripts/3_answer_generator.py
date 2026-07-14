@@ -16,7 +16,24 @@ BASE_URL = os.environ.get("OLLAMA_BASE_URL", "https://ollama.fit.fraunhofer.de/a
 API_KEY  = os.environ.get("OPENAI_API_KEY", "no-key")
 MODEL    = os.environ.get("OLLAMA_MODEL", "gpt-oss:120b")
 
+# The SDK default is a 600s timeout with silent retries, so a stalled endpoint
+# hangs the pipeline for many minutes with no output.
+LLM_TIMEOUT     = float(os.environ.get("ARGUS_LLM_TIMEOUT", "120"))
+LLM_MAX_RETRIES = int(os.environ.get("ARGUS_LLM_MAX_RETRIES", "2"))
+
 MAX_RESULT_CHARS = 6000
+
+_client: OpenAI | None = None
+
+
+def _get_client() -> OpenAI:
+    global _client
+    if _client is None:
+        _client = OpenAI(
+            base_url=BASE_URL, api_key=API_KEY,
+            timeout=LLM_TIMEOUT, max_retries=LLM_MAX_RETRIES,
+        )
+    return _client
 
 SYSTEM = """You are a concise sensor data analyst for the ARGUS cultural heritage monitoring system.
 
@@ -34,7 +51,7 @@ Rules:
 
 
 def generate(query: str, sparql: str, results: list) -> str:
-    client = OpenAI(base_url=BASE_URL, api_key=API_KEY)
+    client = _get_client()
 
     analysis = analyze(results)
 
