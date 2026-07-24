@@ -5,10 +5,6 @@ ex:     http://www.argus-project.eu/resource/
 rdfs:   http://www.w3.org/2000/01/rdf-schema#
 xsd:    http://www.w3.org/2001/XMLSchema#
 
-# Maps the SQL tables back to exactly the classes, predicates and ex: URIs that
-# 2_sparql_retriever.build_sparql() emits, so the pipeline is unchanged. Ontop
-# omits any triple whose template column or object value is NULL.
-
 [MappingDeclaration] @collection [[
 
 mappingId   site

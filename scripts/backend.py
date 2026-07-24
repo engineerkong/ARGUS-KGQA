@@ -1,7 +1,7 @@
 """
 Query backend behind one interface, so the pipeline does not care whether the
-RDF lives in a local rdflib graph or behind a remote SPARQL endpoint (Fuseki,
-Ontop, …). Selected by make_backend(): ARGUS_SPARQL_ENDPOINT picks remote.
+RDF lives in a local rdflib graph or behind a remote SPARQL endpoint (Ontop
+over Postgres). Selected by make_backend(): ARGUS_SPARQL_ENDPOINT picks remote.
 
 URI unfolding needs each result URI's predicate/object pairs. Locally that is a
 cheap in-memory lookup; remotely it must be batched (one VALUES query) or it
@@ -68,7 +68,14 @@ class RemoteSparqlBackend(Backend):
     def __init__(self, endpoint: str):
         from rdflib.plugins.stores.sparqlstore import SPARQLStore
         self.endpoint = endpoint
-        self.graph = Graph(store=SPARQLStore(endpoint, returnFormat="json"))
+        # bind_namespaces="none": rdflib's Graph.query() otherwise auto-prepends
+        # every namespace bound on the graph (including its huge built-in default
+        # set — sosa, rdfs, …) as PREFIX lines ahead of the query text. Since our
+        # queries already declare their own PREFIXes, that produces duplicate
+        # declarations for shared prefixes like "sosa", which strict remote
+        # parsers (Ontop/Jena) reject outright.
+        self.graph = Graph(store=SPARQLStore(endpoint, returnFormat="json"),
+                            bind_namespaces="none")
         self._cache: dict[str, list[tuple[str, str]]] = {}
 
     def query(self, sparql: str) -> list[dict[str, Any]]:

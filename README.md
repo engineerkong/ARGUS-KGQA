@@ -11,7 +11,7 @@ Default LLM endpoint: `https://ollama.fit.fraunhofer.de/api`, model `gpt-oss:120
 
 ```
 [Step 0] Query backend (connected once at startup)          backend.py
-         local TTL in rdflib  OR  remote SPARQL endpoint (Fuseki / Ontop)
+         local TTL in rdflib  OR  remote SPARQL endpoint (Ontop over Postgres)
    │
    ▼ (per query)
 [Step 1] Semantic parser (LLM)                              1_semantic_parser.py
@@ -46,13 +46,13 @@ readings* — while letting the storage scale.
 | Backend | Selected by | Use |
 |---------|-------------|-----|
 | `RdflibBackend` | default (a `data/argus_readings.ttl` file) | dev / small data, zero setup |
-| `RemoteSparqlBackend` | `ARGUS_SPARQL_ENDPOINT` set | Fuseki, or Ontop for SQL-backed data |
+| `RemoteSparqlBackend` | `ARGUS_SPARQL_ENDPOINT` set | Ontop over Postgres, for SQL-backed data |
 
 Switching is one env var — `intent`, SPARQL generation, prompts and analysis are
 unchanged:
 
 ```bash
-export ARGUS_SPARQL_ENDPOINT=http://localhost:3030/argus/query   # e.g. Fuseki
+export ARGUS_SPARQL_ENDPOINT=http://localhost:8081/sparql   # Ontop, see obda/
 python scripts/demo.py          # [Step 0] Backend ready — remote SPARQL endpoint …
 python scripts/test_backend.py  # diagnose a remote endpoint layer by layer
 ```
@@ -66,7 +66,7 @@ one round-trip, not one per URI.
 The observation stream is unbounded and does not belong in an in-memory RDF graph.
 Ontop maps a Postgres schema back to exactly the SOSA/ARGUS RDF the pipeline
 queries, so the pipeline is untouched — it just points `ARGUS_SPARQL_ENDPOINT` at
-Ontop instead of Fuseki.
+Ontop instead of using the local TTL.
 
 ```
 Postgres (SQL time series)  ──Ontop mapping (argus.obda)──►  virtual SPARQL endpoint
@@ -88,7 +88,7 @@ docker compose -f obda/docker-compose.yml up -d postgres
 python scripts/4_load_postgres.py --dry-run      # verify row counts offline first
 python scripts/4_load_postgres.py                # load (needs psycopg + running DB)
 docker compose -f obda/docker-compose.yml up -d ontop
-export ARGUS_SPARQL_ENDPOINT=http://localhost:8080/sparql
+export ARGUS_SPARQL_ENDPOINT=http://localhost:8081/sparql
 python scripts/demo.py
 ```
 
@@ -271,7 +271,7 @@ Grouped by the capability they exercise:
 | `OLLAMA_BASE_URL` | `https://ollama.fit.fraunhofer.de/api` | LLM API endpoint |
 | `OPENAI_API_KEY` | `no-key` | API key for the LLM endpoint |
 | `OLLAMA_MODEL` | `gpt-oss:120b` | Model name |
-| `ARGUS_SPARQL_ENDPOINT` | *(unset → local TTL)* | Remote SPARQL endpoint (Fuseki / Ontop) |
+| `ARGUS_SPARQL_ENDPOINT` | *(unset → local TTL)* | Remote SPARQL endpoint (Ontop) |
 | `ARGUS_TTL_PATH` | `data/argus_readings.ttl` | Local graph file |
 | `ARGUS_PG_DSN` | `postgresql://argus:argus@localhost:5432/argus` | Postgres DSN for the ETL |
 | `ARGUS_KEEP_RAW_JSON` | *(unset)* | `1` re-embeds rawJson in the graph (legacy) |
