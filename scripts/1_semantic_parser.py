@@ -47,6 +47,14 @@ Multi-hop paths (always route through ALL intermediates in order):
   ObservedProperty ↔ Site         : ObservedProperty ←[observedProperty]← Observation ←[hasObservation]← ObservationCollection —[hasSite]→ Site
   ObservedProperty ↔ Sensor       : ObservedProperty ←[observedProperty]← Observation ←[hasObservation]← ObservationCollection —[madeBySensor]→ Sensor
 
+Node geo-location (datatype properties on Node; currently populated for baltanas only):
+  Node.latitude    (decimal degrees, WGS84)
+  Node.longitude   (decimal degrees, WGS84)
+  Node.altitude    (metres)
+  For location/distance/elevation questions, return these Node properties. Distances,
+  nearest/farthest pairs, centroid and spread are computed downstream from the
+  coordinates — you only need to RETURN latitude/longitude/altitude, not compute them.
+
 Variable naming rule: the SPARQL variable for a join's return property is {ClassName}_{property}.
   Site.label → ?site_label        Observation.hasSimpleResult → ?observation_hassimpleresult
   Use this exact dotted form in group_by and order_by fields.\
@@ -108,19 +116,19 @@ Q: "How many sensors are deployed per site?"
 
 Q: "What are the latest 10 readings?"
 {
-  "target_class": "ObservationCollection",
+  "target_class": "Observation",
   "filters": [],
-  "return_properties": ["resultTime"],
+  "return_properties": ["hasSimpleResult"],
   "joins": [
-    {"class": "Observation", "via": "hasObservation", "direction": "outgoing",
-     "return_properties": ["hasSimpleResult"], "filters": []},
+    {"class": "ObservationCollection", "via": "hasObservation", "direction": "incoming",
+     "return_properties": ["resultTime"], "filters": []},
     {"class": "Site", "via": "hasSite", "direction": "outgoing",
      "return_properties": ["label"], "filters": []}
   ],
   "aggregation": null,
   "order_by": {"variable": "ObservationCollection.resultTime", "direction": "DESC"},
   "limit": 10,
-  "explanation": "10 most recent ObservationCollections with value and site."
+  "explanation": "10 most recent individual readings (Observations), ranked by their collection's resultTime so LIMIT counts readings, not collections."
 }
 
 Q: "Which physical quantities are measured at the delos site?"
@@ -140,6 +148,23 @@ Q: "Which physical quantities are measured at the delos site?"
   "order_by": null,
   "limit": null,
   "explanation": "Forward-traverse from ObservationCollection to Site (filtered) → Observation → ObservedProperty to list distinct measured quantities."
+}
+
+Q: "Where are the sensor nodes at the baltanas site?"
+{
+  "target_class": "Node",
+  "filters": [],
+  "return_properties": ["label", "latitude", "longitude", "altitude"],
+  "joins": [
+    {"class": "ObservationCollection", "via": "hasNode", "direction": "incoming",
+     "return_properties": [], "filters": []},
+    {"class": "Site", "via": "hasSite", "direction": "outgoing",
+     "return_properties": [], "filters": [{"property": "label", "op": "equals", "value": "baltanas"}]}
+  ],
+  "aggregation": null,
+  "order_by": null,
+  "limit": null,
+  "explanation": "List baltanas nodes with their coordinates; spatial metrics are derived downstream from lat/long/altitude."
 }
 
 --- END EXAMPLES ---\
@@ -193,6 +218,8 @@ Rules:
   - group_by and order_by variables MUST use the dotted "ClassName.property" form (e.g. "Site.label", "ObservationCollection.resultTime"). The join for that class MUST be present and include the property in return_properties.
   - When asking to LIST instances of a class (e.g. "which sensors", "what sites"), set target_class to that class directly and join ObservationCollection as needed for filtering — EXCEPT for "what quantities/properties are measured/observed at site X": use target_class=ObservationCollection and forward-join Site (filtered), Observation, ObservedProperty (as shown in example 5).
   - The property "readingType" holds data-format codes ("reading", "eng_units") — NOT physical measurement types. To filter by measurement type (temperature, humidity, etc.), filter on ObservedProperty.label via the hasObservation → observedProperty chain.
+  - "latest/most recent N readings/values/measurements": one reading = one Observation, so set target_class=Observation (NOT ObservationCollection) and limit=N; join ObservationCollection via hasObservation (incoming) returning resultTime, and order_by ObservationCollection.resultTime DESC. This makes LIMIT count individual readings. (A timestamp lives on the ObservationCollection, so reach it through that join.)
+  - Location/where/distance/nearest/elevation questions: set target_class=Node and return_properties=["label","latitude","longitude","altitude"]; link to a Site by joining ObservationCollection via hasNode (incoming) then Site via hasSite (outgoing, filtered). Do NOT try to compute distances/centroids in the query — just return the coordinates; the analysis layer computes spatial metrics.
 
 {_FEW_SHOT}
 """

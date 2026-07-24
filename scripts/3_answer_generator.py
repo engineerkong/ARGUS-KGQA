@@ -21,8 +21,6 @@ MODEL    = os.environ.get("OLLAMA_MODEL", "gpt-oss:120b")
 LLM_TIMEOUT     = float(os.environ.get("ARGUS_LLM_TIMEOUT", "120"))
 LLM_MAX_RETRIES = int(os.environ.get("ARGUS_LLM_MAX_RETRIES", "2"))
 
-MAX_RESULT_CHARS = 6000
-
 _client: OpenAI | None = None
 
 
@@ -66,8 +64,6 @@ def generate(query: str, sparql: str, results: list) -> str:
             deduped.append(row)
 
     results_text = json.dumps(deduped, indent=2, ensure_ascii=False)
-    if len(results_text) > MAX_RESULT_CHARS:
-        results_text = results_text[:MAX_RESULT_CHARS] + "\n... (truncated)"
 
     user_msg = (
         f"User question:\n{query}\n\n"

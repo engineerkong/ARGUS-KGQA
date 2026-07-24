@@ -12,6 +12,7 @@ Usage:
 """
 
 import argparse
+import csv
 import hashlib
 import json
 import os
@@ -40,6 +41,44 @@ TTL_FILE = DATA_DIR / "argus_readings.ttl"
 STATE_FILE = DATA_DIR / "argus_readings_state.json"
 SEEN_IDS_FILE = DATA_DIR / "argus_seen_ids.txt"
 BACKUP_FILE = DATA_DIR / "argus_readings.backup.ttl"
+
+# Per-node coordinates live in material/ARGUS_nodes_<site>.csv (site,nodeid,
+# latitude,longitude,altitude). Drop a new CSV per site — no code change needed.
+MATERIAL_DIR = Path(__file__).resolve().parent.parent / "material"
+
+_node_coords: Dict[str, Dict[str, float]] | None = None
+
+
+def _load_node_coords() -> Dict[str, Dict[str, float]]:
+    global _node_coords
+    if _node_coords is not None:
+        return _node_coords
+    coords: Dict[str, Dict[str, float]] = {}
+    for csv_path in sorted(MATERIAL_DIR.glob("ARGUS_nodes_*.csv")):
+        with open(csv_path, newline="", encoding="utf-8") as f:
+            for row in csv.DictReader(f):
+                nid = (row.get("nodeid") or "").strip()
+                if not nid:
+                    continue
+                try:
+                    coords[nid] = {
+                        "latitude": float(row["latitude"]),
+                        "longitude": float(row["longitude"]),
+                        "altitude": float(row["altitude"]),
+                    }
+                except (KeyError, ValueError, TypeError):
+                    continue
+    _node_coords = coords
+    return coords
+
+
+def _add_node_coords(g: Graph, node_uri: URIRef, node_id: str) -> None:
+    coords = _load_node_coords().get(node_id)
+    if not coords:
+        return
+    _add_literal(g, node_uri, ARGUS.latitude, coords["latitude"], XSD.decimal)
+    _add_literal(g, node_uri, ARGUS.longitude, coords["longitude"], XSD.decimal)
+    _add_literal(g, node_uri, ARGUS.altitude, coords["altitude"], XSD.decimal)
 
 
 # ---------------------------------------------------------------------------
@@ -417,6 +456,7 @@ def add_reading_to_graph(g: Graph, reading: Dict[str, Any]) -> str:
     _add_literal(g, node_uri, ARGUS.nodeId, node_id)
     _add_literal(g, node_uri, ARGUS.nodeName, reading.get("node_name"))
     _add_literal(g, node_uri, ARGUS.nodeModel, reading.get("node_model"))
+    _add_node_coords(g, node_uri, node_id)
 
     # Engineering unit
     eng_unit_id = reading.get("eng_unit_id")
@@ -470,6 +510,21 @@ def add_reading_to_graph(g: Graph, reading: Dict[str, Any]) -> str:
 # ---------------------------------------------------------------------------
 # Graph I/O
 # ---------------------------------------------------------------------------
+
+def enrich_existing_nodes(g: Graph) -> int:
+    # Attach coordinates to Node instances already in the graph, matched by
+    # nodeId. Idempotent: replaces any existing coord triples. Returns #nodes hit.
+    hit = 0
+    for node_uri, nid_lit in g.subject_objects(ARGUS.nodeId):
+        coords = _load_node_coords().get(str(nid_lit))
+        if not coords:
+            continue
+        for pred in (ARGUS.latitude, ARGUS.longitude, ARGUS.altitude):
+            g.remove((node_uri, pred, None))
+        _add_node_coords(g, node_uri, str(nid_lit))
+        hit += 1
+    return hit
+
 
 def load_graph() -> Graph:
     g = Graph()
@@ -589,7 +644,17 @@ def main() -> None:
                         help="Resume near the previous last successful page.")
     parser.add_argument("--overlap-pages", type=int, default=2,
                         help="Pages to re-fetch when resuming (default: 2).")
+    parser.add_argument("--enrich-geo-only", action="store_true",
+                        help="Attach node coordinates from material/ARGUS_nodes_*.csv "
+                             "to the existing TTL and exit (no API fetch).")
     args = parser.parse_args()
+
+    if args.enrich_geo_only:
+        g = load_graph()
+        n = enrich_existing_nodes(g)
+        save_graph(g)
+        print(f"Enriched {n} node(s) with coordinates from {MATERIAL_DIR}/ARGUS_nodes_*.csv")
+        return
 
     update_kg(
         max_records=args.max_records,

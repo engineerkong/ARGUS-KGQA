@@ -112,18 +112,33 @@ def _resolve_group_var(raw: str, joins: list) -> str:
     return bare
 
 
+def _bind_order_join(cls: str, prop: str, joins: list,
+                     target_var: str, inner_lines: list, inner_vars: list) -> str | None:
+    # Emit the edge from target to the ordering entity plus its property, so the
+    # order variable is bound inside the LIMIT subquery. Returns the order var,
+    # or None if no matching join describes how to reach the ordering entity.
+    ojoin = next((j for j in joins if _strip_prefix(j.get("class", "")).lower() == cls.lower()), None)
+    if not ojoin:
+        return None
+    via = ojoin.get("via", "")
+    jvar = "?" + _strip_prefix(cls).lower()
+    if ojoin.get("direction", "outgoing") == "outgoing":
+        inner_lines.append(f"    {target_var} {_prop(via)} {jvar} .")
+    else:
+        inner_lines.append(f"    {jvar} {_prop(via)} {target_var} .")
+    ovar = f"?{_var(cls, prop)}"
+    inner_lines.append(f"    {jvar} {_prop(prop)} {ovar} .")
+    inner_vars.append(ovar)
+    return ovar
+
+
 def _build_subquery_sparql(
     target_class: str, target_var: str,
     filters: list, return_props: list,
     joins: list, order_by: dict | None, limit: int,
 ) -> str:
-    """Build SPARQL using an inner subquery so LIMIT applies at the entity level.
-
-    Without a subquery, LIMIT N with one-to-many joins returns N observation
-    rows, not N target entities. The subquery pattern fixes this:
-      inner: SELECT target [+ its direct properties] ... ORDER BY ... LIMIT N
-      outer: join everything else OPTIONAL onto the subquery result.
-    """
+    # Inner subquery makes LIMIT apply at the entity level (N target entities,
+    # not N joined rows). Outer joins everything else OPTIONAL onto that result.
     # ── Inner subquery: target entity + its direct properties ────────────
     inner_vars = [target_var]
     inner_lines = [f"    {target_var} a {_class(target_class)} ."]
@@ -147,12 +162,15 @@ def _build_subquery_sparql(
         raw_ovar = order_by.get("variable", "")
         if "." in raw_ovar:
             cls, prop = raw_ovar.split(".", 1)
-            # Target-class properties are named with bare _var(prop) in the inner scope
-            ovar = "?" + (_var(prop) if cls.lower() == target_class.lower()
-                          else _var(cls, prop))
+            if cls.lower() == target_class.lower():
+                ovar = "?" + _var(prop)  # target's own property, bound above
+            else:
+                # Ordering by a joined entity's property: bind the join edge and
+                # the property inside the subquery so LIMIT ranks target entities.
+                ovar = _bind_order_join(cls, prop, joins, target_var, inner_lines, inner_vars)
         else:
             ovar = "?" + _resolve_group_var(raw_ovar, joins)
-        if ovar in inner_vars:
+        if ovar and ovar in inner_vars:
             inner_order = f"\n    ORDER BY {order_by.get('direction', 'DESC')}({ovar})"
 
     inner_block = (
@@ -219,13 +237,41 @@ def _build_subquery_sparql(
 
     if not outer_select_vars:
         outer_select_vars = [target_var]
+    outer_select_vars = list(dict.fromkeys(outer_select_vars))  # dedup, keep order
 
     select_clause = "SELECT DISTINCT " + " ".join(outer_select_vars)
     where_clause  = "WHERE {\n" + "\n".join(outer_lines) + "\n}"
     return PREFIXES + "\n" + select_clause + "\n" + where_clause
 
 
+def _augment_value_projection(intent: dict) -> dict:
+    # A bare hasSimpleResult projection loses identity under SELECT DISTINCT:
+    # two observations of different properties sharing a value (e.g. pulse=0 and
+    # overThreshold=0) collapse into one row. Auto-join ObservedProperty so the
+    # property label enters the DISTINCT key. Skipped if already joined.
+    joins = intent.get("joins", [])
+    projects_value = (
+        "hasSimpleResult" in intent.get("return_properties", [])
+        or any("hasSimpleResult" in j.get("return_properties", []) for j in joins)
+    )
+    if not projects_value:
+        return intent
+    if any(_strip_prefix(j.get("via", "")) == "observedProperty" for j in joins):
+        return intent
+
+    intent = dict(intent)
+    intent["joins"] = list(joins) + [{
+        "class": "ObservedProperty",
+        "via": "observedProperty",
+        "direction": "outgoing",
+        "return_properties": ["label"],
+        "filters": [],
+    }]
+    return intent
+
+
 def build_sparql(intent: dict) -> str:
+    intent = _augment_value_projection(intent)
     target_class = intent.get("target_class", "ObservationCollection")
     filters      = intent.get("filters", [])
     return_props = intent.get("return_properties", [])

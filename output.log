@@ -61,7 +61,10 @@ GROUP BY ?site_label
 ────────────────────────────────────────────────────────────
 [Step 3] Generating natural language answer…
 [Step 3] Answer:
-The sites contain these numbers of readings: baltanas = 601, lucretili = 190, ranverso = 48, delos = 106.
+- Baltanas: 601 readings  
+- Lucretili: 190 readings  
+- Ranverso: 48 readings  
+- Delos: 106 readings
 
 
 ======================================================================
@@ -75,7 +78,8 @@ QUERY: Which sensors are available at the baltanas site?
   "filters": [],
   "return_properties": [
     "label",
-    "sensorId"
+    "sensorId",
+    "sensorModel"
   ],
   "joins": [
     {
@@ -104,7 +108,7 @@ QUERY: Which sensors are available at the baltanas site?
   "aggregation": null,
   "order_by": null,
   "limit": null,
-  "explanation": "List sensors linked to ObservationCollections at the baltanas site."
+  "explanation": "List sensors deployed at the baltanas site by joining Sensor to ObservationCollection and filtering on Site label."
 }
 
 ────────────────────────────────────────────────────────────
@@ -116,11 +120,12 @@ PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
 PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 
-SELECT DISTINCT ?sensor ?label ?sensorid ?site_label
+SELECT DISTINCT ?sensor ?label ?sensorid ?sensormodel ?site_label
 WHERE {
   ?sensor a sosa:Sensor .
   OPTIONAL { ?sensor rdfs:label ?label . }
   OPTIONAL { ?sensor argus:sensorId ?sensorid . }
+  OPTIONAL { ?sensor argus:sensorModel ?sensormodel . }
     ?observationcollection sosa:madeBySensor ?sensor .
     ?observationcollection argus:hasSite ?site .
     OPTIONAL { ?site rdfs:label ?site_label . }
@@ -141,7 +146,7 @@ WHERE {
 ────────────────────────────────────────────────────────────
 [Step 3] Generating natural language answer…
 [Step 3] Answer:
-The baltanas site hosts **28 sensors** in total. These include two GNSS Base units, three GNSS Rover units, accelerometers Acc‑2A and Acc‑3A, and a range of “ls‑” devices (pulse, thermistor, meter, voltage and voltsingle sensors such as ls‑149443hw‑pulse‑3, ls‑149402hw‑thermistor‑2, ls‑130432hw‑meter‑teros32‑2, ls‑151810hw‑voltage‑2, etc.).
+At the Baltanas site there are **28 sensor instances**. They include GNSS Base and Rover units; accelerometers Acc‑2A and Acc‑3A; pulse and thermistor modules such as ls‑149443hw‑pulse‑3, ls‑149367hw‑thermistor‑2, ls‑149402hw‑pulse‑3, ls‑149421hw‑thermistor‑2, ls‑149780hw‑pulse‑3, etc.; meter devices ls‑130432hw‑meter‑teros32‑2 and ls‑130314hw‑meter‑teros32‑2; several voltage sensors (ls‑151810hw‑voltage‑1/2/3/4) and single‑channel voltage/pulse/thermistor sensors like ls‑149443hw‑voltsingle‑1, ls‑149367hw‑voltsingle‑1, ls‑149402hw‑voltsingle‑1.
 
 
 ======================================================================
@@ -168,9 +173,7 @@ QUERY: What are the temperature values recorded at each site?
       "class": "ObservedProperty",
       "via": "observedProperty",
       "direction": "outgoing",
-      "return_properties": [
-        "label"
-      ],
+      "return_properties": [],
       "filters": [
         {
           "property": "label",
@@ -192,7 +195,103 @@ QUERY: What are the temperature values recorded at each site?
   "aggregation": null,
   "order_by": null,
   "limit": null,
-  "explanation": "List temperature readings (hasSimpleResult) for each site by joining ObservationCollection \u2192 Observation \u2192 ObservedProperty (filtered on temperature) and Site."
+  "explanation": "List temperature measurement values (hasSimpleResult) for each site by filtering ObservedProperty label."
+}
+
+────────────────────────────────────────────────────────────
+[Step 2] SPARQL query:
+PREFIX sosa:  <http://www.w3.org/ns/sosa/>
+PREFIX argus: <http://www.argus-project.eu/ontology/>
+PREFIX ex:    <http://www.argus-project.eu/resource/>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+SELECT DISTINCT ?observation_hassimpleresult ?site_label
+WHERE {
+  ?observationcollection a sosa:ObservationCollection .
+    ?observationcollection argus:hasObservation ?observation .
+    OPTIONAL { ?observation sosa:hasSimpleResult ?observation_hassimpleresult . }
+    ?observation sosa:observedProperty ?observedproperty .
+    ?observedproperty rdfs:label ?_jf_label .
+      FILTER(CONTAINS(LCASE(STR(?_jf_label)), LCASE("temperature")))
+  OPTIONAL {
+    ?observationcollection argus:hasSite ?site .
+    OPTIONAL { ?site rdfs:label ?site_label . }
+  }
+}
+[Step 2] 81 raw result(s) returned.
+
+────────────────────────────────────────────────────────────
+[Step 2] Unfolded results (URIs resolved to linked properties):
+   {'observation_hassimpleresult': '20', 'site_label': 'baltanas'}
+   {'observation_hassimpleresult': '8.5', 'site_label': 'lucretili'}
+   {'observation_hassimpleresult': '8', 'site_label': 'baltanas'}
+   {'observation_hassimpleresult': '14', 'site_label': 'ranverso'}
+   {'observation_hassimpleresult': '11', 'site_label': 'lucretili'}
+  … and 76 more.
+
+────────────────────────────────────────────────────────────
+[Step 3] Generating natural language answer…
+[Step 3] Answer:
+Temperature recordings by site are:
+
+- **Baltanas** [20, 8, 9, 11.7, 19.01, 19.13, 12.1, 11.4, 7, 12.3, 19.02, 20.5, 20.6, 18.92, 19.14, 19.04, 19.0, 18.94, 11.5, 12.2, 18.97, 18.95, 19.05, 19.16, 18.99, 19.06, 18.91, 12, 11.8, 18.96, 18.98, 19.03, 11.6, 6.7, 8.0, 7.2]  
+- **Lucretili** [8.5, 11, 10.3, 7, 8.8, 8.9, 12, 8, 13, 12.1, 8.6, 6, 9, 10.7, 14.9, 10, 9.1, 11.8, 14.7, 11.8]  
+- **Ranverso** [14, 11, 16.4, 10, 12, 16.5, 19.9, 20]  
+
+Overall, the 81 temperature values range from **6 °C** to **21.1 °C**, with an average of **≈14.7 °C**.
+
+
+======================================================================
+QUERY: Which displacement measurements are available?
+======================================================================
+
+────────────────────────────────────────────────────────────
+[Step 1] Semantic parsing: 'Which displacement measurements are available?'
+[Step 1] Intent: {
+  "target_class": "ObservationCollection",
+  "filters": [],
+  "return_properties": [],
+  "joins": [
+    {
+      "class": "Observation",
+      "via": "hasObservation",
+      "direction": "outgoing",
+      "return_properties": [
+        "hasSimpleResult"
+      ],
+      "filters": []
+    },
+    {
+      "class": "ObservedProperty",
+      "via": "observedProperty",
+      "direction": "outgoing",
+      "return_properties": [
+        "label"
+      ],
+      "filters": [
+        {
+          "property": "label",
+          "op": "contains",
+          "value": "displacement"
+        }
+      ]
+    },
+    {
+      "class": "Site",
+      "via": "hasSite",
+      "direction": "outgoing",
+      "return_properties": [
+        "label"
+      ],
+      "filters": []
+    }
+  ],
+  "aggregation": null,
+  "order_by": null,
+  "limit": null,
+  "explanation": "List available displacement measurements with their values and associated sites."
 }
 
 ────────────────────────────────────────────────────────────
@@ -212,107 +311,30 @@ WHERE {
     ?observation sosa:observedProperty ?observedproperty .
     OPTIONAL { ?observedproperty rdfs:label ?observedproperty_label . }
     ?observedproperty rdfs:label ?_jf_label .
-      FILTER(CONTAINS(LCASE(STR(?_jf_label)), LCASE("temperature")))
+      FILTER(CONTAINS(LCASE(STR(?_jf_label)), LCASE("displacement")))
   OPTIONAL {
     ?observationcollection argus:hasSite ?site .
     OPTIONAL { ?site rdfs:label ?site_label . }
   }
 }
-[Step 2] 81 raw result(s) returned.
+[Step 2] 6 raw result(s) returned.
 
 ────────────────────────────────────────────────────────────
 [Step 2] Unfolded results (URIs resolved to linked properties):
-   {'observation_hassimpleresult': '20', 'observedproperty_label': 'temperature', 'site_label': 'baltanas'}
-   {'observation_hassimpleresult': '8.5', 'observedproperty_label': 'temperature', 'site_label': 'lucretili'}
-   {'observation_hassimpleresult': '8', 'observedproperty_label': 'temperature', 'site_label': 'baltanas'}
-   {'observation_hassimpleresult': '14', 'observedproperty_label': 'temperature', 'site_label': 'ranverso'}
-   {'observation_hassimpleresult': '11', 'observedproperty_label': 'temperature', 'site_label': 'lucretili'}
-  … and 76 more.
+   {'observation_hassimpleresult': '-4.14708585158109', 'observedproperty_label': 'eastwest_displacement_millimeters', 'site_label': 'baltanas'}
+   {'observation_hassimpleresult': '7.20917583', 'observedproperty_label': 'potentiometer_displacement', 'site_label': 'delos'}
+   {'observation_hassimpleresult': '7.21247792', 'observedproperty_label': 'potentiometer_displacement', 'site_label': 'delos'}
+   {'observation_hassimpleresult': '7.87138939', 'observedproperty_label': 'potentiometer_displacement', 'site_label': 'delos'}
+   {'observation_hassimpleresult': '-2.40530975056038', 'observedproperty_label': 'eastwest_displacement_millimeters', 'site_label': 'baltanas'}
+  … and 1 more.
 
 ────────────────────────────────────────────────────────────
 [Step 3] Generating natural language answer…
 [Step 3] Answer:
-**Temperature observations by site**
+Available displacement measurements are:
 
-| Site      | Recorded temperature values (°C) |
-|-----------|-----------------------------------|
-| **baltanas** | 20, 8, 9, 11.7, 19, 12.1, 11.4, 7, 12.3, 20.5, 20.6, 11.5 |
-| **lucretili** | 8.5, 11, 10.3, 7, 8.8, 8.9, 12, 13, 12.1, 6, 8.6, 9, 10.7 |
-| **ranverso** | 14, 11, 16.4, 10, 16.5, 12 |
-| **delos**    | 15.2, 19.6, 20, 14.8, 17, 19.1, 20.4 |
-
-(Values are taken directly from the query results; “soil_temperature” entries were excluded.)
-
-
-======================================================================
-QUERY: Which displacement measurements are available?
-======================================================================
-
-────────────────────────────────────────────────────────────
-[Step 1] Semantic parsing: 'Which displacement measurements are available?'
-[Step 1] Intent: {
-  "target_class": "ObservationCollection",
-  "filters": [],
-  "return_properties": [],
-  "joins": [
-    {
-      "class": "Observation",
-      "via": "hasObservation",
-      "direction": "outgoing",
-      "return_properties": [],
-      "filters": []
-    },
-    {
-      "class": "ObservedProperty",
-      "via": "observedProperty",
-      "direction": "outgoing",
-      "return_properties": [
-        "label"
-      ],
-      "filters": [
-        {
-          "property": "label",
-          "op": "contains",
-          "value": "displacement"
-        }
-      ]
-    }
-  ],
-  "aggregation": null,
-  "order_by": null,
-  "limit": null,
-  "explanation": "List observed properties whose label contains 'displacement' via ObservationCollection observations."
-}
-
-────────────────────────────────────────────────────────────
-[Step 2] SPARQL query:
-PREFIX sosa:  <http://www.w3.org/ns/sosa/>
-PREFIX argus: <http://www.argus-project.eu/ontology/>
-PREFIX ex:    <http://www.argus-project.eu/resource/>
-PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
-PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-
-SELECT DISTINCT ?observedproperty_label
-WHERE {
-  ?observationcollection a sosa:ObservationCollection .
-    ?observationcollection argus:hasObservation ?observation .
-    ?observation sosa:observedProperty ?observedproperty .
-    OPTIONAL { ?observedproperty rdfs:label ?observedproperty_label . }
-    ?observedproperty rdfs:label ?_jf_label .
-      FILTER(CONTAINS(LCASE(STR(?_jf_label)), LCASE("displacement")))
-}
-[Step 2] 2 raw result(s) returned.
-
-────────────────────────────────────────────────────────────
-[Step 2] Unfolded results (URIs resolved to linked properties):
-   {'observedproperty_label': 'eastwest_displacement_millimeters'}
-   {'observedproperty_label': 'potentiometer_displacement'}
-
-────────────────────────────────────────────────────────────
-[Step 3] Generating natural language answer…
-[Step 3] Answer:
-Two displacement measurements are available: **eastwest_displacement_millimeters** and **potentiometer_displacement** (2 results).
+- **eastwest_displacement_millimeters** at site *baltanas* – 2 values ranging from ‑4.15 to ‑2.41 mm.  
+- **potentiometer_displacement** at site *delos* – 4 values ranging from 7.21 to 7.90 (unit not specified).
 
 
 ======================================================================
@@ -322,18 +344,18 @@ QUERY: What are the latest 10 readings?
 ────────────────────────────────────────────────────────────
 [Step 1] Semantic parsing: 'What are the latest 10 readings?'
 [Step 1] Intent: {
-  "target_class": "ObservationCollection",
+  "target_class": "Observation",
   "filters": [],
   "return_properties": [
-    "resultTime"
+    "hasSimpleResult"
   ],
   "joins": [
     {
-      "class": "Observation",
+      "class": "ObservationCollection",
       "via": "hasObservation",
-      "direction": "outgoing",
+      "direction": "incoming",
       "return_properties": [
-        "hasSimpleResult"
+        "resultTime"
       ],
       "filters": []
     },
@@ -353,7 +375,7 @@ QUERY: What are the latest 10 readings?
     "direction": "DESC"
   },
   "limit": 10,
-  "explanation": "Retrieve the 10 most recent readings with their values and site labels."
+  "explanation": "Retrieve the 10 most recent individual readings (Observations) ordered by their collection's resultTime."
 }
 
 ────────────────────────────────────────────────────────────
@@ -365,54 +387,50 @@ PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
 PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 
-SELECT DISTINCT ?resulttime ?observation_hassimpleresult ?site_label
+SELECT DISTINCT ?hassimpleresult ?observationcollection_resulttime ?site_label ?observedproperty_label
 WHERE {
   {
-  SELECT ?observationcollection ?resulttime
+  SELECT ?observation ?hassimpleresult ?observationcollection_resulttime
   WHERE {
-    ?observationcollection a sosa:ObservationCollection .
-    OPTIONAL { ?observationcollection sosa:resultTime ?resulttime . }
+    ?observation a sosa:Observation .
+    OPTIONAL { ?observation sosa:hasSimpleResult ?hassimpleresult . }
+    ?observationcollection argus:hasObservation ?observation .
+    ?observationcollection sosa:resultTime ?observationcollection_resulttime .
   }
-    ORDER BY DESC(?resulttime)
+    ORDER BY DESC(?observationcollection_resulttime)
   LIMIT 10
   }
   OPTIONAL {
     ?observationcollection argus:hasObservation ?observation .
-    OPTIONAL { ?observation sosa:hasSimpleResult ?observation_hassimpleresult . }
+    OPTIONAL { ?observationcollection sosa:resultTime ?observationcollection_resulttime . }
   }
   OPTIONAL {
     ?observationcollection argus:hasSite ?site .
     OPTIONAL { ?site rdfs:label ?site_label . }
   }
+  OPTIONAL {
+    ?observation sosa:observedProperty ?observedproperty .
+    OPTIONAL { ?observedproperty rdfs:label ?observedproperty_label . }
+  }
 }
-[Step 2] 27 raw result(s) returned.
+[Step 2] 10 raw result(s) returned.
 
 ────────────────────────────────────────────────────────────
 [Step 2] Unfolded results (URIs resolved to linked properties):
-   {'resulttime': '2026-05-13T03:15:00+00:00', 'observation_hassimpleresult': '0', 'site_label': 'baltanas'}
-   {'resulttime': '2026-05-13T03:15:00+00:00', 'observation_hassimpleresult': '8', 'site_label': 'baltanas'}
-   {'resulttime': '2026-05-13T03:15:00+00:00', 'observation_hassimpleresult': '0.4891083', 'site_label': 'baltanas'}
-   {'resulttime': '2026-05-13T03:15:00+00:00', 'observation_hassimpleresult': '0.18', 'site_label': 'baltanas'}
-   {'resulttime': '2026-05-13T03:15:00+00:00', 'observation_hassimpleresult': '28', 'site_label': 'baltanas'}
-  … and 22 more.
+   {'hassimpleresult': '8', 'observationcollection_resulttime': '2026-05-13T03:15:00+00:00', 'site_label': 'lucretili', 'observedproperty_label': 'temperature'}
+   {'hassimpleresult': '0.18', 'observationcollection_resulttime': '2026-05-13T03:15:00+00:00', 'site_label': 'baltanas', 'observedproperty_label': 'composedAxis'}
+   {'hassimpleresult': '0', 'observationcollection_resulttime': '2026-05-13T03:15:00+00:00', 'site_label': 'baltanas', 'observedproperty_label': 'pulse_counter'}
+   {'hassimpleresult': '28', 'observationcollection_resulttime': '2026-05-13T03:15:00+00:00', 'site_label': 'baltanas', 'observedproperty_label': 'underThresholdEvents'}
+   {'hassimpleresult': '10', 'observationcollection_resulttime': '2026-05-13T03:15:00+00:00', 'site_label': 'baltanas', 'observedproperty_label': 'duration'}
+  … and 5 more.
 
 ────────────────────────────────────────────────────────────
 [Step 3] Generating natural language answer…
 [Step 3] Answer:
-The ten newest measurements were recorded at **2026‑05‑13 03:15 UTC**:
+The latest 10 sensor readings (all taken at 2026‑05‑13 03:15 UTC) are:
 
-| Value | Site |
-|-------|------|
-| 0            | baltanas |
-| 8            | baltanas |
-| 0.4891083    | baltanas |
-| 0.18         | baltanas |
-| 28           | baltanas |
-| 10           | baltanas |
-| 1.0          | baltanas |
-| 11.4         | baltanas |
-| 1            | baltanas |
-| 0.13         | baltanas |
+lucretili – temperature 8;  
+baltanas – composedAxis 0.18, pulse_counter 0, underThresholdEvents 28, duration 10, voltage -0.0011171, overThresholdEvents 0, freqZAxis 1.0, voltage 0.4891083, freqXAxis 1.0.
 
 
 ======================================================================
@@ -444,7 +462,7 @@ QUERY: What is the most recent reading timestamp for each site?
   },
   "order_by": null,
   "limit": null,
-  "explanation": "Maximum resultTime per site gives the most recent reading timestamp for each site."
+  "explanation": "Maximum resultTime per site."
 }
 
 ────────────────────────────────────────────────────────────
@@ -476,12 +494,7 @@ GROUP BY ?site_label
 ────────────────────────────────────────────────────────────
 [Step 3] Generating natural language answer…
 [Step 3] Answer:
-The latest reading timestamps are:
-
-- baltanas – 2026‑05‑13 03:15 UTC  
-- lucretili – 2026‑05‑13 03:15 UTC  
-- ranverso – 2026‑05‑13 03:00 UTC  
-- delos – 2026‑05‑13 03:00 UTC.
+The most recent reading timestamps are: baltanas – 2026‑05‑13T03:15:00+00:00; lucretili – 2026‑05‑13T03:15:00+00:00; ranverso – 2026‑05‑13T03:00:00+00:00; delos – 2026‑05‑13T03:00:00+00:00.
 
 
 ======================================================================
@@ -554,12 +567,7 @@ GROUP BY ?site_label
 ────────────────────────────────────────────────────────────
 [Step 3] Generating natural language answer…
 [Step 3] Answer:
-Sensors per site:
-
-- Baltanas: 28  
-- Lucretili: 14  
-- Ranverso: 13  
-- Delos: 26
+Baltanas has 28 sensors; Lucretili has 14; Ranverso has 13; and Delos has 26.
 
 
 ======================================================================
@@ -577,7 +585,9 @@ QUERY: Which physical quantities are measured at the delos site?
       "class": "Site",
       "via": "hasSite",
       "direction": "outgoing",
-      "return_properties": [],
+      "return_properties": [
+        "label"
+      ],
       "filters": [
         {
           "property": "label",
@@ -606,7 +616,7 @@ QUERY: Which physical quantities are measured at the delos site?
   "aggregation": null,
   "order_by": null,
   "limit": null,
-  "explanation": "List the physical quantities (ObservedProperty labels) measured at the site named delos."
+  "explanation": "Forward-traverse from ObservationCollection to the delos site, then to its observations and observed properties to list measured physical quantities."
 }
 
 ────────────────────────────────────────────────────────────
@@ -618,10 +628,11 @@ PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
 PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 
-SELECT DISTINCT ?observedproperty_label
+SELECT DISTINCT ?site_label ?observedproperty_label
 WHERE {
   ?observationcollection a sosa:ObservationCollection .
     ?observationcollection argus:hasSite ?site .
+    OPTIONAL { ?site rdfs:label ?site_label . }
     ?site rdfs:label ?_jf_label .
       FILTER(LCASE(STR(?_jf_label)) = LCASE("delos"))
     ?observationcollection argus:hasObservation ?observation .
@@ -634,21 +645,15 @@ WHERE {
 
 ────────────────────────────────────────────────────────────
 [Step 2] Unfolded results (URIs resolved to linked properties):
-   {'observedproperty_label': 'voltage'}
-   {'observedproperty_label': 'thermistor'}
-   {'observedproperty_label': 'voltage_1'}
-   {'observedproperty_label': 'axis_z_std'}
-   {'observedproperty_label': 'temperature'}
+   {'site_label': 'delos', 'observedproperty_label': 'voltage'}
+   {'site_label': 'delos', 'observedproperty_label': 'thermistor'}
+   {'site_label': 'delos', 'observedproperty_label': 'voltage_1'}
+   {'site_label': 'delos', 'observedproperty_label': 'axis_z_std'}
+   {'site_label': 'delos', 'observedproperty_label': 'temperature'}
   … and 9 more.
 
 ────────────────────────────────────────────────────────────
 [Step 3] Generating natural language answer…
 [Step 3] Answer:
-At the Delos site 14 distinct physical quantities are measured, such as:
-
-- voltage, voltage_1, voltage_polynomial_4  
-- thermistor, thermistor_ysi44005  
-- temperature  
-- axis_x, axis_y, axis_z (and their standard deviations axis_x_std, axis_y_std, axis_z_std)  
-- potentiometer, potentiometer_displacement.
+At the Delos site 14 different physical quantities are measured: voltage, thermistor, voltage‑1, axis Z std, temperature, axis X, axis Z, axis X std, axis Y, axis Y std, potentiometer displacement, thermistor YSI44005, voltage polynomial 4, and potentiometer.
 
