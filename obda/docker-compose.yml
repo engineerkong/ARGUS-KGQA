@@ -47,6 +47,13 @@ services:
       dockerfile: obda/ingest.Dockerfile
     depends_on:
       - postgres
+    # Plain default bridge, not the obda_default project network: this
+    # sandbox's user-defined bridge networks silently drop outbound internet
+    # traffic (verified — the same request to the ARGUS API succeeds in ~5s
+    # on the default bridge and times out every time on obda_default). ingest
+    # doesn't need obda_default anyway — it never talks to postgres/ontop by
+    # container name, only via host.docker.internal below.
+    network_mode: bridge
     extra_hosts:
       - "host.docker.internal:host-gateway"
     environment:

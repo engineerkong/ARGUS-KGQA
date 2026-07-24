@@ -33,6 +33,14 @@ make_backend = _be.make_backend
 # dropped, the user is just told to expect the wait.
 SLOW_PROMPT_ROWS = 500
 
+# Result sets larger than this are treated as a failure (fed back to Step 1 to
+# add an aggregation or a limit) rather than sent whole to the LLM. Unlike
+# SLOW_PROMPT_ROWS, this one is a hard cutoff — as the underlying data grows
+# (e.g. the live Postgres/Ontop backend), a "list all X" question with no
+# aggregation and no LIMIT would otherwise scale its prompt with the whole
+# dataset instead of with the answer.
+MAX_RESULT_ROWS = int(os.environ.get("ARGUS_MAX_RESULT_ROWS", "1000"))
+
 _DEFAULT_TTL_PATH = Path(__file__).resolve().parent.parent / "data" / "argus_readings.ttl"
 DEFAULT_TTL = Path(os.environ.get("ARGUS_TTL_PATH", str(_DEFAULT_TTL_PATH)))
 MAX_RETRIES = 2
@@ -72,6 +80,18 @@ def _is_failed(results: list[dict]) -> str | None:
     if len(results) == 1 and "error" in results[0]:
         return f"SPARQL execution error: {results[0]['error']}"
     return None
+
+
+def _is_oversized(results: list[dict]) -> bool:
+    # Not fed back to Step 1 as a retry, even with neutral wording: tried that
+    # and the model reached for a LIMIT anyway (its only obvious lever for
+    # "too many rows"), and — because the retriever applies LIMIT at the
+    # target-class subquery level, before joins/filters — it sampled 10
+    # sensors *globally* and only 2 happened to match the requested site. The
+    # answer confidently reported "2 sensors at baltanas" against a true count
+    # of 28: worse than not answering. An oversized result set ends the turn
+    # immediately instead.
+    return len(results) > MAX_RESULT_ROWS
 
 
 class Pipeline:
@@ -148,6 +168,9 @@ class Pipeline:
             if v:
                 print(f"[Step 2] {len(raw_results)} raw result(s) returned.")
 
+            if _is_oversized(raw_results):
+                break
+
             # ── Check if we need to retry ────────────────────────────────────
             failure = _is_failed(raw_results)
             if failure is None:
@@ -165,6 +188,32 @@ class Pipeline:
             else:
                 if v:
                     print(f"\n[Pipeline] Query failed after {self.max_retries} retries — {failure}")
+
+        # Oversized ends the turn on the spot (see _is_oversized) — no retry,
+        # no Steps 2b/3, just an explanation.
+        if _is_oversized(raw_results):
+            answer = (
+                f"This question matches {len(raw_results)} rows, too many to answer directly "
+                f"(limit: {MAX_RESULT_ROWS}). Try asking for a statistic (count/average/min/max) "
+                f"or narrow it — e.g. a specific site, property, or a top-N."
+            )
+            if v:
+                print(f"\n{sep}")
+                print(f"[Pipeline] Giving up — {len(raw_results)} rows exceeds MAX_RESULT_ROWS "
+                      f"({MAX_RESULT_ROWS}); not sending to the LLM.")
+                print("[Step 3] Answer:")
+                print(answer)
+            if self.keep_history:
+                self.history.append({
+                    "query": query,
+                    "intent": intent,
+                    "result_summary": _summarize_results(raw_results),
+                })
+                del self.history[:-self.max_history]
+            return {
+                "query": query, "intent": intent, "sparql": sparql,
+                "results": [], "answer": answer,
+            }
 
         _t = time.perf_counter()
         unfolded = unfold_results(self.backend, raw_results)
