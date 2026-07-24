@@ -7,6 +7,16 @@ answer — with the statistics computed *in the query*, not guessed by the LLM.
 
 Default LLM endpoint: `https://ollama.fit.fraunhofer.de/api`, model `gpt-oss:120b`.
 
+## Requirements
+
+- **Python 3.10+** — the codebase uses `X | None` type hints throughout.
+- **Python packages:** `openai`, `rdflib`, `requests` (core, both modes); `psycopg[binary]` (only for `scripts/0b_online_ingest.py`, the deploy/Postgres path).
+  ```bash
+  pip install openai rdflib requests "psycopg[binary]"
+  ```
+- **Docker + Docker Compose** — deploy mode only (`postgres`, `ontop`, `ingest` in `obda/docker-compose.yml`). Not needed for dev mode.
+- An **LLM API key** (`OPENAI_API_KEY`) for the configured endpoint — see [Environment variables](#environment-variables).
+
 ## Getting started
 
 **Deploy — live data via Postgres + Ontop.** `ingest` creates the schema and
