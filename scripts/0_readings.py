@@ -38,6 +38,12 @@ STATE_FILE = DATA_DIR / "argus_readings_state.json"
 SEEN_IDS_FILE = DATA_DIR / "argus_seen_ids.txt"
 BACKUP_FILE = DATA_DIR / "argus_readings.backup.ttl"
 
+# Raw API payloads are never queried by the pipeline but measured 42% of the TTL,
+# so they live in an append-only sidecar instead of as rdfs literals. Set
+# ARGUS_KEEP_RAW_JSON=1 to also embed them in the graph (legacy behaviour).
+RAW_JSONL_FILE = DATA_DIR / "argus_readings_raw.jsonl"
+KEEP_RAW_JSON_IN_GRAPH = os.environ.get("ARGUS_KEEP_RAW_JSON", "") == "1"
+
 # Per-node coordinates live in material/ARGUS_nodes_<site>.csv (site,nodeid,
 # latitude,longitude,altitude). Drop a new CSV per site — no code change needed.
 MATERIAL_DIR = Path(__file__).resolve().parent.parent / "material"
@@ -125,10 +131,6 @@ def fetch_readings_iter(max_pages: Optional[int] = None, **params) -> Iterator[d
         if max_pages is not None and page >= max_pages:
             break
         page += 1
-
-
-def fetch_all(max_pages: Optional[int] = None, **params) -> list[dict]:
-    return list(fetch_readings_iter(max_pages=max_pages, **params))
 
 
 # ---------------------------------------------------------------------------
@@ -307,6 +309,48 @@ def _append_seen_ids(new_ids: Iterable[str]) -> None:
     with open(SEEN_IDS_FILE, "a", encoding="utf-8") as f:
         for rid in new_ids:
             f.write(rid + "\n")
+
+
+def _append_raw_readings(records: List[Tuple[str, Dict[str, Any]]]) -> None:
+    # Append-only, so a live run never rewrites what is already on disk.
+    if not records:
+        return
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    with open(RAW_JSONL_FILE, "a", encoding="utf-8") as f:
+        for rid, reading in records:
+            f.write(json.dumps({"reading_id": rid, "reading": reading},
+                               ensure_ascii=False, default=str) + "\n")
+
+
+def export_raw_json(g: Graph) -> int:
+    # Move rawJson literals out of the graph into the sidecar, so stripping them
+    # is lossless. Skips readings already present in the sidecar.
+    known = set()
+    if RAW_JSONL_FILE.exists():
+        with open(RAW_JSONL_FILE, encoding="utf-8") as f:
+            for line in f:
+                try:
+                    known.add(json.loads(line)["reading_id"])
+                except (json.JSONDecodeError, KeyError):
+                    continue
+
+    records = []
+    for subject, raw in g.subject_objects(ARGUS.rawJson):
+        rid = str(subject).rsplit("/", 1)[-1]
+        if rid in known:
+            continue
+        try:
+            records.append((rid, json.loads(str(raw))))
+        except json.JSONDecodeError:
+            continue
+    _append_raw_readings(records)
+    return len(records)
+
+
+def strip_raw_json(g: Graph) -> int:
+    n = sum(1 for _ in g.triples((None, ARGUS.rawJson, None)))
+    g.remove((None, ARGUS.rawJson, None))
+    return n
 
 
 def _load_state() -> Dict[str, Any]:
@@ -513,7 +557,9 @@ def add_reading_to_graph(g: Graph, reading: Dict[str, Any]) -> str:
         if unit is not None:
             _add_literal(g, obs_uri, ARGUS.unit, unit)
 
-    g.add((reading_uri, ARGUS.rawJson, Literal(json.dumps(reading, ensure_ascii=False, default=str))))
+    if KEEP_RAW_JSON_IN_GRAPH:
+        g.add((reading_uri, ARGUS.rawJson,
+               Literal(json.dumps(reading, ensure_ascii=False, default=str))))
     return rid
 
 
@@ -610,6 +656,7 @@ def update_kg(
 
     for page_records in pages_iter:
         new_ids = []
+        new_raw = []
         for reading in page_records:
             rid = reading_stable_id(reading)
             if rid in seen_ids:
@@ -618,10 +665,12 @@ def update_kg(
             add_reading_to_graph(g, reading)
             seen_ids.add(rid)
             new_ids.append(rid)
+            new_raw.append((rid, reading))
             added += 1
 
         if new_ids:
             _append_seen_ids(new_ids)
+            _append_raw_readings(new_raw)
 
         pages_since_save += 1
         if pages_since_save >= SAVE_EVERY_PAGES:
@@ -663,7 +712,20 @@ def main() -> None:
     parser.add_argument("--enrich-geo-only", action="store_true",
                         help="Attach node coordinates from material/ARGUS_nodes_*.csv "
                              "to the existing TTL and exit (no API fetch).")
+    parser.add_argument("--strip-raw-json", action="store_true",
+                        help="Remove argus:rawJson literals from the existing TTL "
+                             "and exit. Raw payloads stay available in the JSONL sidecar.")
     args = parser.parse_args()
+
+    if args.strip_raw_json:
+        g = load_graph()
+        before = len(g)
+        exported = export_raw_json(g)
+        removed = strip_raw_json(g)
+        save_graph(g)
+        print(f"Exported {exported} raw reading(s) to {RAW_JSONL_FILE}")
+        print(f"Removed {removed} rawJson triple(s): {before} → {len(g)} triples.")
+        return
 
     if args.enrich_geo_only:
         g = load_graph()

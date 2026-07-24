@@ -44,30 +44,42 @@ Rules:
 - Do NOT output URIs or internal identifiers — use human-readable names and labels only.
 - Do NOT explain the SPARQL query, the ontology, or how the system works.
 - Do NOT add follow-up suggestions or next steps.
+
+Statistics:
+- When the query already computed an aggregate (a count/avg/min/max/sum column), report that value — it is the authoritative one.
+- Otherwise the rows are a de-duplicated listing, so do NOT compute an average, total or record count from them; give the values, ranges or examples the rows support and leave it there.
+- With many rows, summarise and name a few representative examples rather than enumerating everything.
 """
+
+
+def _dedupe(results: list) -> list:
+    seen = set()
+    out = []
+    for row in results:
+        key = tuple(sorted(row.items()))
+        if key not in seen:
+            seen.add(key)
+            out.append(row)
+    return out
+
+
+def prompt_row_stats(results: list) -> tuple[int, int]:
+    # What the LLM will actually receive, so the caller can warn about slow turns.
+    deduped = _dedupe(results)
+    return len(deduped), len(json.dumps(deduped, indent=2, ensure_ascii=False))
 
 
 def generate(query: str, sparql: str, results: list) -> str:
     client = _get_client()
 
     analysis = analyze(results)
-
-    # Deduplicate rows before serialising so repeated observations of the same
-    # entity don't dominate the MAX_RESULT_CHARS budget and hide other rows.
-    seen = set()
-    deduped = []
-    for row in results:
-        key = tuple(sorted(row.items()))
-        if key not in seen:
-            seen.add(key)
-            deduped.append(row)
-
+    deduped = _dedupe(results)
     results_text = json.dumps(deduped, indent=2, ensure_ascii=False)
 
     user_msg = (
         f"User question:\n{query}\n\n"
         f"SPARQL query executed:\n```sparql\n{sparql}\n```\n\n"
-        f"Raw results ({len(results)} rows):\n{results_text}\n\n"
+        f"Results — all {len(deduped)} distinct rows ({len(results)} total):\n{results_text}\n\n"
         f"Pre-computed spatial & temporal analysis:\n"
         f"{analysis['summary_text']}"
     )

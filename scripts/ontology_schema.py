@@ -22,6 +22,12 @@ OWL_FILES = [
     OWL_DIR / "panoptes3_extension.owl",
 ]
 
+# The prompt describes only the extension, which declares exactly the classes the
+# readings graph instantiates. The base ontology adds ~18 classes (Asset, Decision,
+# Measurement, …) that have no instances — offering them as target_class choices
+# costs tokens and invites queries that can only return nothing.
+SCHEMA_OWL_FILES = [OWL_DIR / "panoptes3_extension.owl"]
+
 _PREFIX_MAP = {
     "http://www.w3.org/ns/sosa/": "sosa:",
     "http://www.argus-project.eu/ontology/": "argus:",
@@ -78,18 +84,31 @@ def _superclass(g: Graph, uri: URIRef) -> str | None:
 # ── Load OWL graph ───────────────────────────────────────────────────────────
 
 _cached_graph: Graph | None = None
+_cached_schema_graph: Graph | None = None
+
+
+def _load(files: list[Path]) -> Graph:
+    g = Graph()
+    for owl_file in files:
+        if owl_file.exists():
+            g.parse(str(owl_file), format="xml")
+    return g
 
 
 def load_ontology_graph() -> Graph:
+    # Full vocabulary — drives the SPARQL builder's name resolution.
     global _cached_graph
-    if _cached_graph is not None:
-        return _cached_graph
-    g = Graph()
-    for owl_file in OWL_FILES:
-        if owl_file.exists():
-            g.parse(str(owl_file), format="xml")
-    _cached_graph = g
-    return g
+    if _cached_graph is None:
+        _cached_graph = _load(OWL_FILES)
+    return _cached_graph
+
+
+def load_schema_graph() -> Graph:
+    # Prompt-facing subset (see SCHEMA_OWL_FILES).
+    global _cached_schema_graph
+    if _cached_schema_graph is None:
+        _cached_schema_graph = _load(SCHEMA_OWL_FILES)
+    return _cached_schema_graph
 
 
 # ── Structured extractions (for sparql_retriever) ───────────────────────────
@@ -172,87 +191,10 @@ def extract_prop_range(g: Graph | None = None) -> dict[str, str]:
     return result
 
 
-def extract_graph_connectivity(g: Graph | None = None) -> str:
-    """Auto-generate graph connectivity text from object property domain → range."""
-    if g is None:
-        g = load_ontology_graph()
-
-    lines = []
-    lines.append("Graph connectivity (auto-derived from ontology domain/range):")
-
-    # Collect domain → property → range for object properties
-    connections: dict[str, list[tuple[str, str]]] = {}
-    for prop in g.subjects(RDF.type, OWL.ObjectProperty):
-        if not isinstance(prop, URIRef):
-            continue
-        prop_local = _local(prop)
-        domains = [_local(d) for d in g.objects(prop, RDFS.domain) if isinstance(d, URIRef)]
-        ranges = [_local(r) for r in g.objects(prop, RDFS.range) if isinstance(r, URIRef)]
-        if domains and ranges:
-            domain = domains[0]
-            range_cls = ranges[0]
-            connections.setdefault(domain, []).append((prop_local, range_cls))
-
-    for domain in sorted(connections):
-        for prop_name, range_cls in sorted(connections[domain]):
-            lines.append(f"  {domain} —({prop_name})→ {range_cls}")
-
-    # Group properties by domain to show ownership
-    prop_ownership: dict[str, list[str]] = {}
-    for prop_type in (OWL.ObjectProperty, OWL.DatatypeProperty):
-        for prop in g.subjects(RDF.type, prop_type):
-            if not isinstance(prop, URIRef):
-                continue
-            prop_local = _local(prop)
-            for domain in g.objects(prop, RDFS.domain):
-                if isinstance(domain, URIRef):
-                    domain_local = _local(domain)
-                    prop_ownership.setdefault(domain_local, []).append(prop_local)
-
-    lines.append("")
-    lines.append("Property ownership (which properties belong to which class):")
-    for cls in sorted(prop_ownership):
-        props = ", ".join(sorted(prop_ownership[cls]))
-        lines.append(f"  {cls}: {props}")
-
-    # Derive indirect path hints: for any two classes not directly connected,
-    # show the required intermediate hop
-    lines.append("")
-    lines.append("Indirect paths (classes that require an intermediate hop):")
-    all_classes = set()
-    for domain, conns in connections.items():
-        all_classes.add(domain)
-        for _, range_cls in conns:
-            all_classes.add(range_cls)
-
-    direct_targets: dict[str, set[str]] = {}
-    for domain, conns in connections.items():
-        for _, range_cls in conns:
-            direct_targets.setdefault(domain, set()).add(range_cls)
-
-    for cls_a in sorted(all_classes):
-        reachable_from_a = direct_targets.get(cls_a, set())
-        for cls_b in sorted(all_classes):
-            if cls_a == cls_b or cls_b in reachable_from_a:
-                continue
-            # Check if there's a two-hop path: cls_a → intermediate → cls_b
-            for mid in sorted(all_classes):
-                mid_targets = direct_targets.get(mid, set())
-                mid_sources = {d for d, conns in connections.items() for _, r in conns if r == mid}
-                if cls_a in mid_sources and cls_b in mid_targets:
-                    lines.append(f"  {cls_a} → {cls_b}: must go through {mid}")
-                    break
-                if mid in reachable_from_a and cls_b in mid_targets:
-                    lines.append(f"  {cls_a} → {cls_b}: must go through {mid}")
-                    break
-
-    return "\n".join(lines)
-
-
 def extract_class_list(g: Graph | None = None) -> str:
     """Comma-separated list of short class names for the LLM prompt."""
     if g is None:
-        g = load_ontology_graph()
+        g = load_schema_graph()
     names = set()
     for cls in g.subjects(RDF.type, OWL.Class):
         if isinstance(cls, URIRef):
@@ -264,16 +206,20 @@ def extract_class_list(g: Graph | None = None) -> str:
 
 def extract_schema_text(g: Graph | None = None) -> str:
     if g is None:
-        g = load_ontology_graph()
+        g = load_schema_graph()
+
+    used_prefixes = {_short(t).split(":")[0] + ":"
+                     for t in set(g.subjects()) | set(g.predicates()) | set(g.objects())
+                     if isinstance(t, URIRef) and ":" in _short(t)}
 
     lines: list[str] = []
-    lines.append("ARGUS Ontology (auto-generated from panoptes3.owl + panoptes3_extension.owl)")
+    lines.append("ARGUS ontology (auto-generated from panoptes3_extension.owl)")
     lines.append("")
 
-    # Namespaces
     lines.append("Namespaces:")
     for full, prefix in sorted(_PREFIX_MAP.items(), key=lambda x: x[1]):
-        lines.append(f"  {prefix:12s} <{full}>")
+        if prefix in used_prefixes:
+            lines.append(f"  {prefix:12s} <{full}>")
     lines.append("")
 
     # Classes
@@ -326,16 +272,11 @@ def extract_schema_text(g: Graph | None = None) -> str:
 
             domain_props.setdefault(domain_key, []).append(entry)
 
-    lines.append("Properties (grouped by domain class):")
+    lines.append("Properties (grouped by domain class — domain →(property)→ range):")
     for domain in sorted(domain_props):
         lines.append(f"\n  [{domain}]")
         for entry in sorted(domain_props[domain]):
             lines.append(entry)
-    lines.append("")
-
-    # Append connectivity
-    lines.append("")
-    lines.append(extract_graph_connectivity(g))
 
     return "\n".join(lines)
 

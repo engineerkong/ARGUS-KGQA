@@ -1,0 +1,63 @@
+[PrefixDeclaration]
+sosa:   http://www.w3.org/ns/sosa/
+argus:  http://www.argus-project.eu/ontology/
+ex:     http://www.argus-project.eu/resource/
+rdfs:   http://www.w3.org/2000/01/rdf-schema#
+xsd:    http://www.w3.org/2001/XMLSchema#
+
+# Maps the SQL tables back to exactly the classes, predicates and ex: URIs that
+# 2_sparql_retriever.build_sparql() emits, so the pipeline is unchanged. Ontop
+# omits any triple whose template column or object value is NULL.
+
+[MappingDeclaration] @collection [[
+
+mappingId   site
+target      ex:site/{site_id} a argus:Site ; rdfs:label {label} .
+source      SELECT site_id, label FROM sites
+
+mappingId   node
+target      ex:node/{node_id} a argus:Node ; rdfs:label {label} ; argus:nodeId {node_id} ;
+            argus:nodeName {name} ; argus:nodeModel {model} ;
+            argus:latitude {latitude}^^xsd:decimal ; argus:longitude {longitude}^^xsd:decimal ;
+            argus:altitude {altitude}^^xsd:decimal .
+source      SELECT node_id, label, name, model, latitude, longitude, altitude FROM nodes
+
+mappingId   sensor
+target      ex:sensor/{sensor_id} a sosa:Sensor ; rdfs:label {label} ;
+            argus:sensorId {sensor_id} ; argus:sensorModel {model} .
+source      SELECT sensor_id, label, model FROM sensors
+
+mappingId   observed_property
+target      ex:quantity/{property_id} a argus:ObservedProperty ; rdfs:label {label} .
+source      SELECT property_id, label FROM observed_properties
+
+mappingId   reading
+target      ex:reading/{reading_id} a sosa:ObservationCollection ;
+            argus:hasSite ex:site/{site_id} ; sosa:madeBySensor ex:sensor/{sensor_id} ;
+            argus:hasNode ex:node/{node_id} ; sosa:resultTime {result_time}^^xsd:dateTime ;
+            argus:readingType {reading_type} ; argus:topic {topic} ;
+            argus:topicId {topic_id} ; argus:deviceGroupId {device_group_id} .
+source      SELECT reading_id, site_id, sensor_id, node_id, result_time,
+                   reading_type, topic, topic_id, device_group_id FROM readings
+
+mappingId   reading_has_observation
+target      ex:reading/{reading_id} argus:hasObservation ex:observation/{observation_id} .
+source      SELECT reading_id, observation_id FROM observations
+
+mappingId   observation_numeric
+target      ex:observation/{observation_id} a sosa:Observation ;
+            sosa:observedProperty ex:quantity/{property_id} ;
+            sosa:hasSimpleResult {value}^^xsd:decimal ;
+            sosa:resultTime {result_time}^^xsd:dateTime ; argus:unit {unit} .
+source      SELECT observation_id, property_id, value, result_time, unit
+                   FROM observations WHERE value IS NOT NULL
+
+mappingId   observation_text
+target      ex:observation/{observation_id} a sosa:Observation ;
+            sosa:observedProperty ex:quantity/{property_id} ;
+            sosa:hasSimpleResult {value_text} ;
+            sosa:resultTime {result_time}^^xsd:dateTime ; argus:unit {unit} .
+source      SELECT observation_id, property_id, value_text, result_time, unit
+                   FROM observations WHERE value_text IS NOT NULL
+
+]]

@@ -1,15 +1,10 @@
 """
-Inspect raw ARGUS readings before they become ontology triples: the API JSON,
-the (quantity, value, unit) tuples extracted from the payload, what gets
-dropped, and optionally the RDF each reading turns into. Reuses the real
-0_readings functions so the output matches actual ingestion.
+Inspect raw ARGUS readings before they become ontology triples, reusing the real
+0_readings functions so the output matches actual ingestion. Reads the JSONL
+sidecar offline by default; --source api fetches live.
 
-Reads offline from the argus:rawJson literals in the TTL by default.
-
-    python scripts/test_readings.py                    # 3 samples
     python scripts/test_readings.py --limit 10 --show-triples
     python scripts/test_readings.py --stats-only --limit 500
-    python scripts/test_readings.py --source api --limit 5
 """
 
 from __future__ import annotations
@@ -26,9 +21,24 @@ from ontology_schema import ARGUS  # noqa: E402
 
 
 def _load_from_ttl(limit: int | None) -> Iterator[Dict[str, Any]]:
+    # Raw payloads now live in the JSONL sidecar; fall back to rawJson literals
+    # for graphs written before that change.
+    jsonl = _rd.RAW_JSONL_FILE
+    if jsonl.exists():
+        with open(jsonl, encoding="utf-8") as f:
+            for n, line in enumerate(f):
+                if limit is not None and n >= limit:
+                    return
+                try:
+                    yield json.loads(line)["reading"]
+                except (json.JSONDecodeError, KeyError):
+                    continue
+        return
+
     ttl = _rd.TTL_FILE
     if not ttl.exists():
-        raise SystemExit(f"TTL not found: {ttl}. Run 0_readings.py first, or use --source api.")
+        raise SystemExit(f"No raw readings found: neither {jsonl} nor {ttl} exists. "
+                         "Run 0_readings.py first, or use --source api.")
     g = Graph()
     g.parse(str(ttl), format="turtle")
     n = 0

@@ -9,10 +9,10 @@ from __future__ import annotations
 import importlib
 import json
 import os
+import time
 from pathlib import Path
 from typing import Any
 
-from rdflib import Graph
 
 _sp = importlib.import_module("1_semantic_parser")
 parse = _sp.parse
@@ -24,6 +24,14 @@ unfold_results = _sr.unfold_results
 
 _ag = importlib.import_module("3_answer_generator")
 generate = _ag.generate
+prompt_row_stats = _ag.prompt_row_stats
+
+_be = importlib.import_module("backend")
+make_backend = _be.make_backend
+
+# Result sets larger than this make the Step 3 call noticeably slow; nothing is
+# dropped, the user is just told to expect the wait.
+SLOW_PROMPT_ROWS = 500
 
 _DEFAULT_TTL_PATH = Path(__file__).resolve().parent.parent / "data" / "argus_readings.ttl"
 DEFAULT_TTL = Path(os.environ.get("ARGUS_TTL_PATH", str(_DEFAULT_TTL_PATH)))
@@ -74,6 +82,7 @@ class Pipeline:
         max_retries: int = MAX_RETRIES,
         keep_history: bool = False,
         max_history: int = MAX_HISTORY,
+        sparql_endpoint: str | None = None,
     ):
         self.verbose = verbose
         self.max_retries = max_retries
@@ -84,19 +93,14 @@ class Pipeline:
         self.history: list[dict[str, Any]] = []
         ttl = Path(ttl_path) if ttl_path else DEFAULT_TTL
 
-        # ── Step 0: Load KG store (once) ────────────────────────────────────
-        if self.verbose:
-            print(f"[Step 0] Loading KG from {ttl}…")
-
-        self.graph = Graph()
-        if ttl.exists():
-            self.graph.parse(str(ttl), format="turtle")
-        else:
+        # ── Step 0: Connect the query backend (local TTL or remote SPARQL) ──
+        endpoint = sparql_endpoint or os.environ.get("ARGUS_SPARQL_ENDPOINT")
+        if not endpoint and not ttl.exists():
             print(f"[Step 0] WARNING: TTL file not found: {ttl}")
             print("[Step 0] Run `python scripts/0_readings.py --max-records 500` to fetch data first.")
-
+        self.backend = make_backend(ttl_path=ttl, endpoint=endpoint)
         if self.verbose:
-            print(f"[Step 0] Graph ready — {len(self.graph)} triples.")
+            print(f"[Step 0] Backend ready — {self.backend.describe()}.")
 
     def run(self, query: str) -> dict[str, Any]:
         v = self.verbose
@@ -106,6 +110,11 @@ class Pipeline:
         intent = None
         sparql = None
         raw_results = []
+        # Separated so a slow turn can be attributed to the LLM endpoint (steps 1
+        # and 3) rather than to local query work (step 2).
+        t_parse = t_query = t_answer = 0.0
+        parse_calls = 0
+        t_total = time.perf_counter()
 
         for attempt in range(1 + self.max_retries):
             # ── Step 1: Semantic Parsing ─────────────────────────────────────
@@ -119,18 +128,23 @@ class Pipeline:
                         print(f"[Step 1] Context from {len(history)} prior turn(s): {prior}")
                 else:
                     print(f"[Step 1] Retry {attempt}/{self.max_retries} — re-parsing with feedback")
+            _t = time.perf_counter()
             intent = parse(query, feedback=feedback, history=history)
+            t_parse += time.perf_counter() - _t
+            parse_calls += 1
             if v:
                 print("[Step 1] Intent:", json.dumps(intent, indent=2))
 
             # ── Step 2: SPARQL Retrieval + Result Unfolding ──────────────────
+            _t = time.perf_counter()
             sparql = build_sparql(intent)
             if v:
                 print(f"\n{sep}")
                 print("[Step 2] SPARQL query:")
                 print(sparql)
 
-            raw_results = execute(self.graph, sparql)
+            raw_results = execute(self.backend, sparql)
+            t_query += time.perf_counter() - _t
             if v:
                 print(f"[Step 2] {len(raw_results)} raw result(s) returned.")
 
@@ -152,7 +166,9 @@ class Pipeline:
                 if v:
                     print(f"\n[Pipeline] Query failed after {self.max_retries} retries — {failure}")
 
-        unfolded = unfold_results(self.graph, raw_results)
+        _t = time.perf_counter()
+        unfolded = unfold_results(self.backend, raw_results)
+        t_query += time.perf_counter() - _t
         if v:
             print(f"\n{sep}")
             print("[Step 2] Unfolded results (URIs resolved to linked properties):")
@@ -163,12 +179,24 @@ class Pipeline:
 
         # ── Step 3: Natural Language Answer ─────────────────────────────────
         if v:
+            llm_rows, llm_chars = prompt_row_stats(unfolded)
             print(f"\n{sep}")
+            print(f"[Step 3] Sending {llm_rows} row(s) / ~{llm_chars:,} chars to the LLM.")
+            if llm_rows > SLOW_PROMPT_ROWS:
+                print(f"[Step 3] Large result set — this answer may take a while.")
             print("[Step 3] Generating natural language answer…")
+        _t = time.perf_counter()
         answer = generate(query, sparql, unfolded)
+        t_answer = time.perf_counter() - _t
         if v:
             print("[Step 3] Answer:")
             print(answer)
+            total = time.perf_counter() - t_total
+            llm = t_parse + t_answer
+            print(f"\n[Timing] total {total:.1f}s = "
+                  f"LLM {llm:.1f}s ({llm/total*100:.0f}%) "
+                  f"[step1 {t_parse:.1f}s ×{parse_calls} call(s), step3 {t_answer:.1f}s] "
+                  f"+ local query {t_query:.2f}s")
 
         if self.keep_history:
             self.history.append({

@@ -62,21 +62,6 @@ Variable naming rule: the SPARQL variable for a join's return property is {Class
 _FEW_SHOT = """\
 --- EXAMPLES ---
 
-Q: "How many readings are available per site?"
-{
-  "target_class": "ObservationCollection",
-  "filters": [],
-  "return_properties": [],
-  "joins": [
-    {"class": "Site", "via": "hasSite", "direction": "outgoing",
-     "return_properties": ["label"], "filters": []}
-  ],
-  "aggregation": {"type": "count", "group_by": "Site.label",
-                  "target": "observationcollection", "distinct": true},
-  "order_by": null, "limit": null,
-  "explanation": "Count distinct ObservationCollections per site."
-}
-
 Q: "What are the temperature values recorded at each site?"
 {
   "target_class": "ObservationCollection",
@@ -90,10 +75,28 @@ Q: "What are the temperature values recorded at each site?"
     {"class": "Site", "via": "hasSite", "direction": "outgoing",
      "return_properties": ["label"], "filters": []}
   ],
+  "aggregation": null,
+  "order_by": null, "limit": null,
+  "explanation": "Lists the individual values, so no aggregation — contrast with 'average temperature', which must aggregate."
+}
+
+Q: "What is the average temperature at each site?"
+{
+  "target_class": "ObservationCollection",
+  "filters": [],
+  "return_properties": [],
+  "joins": [
+    {"class": "Observation", "via": "hasObservation", "direction": "outgoing",
+     "return_properties": [], "filters": []},
+    {"class": "ObservedProperty", "via": "observedProperty", "direction": "outgoing",
+     "return_properties": [], "filters": [{"property": "label", "op": "equals", "value": "temperature"}]},
+    {"class": "Site", "via": "hasSite", "direction": "outgoing",
+     "return_properties": ["label"], "filters": []}
+  ],
   "aggregation": {"type": "avg", "group_by": "Site.label",
                   "target": "hasSimpleResult", "distinct": false},
   "order_by": null, "limit": null,
-  "explanation": "Average temperature per site via ObservedProperty filter."
+  "explanation": "AVG computed in the query over every observation, so de-duplication of detail rows cannot skew it."
 }
 
 Q: "How many sensors are deployed per site?"
@@ -239,6 +242,8 @@ Rules:
   - For time-based queries use resultTime with after/before operators.
   - direction="outgoing" means the subject (anchor) → via → object (join class).  direction="incoming" means object (join class) → via → subject (anchor).
   - For COUNT aggregations: set "target" to the class name in lowercase (e.g. "sensor"), distinct=true. For min/max/avg/sum: set "target" to the property name (e.g. "hasSimpleResult"), distinct=false.
+  - AGGREGATE FIRST — this is a correctness rule, not an optimisation. If the question asks for a statistic ("average", "mean", "total", "sum", "how many", "highest", "lowest", "maximum", "minimum"), you MUST set "aggregation" so the statistic is computed inside the query. Detail rows go through DISTINCT de-duplication, so any average, sum or count derived from them afterwards is WRONG (measured: 15% error on an average). Only omit "aggregation" when the user genuinely wants the individual values listed.
+  - When aggregating on a property, put it in "aggregation.target" only — it does not also need to be in return_properties. Set group_by to null for a single overall figure, or to "ClassName.property" for a per-group breakdown.
   - group_by and order_by variables MUST use the dotted "ClassName.property" form (e.g. "Site.label", "ObservationCollection.resultTime"). The join for that class MUST be present and include the property in return_properties.
   - When asking to LIST instances of a class (e.g. "which sensors", "what sites"), set target_class to that class directly and join ObservationCollection as needed for filtering — EXCEPT for "what quantities/properties are measured/observed at site X": use target_class=ObservationCollection and forward-join Site (filtered), Observation, ObservedProperty (as shown in example 5).
   - The property "readingType" holds data-format codes ("reading", "eng_units") — NOT physical measurement types. To filter by measurement type (temperature, humidity, etc.), filter on ObservedProperty.label via the hasObservation → observedProperty chain.

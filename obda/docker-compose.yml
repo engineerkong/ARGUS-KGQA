@@ -1,0 +1,37 @@
+# Phase 3: Postgres + Ontop exposing a SPARQL endpoint over the SQL data.
+# The pipeline points at it with ARGUS_SPARQL_ENDPOINT — no code change.
+#
+#   1. docker compose -f obda/docker-compose.yml up -d postgres
+#   2. python scripts/4_load_postgres.py            # create schema + load data
+#   3. docker compose -f obda/docker-compose.yml up -d ontop
+#   4. export ARGUS_SPARQL_ENDPOINT=http://localhost:8080/sparql
+#      python scripts/demo.py
+
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: argus
+      POSTGRES_USER: argus
+      POSTGRES_PASSWORD: argus
+    ports:
+      - "5432:5432"
+    volumes:
+      - argus_pg:/var/lib/postgresql/data
+
+  ontop:
+    image: ontop/ontop:5.5.0
+    depends_on:
+      - postgres
+    ports:
+      - "8080:8080"
+    environment:
+      ONTOP_MAPPING_FILE: /opt/ontop/input/argus.obda
+      ONTOP_PROPERTIES_FILE: /opt/ontop/input/argus.properties
+      ONTOP_CORS_ALLOWED_ORIGINS: "*"
+    volumes:
+      - ./argus.obda:/opt/ontop/input/argus.obda:ro
+      - ./argus.properties:/opt/ontop/input/argus.properties:ro
+
+volumes:
+  argus_pg:

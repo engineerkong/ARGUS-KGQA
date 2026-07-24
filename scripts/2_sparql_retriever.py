@@ -462,19 +462,8 @@ def build_sparql(intent: dict) -> str:
             + group_clause + order_clause + limit_clause)
 
 
-def execute(graph: Graph, sparql: str) -> list[dict[str, Any]]:
-    results = []
-    try:
-        qres = graph.query(sparql)
-        for row in qres:
-            record = {}
-            for var in qres.vars:
-                val = row[var]
-                record[str(var)] = str(val) if val is not None else None
-            results.append(record)
-    except Exception as e:
-        results = [{"error": str(e)}]
-    return results
+def execute(backend, sparql: str) -> list[dict[str, Any]]:
+    return backend.query(sparql)
 
 
 # ── URI unfolding ────────────────────────────────────────────────────────
@@ -486,6 +475,7 @@ import re
 
 _RESOURCE_PREFIX = str(EX)
 _SKIP_PREDS = {str(RDF.type)}
+_RDFS_LABEL = str(RDFS.label)
 _MAX_VALUE_LEN = 200
 _UUID_RE = re.compile(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$', re.I)
 _HEX_ID_RE = re.compile(r'^[0-9a-f]{16,}$', re.I)
@@ -510,34 +500,30 @@ def _pred_short(pred_str: str) -> str:
     return pred_str.rsplit("/", 1)[-1].rsplit("#", 1)[-1]
 
 
-def _resolve_uri(graph: Graph, uri_str: str, cache: dict, depth: int = 0) -> dict[str, str]:
+def _resolve_uri(backend, uri_str: str, cache: dict, depth: int = 0) -> dict[str, str]:
     if uri_str in cache:
         return cache[uri_str]
 
-    uri = URIRef(uri_str)
     info = {}
-
-    for pred, obj in graph.predicate_objects(uri):
-        pred_str = str(pred)
+    for pred_str, obj_str in backend.predicate_objects(uri_str):
         if pred_str in _SKIP_PREDS:
             continue
         key = _pred_short(pred_str)
         if key in info:
             continue
-
-        obj_str = str(obj)
         if len(obj_str) > _MAX_VALUE_LEN:
             continue
         if _is_resource_uri(obj_str):
             if depth < 1:
-                nested = _resolve_uri(graph, obj_str, cache, depth + 1)
+                nested = _resolve_uri(backend, obj_str, cache, depth + 1)
                 resolved = nested.get("label")
                 if resolved:
                     info[key] = resolved
             else:
-                for lbl in graph.objects(URIRef(obj_str), RDFS.label):
-                    info[key] = str(lbl)
-                    break
+                for p2, o2 in backend.predicate_objects(obj_str):
+                    if p2 == _RDFS_LABEL:
+                        info[key] = o2
+                        break
         elif _is_id_value(obj_str):
             continue
         else:
@@ -563,23 +549,34 @@ def _clean_value(val: str | None) -> str | None:
     return val
 
 
-def unfold_results(graph: Graph, results: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Unfold resource URIs in results by following all their properties in the graph."""
+def unfold_results(backend, results: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Unfold resource URIs in results into their linked properties, via the backend."""
     if not results or "error" in results[0]:
         return results
+
+    # Warm the batch so a remote backend resolves all URIs in one round-trip.
+    backend.prefetch([v for row in results for v in row.values() if _is_resource_uri(v)])
 
     cache: dict[str, dict] = {}
     unfolded = []
 
     for row in results:
         new_row = {}
+        row_lower = {k.lower(): v for k, v in row.items()}
         for key, val in row.items():
             if _is_resource_uri(val):
-                info = _resolve_uri(graph, val, cache)
+                info = _resolve_uri(backend, val, cache)
                 for info_key, info_val in info.items():
                     cleaned = _clean_value(info_val)
-                    if cleaned is not None:
-                        new_row[f"{key}_{info_key}"] = cleaned
+                    if cleaned is None:
+                        continue
+                    # Unfolding a URI re-emits properties the query already
+                    # selected directly (?node → node_label beside ?label).
+                    # Drop the copy only when name and value both match.
+                    direct = row_lower.get(info_key.lower())
+                    if direct is not None and str(direct) == str(cleaned):
+                        continue
+                    new_row[f"{key}_{info_key}"] = cleaned
                 if not info:
                     cleaned = _clean_value(val)
                     if cleaned is not None:
