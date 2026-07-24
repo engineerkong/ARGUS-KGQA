@@ -1,8 +1,7 @@
 """
-Step 1 — Semantic Parser.
-
-Sends the NL query + ontology schema to the LLM and returns a structured
-intent JSON that describes which SOSA/ARGUS classes and properties are needed.
+Step 1 — NL query + ontology schema → structured intent JSON naming the
+SOSA/ARGUS classes and properties needed. Prior turns may be passed as history
+so follow-up questions resolve against them.
 """
 
 from __future__ import annotations
@@ -167,6 +166,31 @@ Q: "Where are the sensor nodes at the baltanas site?"
   "explanation": "List baltanas nodes with their coordinates; spatial metrics are derived downstream from lat/long/altitude."
 }
 
+Q: "among these sensors, how many are about temperature?"
+   (follow-up; the previous turn asked "how many sensors are in baltanas?" and returned 28 sensors)
+   Inherit the set definition — target_class=Sensor plus the baltanas Site filter — then ADD the
+   ObservedProperty constraint. The previous rows held no property information, so the new joins
+   are required.
+{
+  "target_class": "Sensor",
+  "filters": [],
+  "return_properties": [],
+  "joins": [
+    {"class": "ObservationCollection", "via": "madeBySensor", "direction": "incoming",
+     "return_properties": [], "filters": []},
+    {"class": "Site", "via": "hasSite", "direction": "outgoing",
+     "return_properties": [], "filters": [{"property": "label", "op": "equals", "value": "baltanas"}]},
+    {"class": "Observation", "via": "hasObservation", "direction": "outgoing",
+     "return_properties": [], "filters": []},
+    {"class": "ObservedProperty", "via": "observedProperty", "direction": "outgoing",
+     "return_properties": [], "filters": [{"property": "label", "op": "contains", "value": "temperature"}]}
+  ],
+  "aggregation": {"type": "count", "group_by": null, "target": "sensor", "distinct": true},
+  "order_by": null,
+  "limit": null,
+  "explanation": "Count baltanas sensors (inherited set) that observe temperature (added constraint)."
+}
+
 --- END EXAMPLES ---\
 """
 
@@ -221,11 +245,31 @@ Rules:
   - "latest/most recent N readings/values/measurements": one reading = one Observation, so set target_class=Observation (NOT ObservationCollection) and limit=N; join ObservationCollection via hasObservation (incoming) returning resultTime, and order_by ObservationCollection.resultTime DESC. This makes LIMIT count individual readings. (A timestamp lives on the ObservationCollection, so reach it through that join.)
   - Location/where/distance/nearest/elevation questions: set target_class=Node and return_properties=["label","latitude","longitude","altitude"]; link to a Site by joining ObservationCollection via hasNode (incoming) then Site via hasSite (outgoing, filtered). Do NOT try to compute distances/centroids in the query — just return the coordinates; the analysis layer computes spatial metrics.
 
+Follow-up handling (earlier turns may appear above as question → intent pairs):
+  - Treat the current question as SELF-CONTAINED by default. If it can be understood on its own, IGNORE the earlier turns completely.
+  - Use earlier turns ONLY to resolve what the current question leaves unresolved: pronouns ("there", "those", "it"), ellipsis ("what about delos?", "and the maximum?"), or an omitted subject.
+  - When resolving, copy only the specific missing piece. NEVER carry over filters, aggregations, limits, joins or target_class that the current question does not itself imply. A new site/quantity mentioned now REPLACES the old one — it does not add to it.
+  - The output intent must always be complete and standalone, exactly as if the question had been asked with no history.
+  - "among these / of those / from that set" narrows the PREVIOUS result set. That set is defined by the previous intent's target_class and filters, so inherit those and ADD the new constraint as an extra join/filter. Never try to filter the previously returned rows — build a complete new query instead.
+  - A "[The previous query returned …]" note tells you how big that set was and which columns it had. Those columns are only what was displayed; they do NOT limit what you may query now. If the new question needs a property that was not returned, add whatever joins are required to reach it.
+
 {_FEW_SHOT}
 """
 
 
-def parse(query: str, feedback: str | None = None) -> dict:
+def _format_result_summary(summary: dict | None) -> str | None:
+    if not summary or not summary.get("row_count"):
+        return None
+    parts = [f"[The previous query returned {summary['row_count']} row(s)"]
+    if summary.get("columns"):
+        parts.append(f"columns: {', '.join(summary['columns'])}")
+    if summary.get("sample_values"):
+        parts.append(f"e.g. {summary.get('sample_of') or 'value'} = "
+                     f"{', '.join(summary['sample_values'])}")
+    return "; ".join(parts) + "]"
+
+
+def parse(query: str, feedback: str | None = None, history: list[dict] | None = None) -> dict:
     client = _get_client()
 
     user_content = f"Query: {query}"
@@ -240,8 +284,23 @@ def parse(query: str, feedback: str | None = None) -> dict:
 
     messages = [
         {"role": "system", "content": PARSE_SYSTEM + "\n\nOntology schema:\n" + ONTOLOGY_SCHEMA},
-        {"role": "user",   "content": user_content},
     ]
+    # Prior turns as (question → intent) pairs, so the model can resolve references
+    # in a follow-up. Each turn's result shape is prepended to the NEXT question, so
+    # "among these" has a concrete referent. The system prompt forbids inheriting
+    # anything the current question does not itself imply.
+    prev_summary = None
+    for turn in history or []:
+        content = f"Query: {turn['query']}"
+        if prev_summary:
+            content = f"{prev_summary}\n{content}"
+        messages.append({"role": "user", "content": content})
+        messages.append({"role": "assistant", "content": json.dumps(turn["intent"], ensure_ascii=False)})
+        prev_summary = _format_result_summary(turn.get("result_summary"))
+
+    if prev_summary:
+        user_content = f"{prev_summary}\n{user_content}"
+    messages.append({"role": "user", "content": user_content})
 
     response = client.chat.completions.create(
         model=MODEL,

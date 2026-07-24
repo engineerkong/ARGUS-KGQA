@@ -1,32 +1,39 @@
 """
-Demo — ARGUS KGQA Pipeline (Steps 0–3: KG → Parse → SPARQL → Answer).
+Demo runner for the ARGUS KGQA pipeline.
 
-Prerequisites:
-    1. Fetch data first:
-       python scripts/0_readings.py --max-records 500
+Needs data (0_readings.py) and an LLM endpoint (OPENAI_API_KEY,
+OLLAMA_BASE_URL, OLLAMA_MODEL).
 
-    2. Set LLM endpoint:
-       export OPENAI_API_KEY=<your_fraunhofer_key>
-       export OLLAMA_BASE_URL=https://ollama.fit.fraunhofer.de/api
-       export OLLAMA_MODEL=gpt-oss:120b
-
-Run:
-    python scripts/demo.py              # batch mode: run preset queries
-    python scripts/demo.py --online     # interactive mode: type queries in terminal
+    python scripts/demo.py           # preset queries, no conversation history
+    python scripts/demo.py --online  # interactive, follow-up questions supported
 """
 
 import argparse
 from pipeline import Pipeline
 
 QUERIES = [
+    # ── General retrieval ────────────────────────────────────────────────
     "How many readings are available per site?",
     "Which sensors are available at the baltanas site?",
-    "What are the temperature values recorded at each site?",
     "Which displacement measurements are available?",
-    "What are the latest 10 readings?",
-    "What is the most recent reading timestamp for each site?",
     "How many sensors are deployed per site?",
     "Which physical quantities are measured at the delos site?",
+
+    # ── Spatial — node coordinates, centroid/bbox, haversine distances ───
+    "Where are the sensor nodes at the baltanas site?",
+    "Which node at baltanas has the highest altitude, and which the lowest?",
+    "How far apart are the two most distant nodes at baltanas?",
+    "Which two nodes at baltanas are closest together?",
+
+    # ── Temporal — full-timestamp recency, oldest/newest/span ────────────
+    "What are the latest 10 readings?",
+    "What is the most recent reading timestamp for each site?",
+    "What time period do the readings at baltanas cover?",
+
+    # ── Numeric — per-quantity ranges, never a single global min/max ─────
+    "What are the temperature values recorded at each site?",
+    "What physical quantities are measured at baltanas and what are their value ranges?",
+    "How does the voltage range at delos compare to baltanas?",
 ]
 
 
@@ -41,7 +48,8 @@ def run_batch(pipeline: Pipeline):
 
 def run_online(pipeline: Pipeline):
     print("ARGUS KGQA — Interactive Mode")
-    print("Type a question and press Enter. Type 'quit' or Ctrl+C to exit.\n")
+    print("Follow-up questions are supported (e.g. 'what about delos?').")
+    print("Type 'reset' to forget the conversation, 'quit' or Ctrl+C to exit.\n")
 
     while True:
         try:
@@ -55,6 +63,10 @@ def run_online(pipeline: Pipeline):
         if query.lower() in ("quit", "exit", "q"):
             print("Bye.")
             break
+        if query.lower() in ("reset", "clear"):
+            pipeline.reset_history()
+            print("Conversation history cleared.\n")
+            continue
 
         print()
         result = pipeline.run(query)
@@ -71,7 +83,9 @@ def main():
                         help="Hide intermediate pipeline steps")
     args = parser.parse_args()
 
-    pipeline = Pipeline(verbose=not args.quiet)
+    # History only in interactive mode — batch queries stay independent so the
+    # preset run is reproducible and one query cannot contaminate the next.
+    pipeline = Pipeline(verbose=not args.quiet, keep_history=args.online)
 
     if args.online:
         run_online(pipeline)

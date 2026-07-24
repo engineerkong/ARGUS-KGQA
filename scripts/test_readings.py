@@ -1,21 +1,15 @@
 """
-Inspect what raw ARGUS readings look like BEFORE they become ontology triples.
+Inspect raw ARGUS readings before they become ontology triples: the API JSON,
+the (quantity, value, unit) tuples extracted from the payload, what gets
+dropped, and optionally the RDF each reading turns into. Reuses the real
+0_readings functions so the output matches actual ingestion.
 
-Shows, per reading: the raw API JSON, the (quantity, value, unit) tuples that
-`_extract_observations` pulls from the payload, which of them get dropped, and
-optionally the RDF the reading would turn into. Reuses the real 0_readings
-functions so the output matches the actual ingestion behaviour.
+Reads offline from the argus:rawJson literals in the TTL by default.
 
-Sources:
-  ttl  — reconstruct raw readings from argus:rawJson literals (offline, default)
-  api  — fetch live from the ARGUS API
-
-Usage:
-  python scripts/test_readings.py                       # 3 samples from the TTL
-  python scripts/test_readings.py --limit 10 --show-triples
-  python scripts/test_readings.py --source api --limit 5
-  python scripts/test_readings.py --stats-only --limit 500
-  python scripts/test_readings.py --reading-id <sha24>  # one specific reading
+    python scripts/test_readings.py                    # 3 samples
+    python scripts/test_readings.py --limit 10 --show-triples
+    python scripts/test_readings.py --stats-only --limit 500
+    python scripts/test_readings.py --source api --limit 5
 """
 
 from __future__ import annotations
@@ -26,7 +20,6 @@ from collections import Counter
 from typing import Any, Dict, Iterator, List
 
 from rdflib import Graph
-from rdflib.namespace import Namespace
 
 _rd = importlib.import_module("0_readings")
 from ontology_schema import ARGUS  # noqa: E402

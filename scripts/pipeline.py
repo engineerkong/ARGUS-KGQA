@@ -1,13 +1,8 @@
 """
-ARGUS KGQA Pipeline — orchestrates three steps per query:
+ARGUS KGQA pipeline: parse → SPARQL → answer, over a KG loaded once at init.
 
-  Step 0. KG store          (SOSA/ARGUS readings graph, loaded once at init)
-  Step 1. Semantic parsing  (NL query → structured intent)
-  Step 2. SPARQL retrieval  (intent → SPARQL → raw results → unfolded results)
-  Step 3. NL answer         (unfolded results → natural-language response)
-
-If Step 2 returns an error or empty results, the pipeline feeds the failure
-back to Step 1 and retries (up to max_retries times).
+A Step 2 error or empty result is fed back to Step 1 for up to max_retries
+re-parses. Conversation history is opt-in (see Pipeline.keep_history).
 """
 
 from __future__ import annotations
@@ -33,6 +28,33 @@ generate = _ag.generate
 _DEFAULT_TTL_PATH = Path(__file__).resolve().parent.parent / "data" / "argus_readings.ttl"
 DEFAULT_TTL = Path(os.environ.get("ARGUS_TTL_PATH", str(_DEFAULT_TTL_PATH)))
 MAX_RETRIES = 2
+MAX_HISTORY = 2
+
+
+MAX_SAMPLE_VALUES = 8
+
+
+def _summarize_results(results: list[dict[str, Any]]) -> dict[str, Any]:
+    # Compact shape of a result set for follow-up context: how big it was and
+    # which columns it had. Deliberately not the rows themselves — a follow-up
+    # almost always asks about an attribute that was never projected, so the
+    # rows cannot answer it and would only waste tokens.
+    if not results or (len(results) == 1 and "error" in results[0]):
+        return {"row_count": 0, "columns": [], "sample_values": [], "sample_of": None}
+
+    columns = sorted({k for row in results for k in row})
+    label_col = next((c for c in columns if c.endswith("_label")), columns[0] if columns else None)
+
+    values: list[str] = []
+    for row in results:
+        v = row.get(label_col)
+        if v is not None and str(v) not in values:
+            values.append(str(v))
+        if len(values) >= MAX_SAMPLE_VALUES:
+            break
+
+    return {"row_count": len(results), "columns": columns,
+            "sample_values": values, "sample_of": label_col}
 
 
 def _is_failed(results: list[dict]) -> str | None:
@@ -50,9 +72,16 @@ class Pipeline:
         verbose: bool = True,
         ttl_path: str | Path | None = None,
         max_retries: int = MAX_RETRIES,
+        keep_history: bool = False,
+        max_history: int = MAX_HISTORY,
     ):
         self.verbose = verbose
         self.max_retries = max_retries
+        # Conversation memory is opt-in: interactive sessions need it to resolve
+        # follow-ups, batch runs must stay stateless so each query is reproducible.
+        self.keep_history = keep_history
+        self.max_history = max_history
+        self.history: list[dict[str, Any]] = []
         ttl = Path(ttl_path) if ttl_path else DEFAULT_TTL
 
         # ── Step 0: Load KG store (once) ────────────────────────────────────
@@ -80,13 +109,17 @@ class Pipeline:
 
         for attempt in range(1 + self.max_retries):
             # ── Step 1: Semantic Parsing ─────────────────────────────────────
+            history = self.history if self.keep_history else None
             if v:
                 print(f"\n{sep}")
                 if attempt == 0:
                     print(f"[Step 1] Semantic parsing: {query!r}")
+                    if history:
+                        prior = ", ".join(repr(t["query"]) for t in history)
+                        print(f"[Step 1] Context from {len(history)} prior turn(s): {prior}")
                 else:
                     print(f"[Step 1] Retry {attempt}/{self.max_retries} — re-parsing with feedback")
-            intent = parse(query, feedback=feedback)
+            intent = parse(query, feedback=feedback, history=history)
             if v:
                 print("[Step 1] Intent:", json.dumps(intent, indent=2))
 
@@ -137,6 +170,14 @@ class Pipeline:
             print("[Step 3] Answer:")
             print(answer)
 
+        if self.keep_history:
+            self.history.append({
+                "query": query,
+                "intent": intent,
+                "result_summary": _summarize_results(unfolded),
+            })
+            del self.history[:-self.max_history]
+
         return {
             "query":   query,
             "intent":  intent,
@@ -144,3 +185,6 @@ class Pipeline:
             "results": unfolded,
             "answer":  answer,
         }
+
+    def reset_history(self) -> None:
+        self.history.clear()

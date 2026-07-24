@@ -1,14 +1,10 @@
 """
-Step 0 — ARGUS API client + RDF Knowledge Graph builder.
+Step 0 — fetch ARGUS readings and build the SOSA/ARGUS Turtle knowledge graph.
 
-Fetches sensor readings from the ARGUS API, converts them to RDF triples
-using SOSA/ARGUS vocabularies, and stores the result as a Turtle file.
-
-Usage:
-    python scripts/0_readings.py                        # fetch all, full run
-    python scripts/0_readings.py --max-records 500      # limit records
-    python scripts/0_readings.py --resume               # incremental update
-    python scripts/0_readings.py --resume --overlap-pages 3
+    python scripts/0_readings.py                    # full run
+    python scripts/0_readings.py --max-records 500  # limit records
+    python scripts/0_readings.py --resume           # incremental update
+    python scripts/0_readings.py --enrich-geo-only  # only refresh node coordinates
 """
 
 import argparse
@@ -25,7 +21,7 @@ import requests
 from requests.adapters import HTTPAdapter
 from requests.exceptions import RequestException
 from urllib3.util.retry import Retry
-from rdflib import Graph, Literal, Namespace, RDF, URIRef
+from rdflib import Graph, Literal, RDF, URIRef
 from rdflib.namespace import RDFS, XSD
 from ontology_schema import SOSA, ARGUS, EX
 
@@ -48,6 +44,21 @@ MATERIAL_DIR = Path(__file__).resolve().parent.parent / "material"
 
 _node_coords: Dict[str, Dict[str, float]] | None = None
 
+# Site names carry accents (e.g. "Baltanás"), so these CSVs are not always UTF-8.
+# latin-1 decodes any byte, so it is the guaranteed last resort.
+_CSV_ENCODINGS = ("utf-8-sig", "utf-8", "cp1252", "latin-1")
+
+
+def _read_csv_rows(csv_path: Path) -> List[Dict[str, str]]:
+    for encoding in _CSV_ENCODINGS:
+        try:
+            with open(csv_path, newline="", encoding=encoding) as f:
+                return list(csv.DictReader(f))
+        except UnicodeDecodeError:
+            continue
+    print(f"WARNING: could not decode {csv_path} with any of {_CSV_ENCODINGS}; skipping.")
+    return []
+
 
 def _load_node_coords() -> Dict[str, Dict[str, float]]:
     global _node_coords
@@ -55,19 +66,18 @@ def _load_node_coords() -> Dict[str, Dict[str, float]]:
         return _node_coords
     coords: Dict[str, Dict[str, float]] = {}
     for csv_path in sorted(MATERIAL_DIR.glob("ARGUS_nodes_*.csv")):
-        with open(csv_path, newline="", encoding="utf-8") as f:
-            for row in csv.DictReader(f):
-                nid = (row.get("nodeid") or "").strip()
-                if not nid:
-                    continue
-                try:
-                    coords[nid] = {
-                        "latitude": float(row["latitude"]),
-                        "longitude": float(row["longitude"]),
-                        "altitude": float(row["altitude"]),
-                    }
-                except (KeyError, ValueError, TypeError):
-                    continue
+        for row in _read_csv_rows(csv_path):
+            nid = (row.get("nodeid") or "").strip()
+            if not nid:
+                continue
+            try:
+                coords[nid] = {
+                    "latitude": float(row["latitude"]),
+                    "longitude": float(row["longitude"]),
+                    "altitude": float(row["altitude"]),
+                }
+            except (KeyError, ValueError, TypeError):
+                continue
     _node_coords = coords
     return coords
 
@@ -616,6 +626,12 @@ def update_kg(
         pages_since_save += 1
         if pages_since_save >= SAVE_EVERY_PAGES:
             _checkpoint()
+
+    # Coordinates are static per-node metadata, so refresh them for every node in
+    # the graph — not just nodes touched by newly ingested readings. Without this,
+    # a re-run whose readings are all duplicates would never pick up CSV edits.
+    enriched = enrich_existing_nodes(g)
+    print(f"Node coordinates refreshed from CSV: {enriched} node(s)")
 
     _checkpoint()
 

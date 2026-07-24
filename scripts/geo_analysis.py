@@ -1,9 +1,7 @@
 """
-Spatial and temporal analysis helpers.
-
-Pre-computes recency, per-series numeric stats, and — when rows carry node
-coordinates — real spatial metrics (distances, centroid, bounding box, spread),
-so the answer generator reasons over structured analysis rather than raw rows.
+Pre-computed analysis of a result set, so the answer LLM never does the maths:
+recency, per-quantity numeric stats, and spatial metrics when rows carry
+node coordinates. Sections are emitted only when the data supports them.
 """
 
 from __future__ import annotations

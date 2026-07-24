@@ -1,8 +1,7 @@
 """
-Step 3 — Natural Language Answer Generator.
-
-Passes the original query, SPARQL, unfolded results, and pre-computed
-spatial/temporal analysis to the LLM, asking it to reason — not just reformat.
+Step 3 — turn results into an answer. The LLM receives the query, the SPARQL,
+the full result rows and the pre-computed spatial/temporal analysis, and is
+asked to reason over them rather than reformat them.
 """
 
 from __future__ import annotations

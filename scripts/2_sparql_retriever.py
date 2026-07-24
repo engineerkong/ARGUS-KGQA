@@ -1,13 +1,8 @@
 """
-Step 2 — SPARQL Retriever + Result Unfolding.
+Step 2 — intent → SPARQL → results, with resource URIs unfolded into labels.
 
-Converts a parsed intent (from 1_semantic_parser) into a SPARQL SELECT query,
-executes it against the rdflib graph, and returns results as a list of dicts.
-URI values are then unfolded by following their linked properties in the graph,
-replacing opaque resource URIs with human-readable labels and values.
-
-All class/property mappings are derived from the OWL ontology files
-via ontology_schema — no hardcoded schema knowledge here.
+Class and property mappings come from the OWL files via ontology_schema, so
+there is no hardcoded schema knowledge here.
 """
 
 from __future__ import annotations
@@ -80,27 +75,22 @@ def _filter_expr(fvar: str, op: str, val: str) -> str:
 
 
 def _type_check_redundant(jclass: str, via: str, direction: str) -> bool:
-    """True when the join edge itself already pins the join variable's class.
-
-    An outgoing edge constrains its object to the property's range; an incoming
-    edge constrains its subject to the domain. When that matches the join class,
-    an extra `?var a <Class>` triple filters nothing — but rdflib joins it as a
-    low-selectivity rdf:type pattern and the query cost explodes (measured: one
-    such triple took a 0.05s query to 19s on a 24k-triple graph, with an
-    identical result set).
-    """
+    # True when the join edge already pins the join variable's class, making an
+    # extra `?var a <Class>` triple a no-op filter. Worth skipping: rdflib treats
+    # it as a low-selectivity rdf:type pattern — measured 0.05s → 19s on a 24k
+    # triple graph for an identical result set.
     via_short = _strip_prefix(via)
     implied = (PROP_RANGE.get(via_short) if direction == "outgoing"
                else PROP_DOMAIN.get(via_short))
     return implied is not None and implied == _strip_prefix(jclass)
 
 
-def _resolve_group_var(raw: str, joins: list) -> str:
-    """Resolve a group_by or order_by name to the SPARQL variable name.
-
-    Accepts both the qualified form ("Site.label" → "site_label") and the
-    legacy bare form ("label" — resolved by scanning join return_properties).
-    """
+def _resolve_group_var(raw: str | None, joins: list) -> str:
+    # Qualified form ("Site.label" → "site_label") or bare form ("label",
+    # resolved by scanning join return_properties). Empty when unset: an
+    # aggregation with no group_by is a valid ungrouped total.
+    if not raw:
+        return ""
     if "." in raw:
         cls, prop = raw.split(".", 1)
         return _var(cls, prop)
@@ -228,7 +218,10 @@ def _build_subquery_sparql(
             prop = f.get("property", "")
             val  = f.get("value", "")
             op   = f.get("op", "contains")
-            fvar = f"?_jf_{_var(prop)}"
+            # Scope the filter variable to the join class: two joins filtering on
+            # the same property name (e.g. Site.label and ObservedProperty.label)
+            # would otherwise share one variable and force both values to be equal.
+            fvar = f"?_jf_{_var(jclass, prop)}"
             outer_lines.append(f"    {jvar} {_prop(prop)} {fvar} .")
             outer_lines.append("    " + _filter_expr(fvar, op, val))
 
@@ -288,8 +281,6 @@ def build_sparql(intent: dict) -> str:
         return _build_subquery_sparql(
             target_class, target_var, filters, return_props, joins, order_by, limit
         )
-
-    target_var = "?" + target_class.lower()
 
     # ── SELECT variables ─────────────────────────────────────────────────
     # For ObservationCollection the target URI is an opaque internal hash —
@@ -393,7 +384,10 @@ def build_sparql(intent: dict) -> str:
             prop = f.get("property", "")
             val  = f.get("value", "")
             op   = f.get("op", "contains")
-            fvar = f"?_jf_{_var(prop)}"
+            # Scope the filter variable to the join class: two joins filtering on
+            # the same property name (e.g. Site.label and ObservedProperty.label)
+            # would otherwise share one variable and force both values to be equal.
+            fvar = f"?_jf_{_var(jclass, prop)}"
             lines.append(f"    {jvar} {_prop(prop)} {fvar} .")
             lines.append("    " + _filter_expr(fvar, op, val))
 
@@ -436,14 +430,17 @@ def build_sparql(intent: dict) -> str:
         else:
             agg_target = target_var
 
-        group_var = "?" + _resolve_group_var(aggregation.get("group_by", ""), joins)
+        group_name = _resolve_group_var(aggregation.get("group_by"), joins)
+        group_var = f"?{group_name}" if group_name else ""
 
         agg_var = f"?{agg_type.lower()}"
 
         use_distinct = aggregation.get("distinct", agg_type == "COUNT")
         distinct_kw = "DISTINCT " if use_distinct else ""
-        select_clause = f"SELECT {group_var} ({agg_type}({distinct_kw}{agg_target}) AS {agg_var})"
-        group_clause = f"\nGROUP BY {group_var}"
+        agg_expr = f"({agg_type}({distinct_kw}{agg_target}) AS {agg_var})"
+        # No group_by → a single ungrouped total, so no GROUP BY clause.
+        select_clause = f"SELECT {group_var} {agg_expr}" if group_var else f"SELECT {agg_expr}"
+        group_clause = f"\nGROUP BY {group_var}" if group_var else ""
     else:
         select_clause = "SELECT DISTINCT " + " ".join(select_vars)
         group_clause = ""

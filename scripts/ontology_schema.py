@@ -1,17 +1,13 @@
 """
-Dynamically extract ontology metadata from OWL files.
-
-Provides:
-  - Shared RDF namespaces (SOSA, ARGUS, EX, PANOPTES)
-  - Structured maps for the SPARQL builder (class_map, prop_map, etc.)
-  - Human-readable schema text + graph connectivity for the LLM prompt
+Ontology metadata extracted from the OWL files: shared namespaces, structured
+maps for the SPARQL builder, and schema text for the LLM prompt.
 """
 
 from __future__ import annotations
 
 from pathlib import Path
 from rdflib import Graph, Namespace, URIRef
-from rdflib.namespace import OWL, RDF, RDFS, XSD
+from rdflib.namespace import OWL, RDF, RDFS
 
 # ── Shared namespaces ────────────────────────────────────────────────────────
 
