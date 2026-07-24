@@ -1,7 +1,7 @@
 """
 Inspect raw ARGUS readings before they become ontology triples, reusing the real
-0_readings functions so the output matches actual ingestion. Reads the JSONL
-sidecar offline by default; --source api fetches live.
+0a_offline_readings functions so the output matches actual ingestion. Reads the
+JSONL sidecar offline by default; --source api fetches live.
 
     python scripts/test_readings.py --limit 10 --show-triples
     python scripts/test_readings.py --stats-only --limit 500
@@ -16,7 +16,7 @@ from typing import Any, Dict, Iterator, List
 
 from rdflib import Graph
 
-_rd = importlib.import_module("0_readings")
+_rd = importlib.import_module("0a_offline_readings")
 from ontology_schema import ARGUS  # noqa: E402
 
 
@@ -38,7 +38,7 @@ def _load_from_ttl(limit: int | None) -> Iterator[Dict[str, Any]]:
     ttl = _rd.TTL_FILE
     if not ttl.exists():
         raise SystemExit(f"No raw readings found: neither {jsonl} nor {ttl} exists. "
-                         "Run 0_readings.py first, or use --source api.")
+                         "Run 0a_offline_readings.py first, or use --source api.")
     g = Graph()
     g.parse(str(ttl), format="turtle")
     n = 0

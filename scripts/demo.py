@@ -1,7 +1,8 @@
 """
 Demo runner for the ARGUS KGQA pipeline.
 
-Needs data (0_readings.py) and an LLM endpoint (OPENAI_API_KEY,
+Needs data (0a_offline_readings.py, or ARGUS_SPARQL_ENDPOINT pointed at Ontop)
+and an LLM endpoint (OPENAI_API_KEY,
 OLLAMA_BASE_URL, OLLAMA_MODEL).
 
     python scripts/demo.py           # preset queries, no conversation history

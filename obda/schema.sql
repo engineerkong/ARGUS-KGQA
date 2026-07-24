@@ -60,6 +60,13 @@ CREATE INDEX IF NOT EXISTS observations_reading_idx ON observations (reading_id)
 CREATE INDEX IF NOT EXISTS observations_property_idx ON observations (property_id);
 CREATE INDEX IF NOT EXISTS observations_time_idx     ON observations (result_time);
 
+-- Bookkeeping for scripts/0b_online_ingest.py's live loop (e.g. last API page
+-- successfully processed). Not part of the RDF the pipeline queries.
+CREATE TABLE IF NOT EXISTS ingest_state (
+    key   TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+);
+
 -- Scaling note: for very large deployments make observations a TimescaleDB
 -- hypertable — SELECT create_hypertable('observations','result_time') — and add
 -- continuous aggregates for per-site/per-property hourly stats. Plain Postgres

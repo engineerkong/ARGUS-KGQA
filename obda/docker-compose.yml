@@ -2,10 +2,15 @@
 # The pipeline points at it with ARGUS_SPARQL_ENDPOINT — no code change.
 #
 #   1. docker compose -f obda/docker-compose.yml up -d postgres
-#   2. python scripts/4_load_postgres.py            # create schema + load data
+#   2. python scripts/0b_online_ingest.py --once     # create schema + first load
 #   3. docker compose -f obda/docker-compose.yml up -d ontop
 #   4. export ARGUS_SPARQL_ENDPOINT=http://localhost:8081/sparql
 #      python scripts/demo.py
+#
+# Live data: `docker compose -f obda/docker-compose.yml up -d ingest` runs
+# scripts/0b_online_ingest.py on a loop (ARGUS_INGEST_INTERVAL seconds, default
+# 3600), pulling straight from the ARGUS API into Postgres — no local files —
+# so Postgres, and therefore Ontop's endpoint, stays current without a restart.
 
 services:
   postgres:
@@ -35,6 +40,21 @@ services:
       - ./argus.obda:/opt/ontop/input/argus.obda:ro
       - ./argus.properties:/opt/ontop/input/argus.properties:ro
       - ./jdbc:/opt/ontop/jdbc:ro
+
+  ingest:
+    build:
+      context: ..
+      dockerfile: obda/ingest.Dockerfile
+    depends_on:
+      - postgres
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      ARGUS_PG_DSN: postgresql://argus:argus@host.docker.internal:5432/argus
+      ARGUS_INGEST_INTERVAL: "3600"
+    volumes:
+      - ../material:/app/material    # node-coordinate CSVs; Postgres holds everything else
+    restart: unless-stopped
 
 volumes:
   argus_pg:

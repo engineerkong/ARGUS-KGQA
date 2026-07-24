@@ -54,7 +54,7 @@ def main() -> None:
     print("[2] Is any data loaded?")
     code, body = _raw("SELECT (COUNT(*) AS ?n) WHERE { ?s ?p ?o }")
     print(f"    {body[:200]}")
-    print("    → If count is 0, run `python scripts/4_load_postgres.py` first.\n")
+    print("    → If count is 0, run `python scripts/0b_online_ingest.py --once` first.\n")
 
     print("[3] Through the pipeline's backend (rdflib SPARQLStore)")
     be = __import__("backend")

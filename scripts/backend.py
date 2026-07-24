@@ -102,6 +102,10 @@ class RemoteSparqlBackend(Backend):
         return self._cache.get(uri, [])
 
     def describe(self) -> str:
+        rows = self.query("SELECT (COUNT(*) AS ?n) WHERE { ?s ?p ?o }")
+        if rows and "error" not in rows[0]:
+            n = next(iter(rows[0].values()))
+            return f"remote SPARQL endpoint — {self.endpoint} — {int(n):,} triples"
         return f"remote SPARQL endpoint — {self.endpoint}"
 
 

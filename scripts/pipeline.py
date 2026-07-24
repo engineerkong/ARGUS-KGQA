@@ -97,7 +97,7 @@ class Pipeline:
         endpoint = sparql_endpoint or os.environ.get("ARGUS_SPARQL_ENDPOINT")
         if not endpoint and not ttl.exists():
             print(f"[Step 0] WARNING: TTL file not found: {ttl}")
-            print("[Step 0] Run `python scripts/0_readings.py --max-records 500` to fetch data first.")
+            print("[Step 0] Run `python scripts/0a_offline_readings.py --max-records 500` to fetch data first.")
         self.backend = make_backend(ttl_path=ttl, endpoint=endpoint)
         if self.verbose:
             print(f"[Step 0] Backend ready — {self.backend.describe()}.")

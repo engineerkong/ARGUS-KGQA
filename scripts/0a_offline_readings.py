@@ -1,10 +1,12 @@
 """
-Step 0 — fetch ARGUS readings and build the SOSA/ARGUS Turtle knowledge graph.
+Step 0a — fetch ARGUS readings and build a local SOSA/ARGUS Turtle knowledge
+graph, for the dev-mode RdflibBackend. For a live deployment against Postgres +
+Ontop, use 0b_online_ingest.py instead.
 
-    python scripts/0_readings.py                    # full run
-    python scripts/0_readings.py --max-records 500  # limit records
-    python scripts/0_readings.py --resume           # incremental update
-    python scripts/0_readings.py --enrich-geo-only  # only refresh node coordinates
+    python scripts/0a_offline_readings.py                    # full run
+    python scripts/0a_offline_readings.py --max-records 500  # limit records
+    python scripts/0a_offline_readings.py --resume           # incremental update
+    python scripts/0a_offline_readings.py --enrich-geo-only  # only refresh node coordinates
 """
 
 import argparse
