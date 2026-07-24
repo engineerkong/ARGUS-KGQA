@@ -19,7 +19,7 @@ docker compose -f obda/docker-compose.yml up -d ingest
 docker compose -f obda/docker-compose.yml up -d ontop
 
 export ARGUS_SPARQL_ENDPOINT=http://localhost:8081/sparql
-export OPENAI_API_KEY="your_fraunhofer_api_key"
+export OPENAI_API_KEY="your_fraunhofer_api_key" # sk-39f498e276294f96a8cefdf9ac16fa12 (temporary)
 python scripts/demo.py --online
 ```
 
