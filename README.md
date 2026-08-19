@@ -5,7 +5,7 @@ the SOSA/ARGUS RDF vocabularies. A question is parsed into a structured intent,
 compiled to SPARQL, executed against a knowledge graph, and turned into a concise
 answer — with the statistics computed *in the query*, not guessed by the LLM.
 
-Default LLM endpoint: `https://ollama.fit.fraunhofer.de/api`, model `gpt-oss:120b`.
+Default LLM endpoint: `https://ollama.fit.fraunhofer.de/api`, model `qwen3.6:35b`.
 
 ## Requirements
 
@@ -282,7 +282,7 @@ Grouped by the capability they exercise:
 |----------|---------|-------------|
 | `OLLAMA_BASE_URL` | `https://ollama.fit.fraunhofer.de/api` | LLM API endpoint |
 | `OPENAI_API_KEY` | `no-key` | API key for the LLM endpoint |
-| `OLLAMA_MODEL` | `gpt-oss:120b` | Model name |
+| `OLLAMA_MODEL` | `qwen3.6:35b` | Model name |
 | `ARGUS_SPARQL_ENDPOINT` | *(unset → local TTL)* | Remote SPARQL endpoint (Ontop) |
 | `ARGUS_TTL_PATH` | `data/argus_readings.ttl` | Local graph file |
 | `ARGUS_PG_DSN` | `postgresql://argus:argus@localhost:5432/argus` | Postgres DSN for `0b_online_ingest.py` |

@@ -12,7 +12,7 @@ from ontology_schema import get_ontology_schema, extract_class_list
 
 BASE_URL = os.environ.get("OLLAMA_BASE_URL", "https://ollama.fit.fraunhofer.de/api")
 API_KEY  = os.environ.get("OPENAI_API_KEY", "no-key")
-MODEL    = os.environ.get("OLLAMA_MODEL", "gpt-oss:120b")
+MODEL    = os.environ.get("OLLAMA_MODEL", "qwen3.6:35b")
 
 # The SDK default is a 600s timeout with silent retries, so a stalled endpoint
 # hangs the pipeline for many minutes with no output.

@@ -20,7 +20,7 @@ from openai import OpenAI
 
 BASE_URL = os.environ.get("OLLAMA_BASE_URL", "https://ollama.fit.fraunhofer.de/api")
 API_KEY  = os.environ.get("OPENAI_API_KEY", "no-key")
-MODEL    = os.environ.get("OLLAMA_MODEL", "gpt-oss:120b")
+MODEL    = os.environ.get("OLLAMA_MODEL", "qwen3.6:35b")
 TIMEOUT  = float(os.environ.get("ARGUS_LLM_TIMEOUT", "120"))
 
 PROMPT = "Reply with the single word: pong."
