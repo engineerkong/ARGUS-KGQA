@@ -46,13 +46,14 @@ BACKUP_FILE = DATA_DIR / "argus_readings.backup.ttl"
 RAW_JSONL_FILE = DATA_DIR / "argus_readings_raw.jsonl"
 KEEP_RAW_JSON_IN_GRAPH = os.environ.get("ARGUS_KEEP_RAW_JSON", "") == "1"
 
-# Per-node coordinates live in material/ARGUS_nodes_<site>.csv (site,nodeid,
-# latitude,longitude,altitude). Drop a new CSV per site — no code change needed.
+# Per-node coordinates live in material/ARGUS_nodes.csv (site,nodeid,
+# latitude,longitude,altitude), one row per node across all sites.
 MATERIAL_DIR = Path(__file__).resolve().parent.parent / "material"
+NODES_CSV = MATERIAL_DIR / "ARGUS_nodes.csv"
 
 _node_coords: Dict[str, Dict[str, float]] | None = None
 
-# Site names carry accents (e.g. "Baltanás"), so these CSVs are not always UTF-8.
+# Site names carry accents (e.g. "Baltanás"), so this CSV is not always UTF-8.
 # latin-1 decodes any byte, so it is the guaranteed last resort.
 _CSV_ENCODINGS = ("utf-8-sig", "utf-8", "cp1252", "latin-1")
 
@@ -73,19 +74,18 @@ def _load_node_coords() -> Dict[str, Dict[str, float]]:
     if _node_coords is not None:
         return _node_coords
     coords: Dict[str, Dict[str, float]] = {}
-    for csv_path in sorted(MATERIAL_DIR.glob("ARGUS_nodes_*.csv")):
-        for row in _read_csv_rows(csv_path):
-            nid = (row.get("nodeid") or "").strip()
-            if not nid:
-                continue
-            try:
-                coords[nid] = {
-                    "latitude": float(row["latitude"]),
-                    "longitude": float(row["longitude"]),
-                    "altitude": float(row["altitude"]),
-                }
-            except (KeyError, ValueError, TypeError):
-                continue
+    for row in _read_csv_rows(NODES_CSV):
+        nid = (row.get("nodeid") or "").strip()
+        if not nid:
+            continue
+        try:
+            coords[nid] = {
+                "latitude": float(row["latitude"]),
+                "longitude": float(row["longitude"]),
+                "altitude": float(row["altitude"]),
+            }
+        except (KeyError, ValueError, TypeError):
+            continue
     _node_coords = coords
     return coords
 
@@ -712,7 +712,7 @@ def main() -> None:
     parser.add_argument("--overlap-pages", type=int, default=2,
                         help="Pages to re-fetch when resuming (default: 2).")
     parser.add_argument("--enrich-geo-only", action="store_true",
-                        help="Attach node coordinates from material/ARGUS_nodes_*.csv "
+                        help="Attach node coordinates from material/ARGUS_nodes.csv "
                              "to the existing TTL and exit (no API fetch).")
     parser.add_argument("--strip-raw-json", action="store_true",
                         help="Remove argus:rawJson literals from the existing TTL "
@@ -733,7 +733,7 @@ def main() -> None:
         g = load_graph()
         n = enrich_existing_nodes(g)
         save_graph(g)
-        print(f"Enriched {n} node(s) with coordinates from {MATERIAL_DIR}/ARGUS_nodes_*.csv")
+        print(f"Enriched {n} node(s) with coordinates from {NODES_CSV}")
         return
 
     update_kg(

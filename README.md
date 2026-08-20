@@ -147,6 +147,44 @@ python scripts/0a_offline_readings.py --resume            # incremental update
 python scripts/0a_offline_readings.py --enrich-geo-only   # refresh node coordinates from CSV
 ```
 
+### Refreshing node coordinates
+
+Node lat/long/altitude come from `material/ARGUS_nodes.csv` (`site,nodeid,
+latitude,longitude,altitude` — one row per node, all sites). Updating that CSV
+does **not** retroactively update either backend by itself — pick the method
+that matches how you're running the pipeline:
+
+**Method 1 — Postgres + Ontop (`ARGUS_SPARQL_ENDPOINT` set).** New nodes get
+coordinates automatically on their first `0b_online_ingest.py` insert, but
+nodes already in the `nodes` table are skipped (`ON CONFLICT DO NOTHING`), so
+existing rows need a one-off backfill from the CSV, e.g.:
+
+```bash
+docker exec -i <postgres-container> psql -U argus -d argus <<'SQL'
+UPDATE nodes n SET latitude = c.latitude, longitude = c.longitude, altitude = c.altitude
+FROM (VALUES ('<node_id>', <lat>, <lon>, <alt>), ...) AS c(node_id, latitude, longitude, altitude)
+WHERE n.node_id = c.node_id;
+SQL
+```
+(generate the `VALUES` rows from `material/ARGUS_nodes.csv`). Ontop queries
+Postgres live, so the fix is visible immediately — no restart needed.
+
+**Method 2 — local TTL snapshot (`ARGUS_SPARQL_ENDPOINT` unset).**
+
+```bash
+python scripts/0a_offline_readings.py --enrich-geo-only
+```
+
+This attaches coordinates from `material/ARGUS_nodes.csv` to the nodes already
+in `data/argus_readings.ttl` and exits (no API fetch). It also writes
+`data/argus_readings.backup.ttl` first — if that file is owned by a different
+user (e.g. left over from a `sudo`/root run), the write fails with
+`PermissionError`; fix with:
+
+```bash
+sudo chown "$USER" data/argus_readings.backup.ttl
+```
+
 ## Handling large result sets
 
 - **Aggregate first (a correctness rule, not an optimisation).** For any statistic
@@ -168,8 +206,8 @@ prompt. Sections appear only when the data supports them:
 - **Temporal** — full-timestamp recency (not day-rounded): newest, oldest, span.
 - **Spatial** — when rows carry node coordinates: centroid, bounding box, altitude
   range, and haversine **distances** (nearest / farthest pairs). Node coordinates
-  come from `material/ARGUS_nodes_<site>.csv`, attached to `argus:Node` instances
-  at ingest time — drop a new CSV per site, no code change.
+  come from `material/ARGUS_nodes.csv`, attached to `argus:Node` instances at
+  ingest time — see [Refreshing node coordinates](#refreshing-node-coordinates).
 - **Numeric** — min/max/avg **grouped by observed property**, so a temperature range
   is never mixed with voltages into one meaningless figure.
 
@@ -256,7 +294,7 @@ sosa:ObservationCollection          ← one API reading record
 | `scripts/test_llm.py` | Measure LLM endpoint latency |
 | `scripts/ontology_schema.py` | Parses the OWL files; single source of schema truth |
 | `material/panoptes3.owl`, `panoptes3_extension.owl` | Core + extension ontologies |
-| `material/ARGUS_nodes_<site>.csv` | Per-node coordinates (lat/long/altitude) |
+| `material/ARGUS_nodes.csv` | Per-node coordinates (site,nodeid,lat/long/altitude — all sites) |
 | `obda/` | Ontop OBDA setup — schema, mapping, connection, compose |
 
 Generated data (in `data/`, gitignored, dev-only): `argus_readings.ttl` (graph),
