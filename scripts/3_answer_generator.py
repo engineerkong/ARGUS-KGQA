@@ -49,6 +49,12 @@ Statistics:
 - When the query already computed an aggregate (a count/avg/min/max/sum column), report that value — it is the authoritative one.
 - Otherwise the rows are a de-duplicated listing, so do NOT compute an average, total or record count from them; give the values, ranges or examples the rows support and leave it there.
 - With many rows, summarise and name a few representative examples rather than enumerating everything.
+
+AD-RT rule check (when present in the prompt):
+- If a message includes a section starting "AD-RT rule check", that verdict (EXCEEDS/within a threshold) was computed in Python, not by you — report it as-is, do NOT recompute or second-guess it by comparing raw numbers yourself.
+- If that section says no policy was found for the site/quantity, say plainly that no AD-RT threshold is defined for it — do not guess whether the value is anomalous.
+- If the question asks about anomalies/thresholds/exceedances but no such section is present, say the AD-RT rule check could not be run for this question rather than inventing a judgement from the raw rows.
+- If the prompt says "This is a yes/no anomaly check", START with "Yes."/"No."/"Cannot be determined." (Yes if ANY listed rule fired), then give the supporting numbers and, if multiple rules were checked, which fired.
 """
 
 
@@ -69,7 +75,8 @@ def prompt_row_stats(results: list) -> tuple[int, int]:
     return len(deduped), len(json.dumps(deduped, indent=2, ensure_ascii=False))
 
 
-def generate(query: str, sparql: str, results: list) -> str:
+def generate(query: str, sparql: str, results: list, ad_rt_summary: str | None = None,
+             anomaly_check: bool = False, verbose: bool = False) -> str:
     client = _get_client()
 
     analysis = analyze(results)
@@ -83,6 +90,16 @@ def generate(query: str, sparql: str, results: list) -> str:
         f"Pre-computed spatial & temporal analysis:\n"
         f"{analysis['summary_text']}"
     )
+    if verbose:
+        print(f"[Step 3] Pre-computed spatial & temporal analysis:\n{analysis['summary_text']}")
+
+    # AD-RT expert-rule threshold check — precomputed by the caller (Step 2b,
+    # see pipeline.py) and just passed through here; Step 3 only assembles the
+    # prompt and asks the model to report it, never queries or computes it.
+    if ad_rt_summary:
+        user_msg += f"\n\n{ad_rt_summary}"
+        if anomaly_check:
+            user_msg += "\n\n(This is a yes/no anomaly check — lead your answer with Yes/No/Cannot be determined.)"
 
     response = client.chat.completions.create(
         model=MODEL,

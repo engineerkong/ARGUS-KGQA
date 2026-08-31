@@ -25,7 +25,7 @@ from requests.exceptions import RequestException
 from urllib3.util.retry import Retry
 from rdflib import Graph, Literal, RDF, URIRef
 from rdflib.namespace import RDFS, XSD
-from ontology_schema import SOSA, ARGUS, EX
+from ontology_schema import SOSA, ARGUS, EX, PANOPTES
 
 
 # ---------------------------------------------------------------------------
@@ -104,12 +104,23 @@ def _add_node_coords(g: Graph, node_uri: URIRef, node_id: str) -> None:
 # ---------------------------------------------------------------------------
 
 BASE_URL = os.environ.get("ARGUS_API_URL", "http://api.argusservices.athenarc.gr/api/readings")
+API_ROOT = BASE_URL.rsplit("/", 1)[0]  # .../api/readings -> .../api
 
 API_HEADERS = {"Accept": "application/json"}
 REQUEST_TIMEOUT = (10, 180)
 PAGE_SLEEP_SECONDS = 0.5
 MAX_CONSECUTIVE_FAILURES = 20
 SAVE_EVERY_PAGES = 50
+
+# Governance/context endpoints (small, non-paginated-heavy reference data —
+# refetched in full each run and upserted by API id, unlike the append-only
+# readings stream). "threats" and "policies" mirror the AD-RT expert-rule
+# thresholds (RT/rules.py); "assets" are the 5 pilot heritage sites.
+GOVERNANCE_ENDPOINTS = ["threats", "policies", "decisions", "assets"]
+
+# Known pilot site slugs, matching RT/realtime_monitor.py SITES and the
+# argus:Site individuals minted by add_reading_to_graph().
+KNOWN_PILOT_SITES = ["delos", "baltanas", "lucretili", "ranverso", "schenkenberg"]
 
 
 # ---------------------------------------------------------------------------
@@ -178,6 +189,23 @@ def _parse_paginated(payload: Dict[str, Any], fallback_page: int) -> Tuple[List[
     total = meta.get("total")
     records = [item for item in data if isinstance(item, dict)]
     return records, current_page, last_page, total
+
+
+def fetch_all_records(session: requests.Session, url: str) -> List[Dict[str, Any]]:
+    """Fetch every page of a small paginated endpoint (threats/policies/decisions/assets)."""
+    records: List[Dict[str, Any]] = []
+    page = 1
+    while True:
+        response = session.get(url, headers=API_HEADERS, params={"page": page}, timeout=REQUEST_TIMEOUT)
+        response.raise_for_status()
+        payload = response.json()
+        page_records, current_page, last_page, _ = _parse_paginated(payload, page)
+        records.extend(page_records)
+        if current_page >= last_page:
+            break
+        page = current_page + 1
+        time.sleep(PAGE_SLEEP_SECONDS)
+    return records
 
 
 def fetch_readings_paginated(
@@ -566,6 +594,129 @@ def add_reading_to_graph(g: Graph, reading: Dict[str, Any]) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Governance data (threats / policies / decisions / assets)
+# ---------------------------------------------------------------------------
+
+def _parse_metadata(record: Dict[str, Any]) -> Dict[str, Any]:
+    raw = record.get("metadata")
+    if isinstance(raw, dict):
+        return raw
+    if isinstance(raw, str) and raw.strip():
+        try:
+            return json.loads(raw)
+        except json.JSONDecodeError:
+            return {}
+    return {}
+
+
+def _match_pilot_site(*texts: Optional[str]) -> Optional[str]:
+    """Find a known pilot slug (delos, baltanas, ...) mentioned in any of the given texts."""
+    haystack = " ".join(_safe_text(t, "") for t in texts).lower()
+    for slug in KNOWN_PILOT_SITES:
+        if slug in haystack:
+            return slug
+    return None
+
+
+def _remove_subject(g: Graph, subject: URIRef) -> None:
+    # Governance records are mutable reference data (thresholds can change),
+    # so re-ingesting is an upsert by API id, not append-only like readings.
+    g.remove((subject, None, None))
+
+
+def add_threat_to_graph(g: Graph, record: Dict[str, Any]) -> URIRef:
+    uri = EX[f"threat/{record['id']}"]
+    _remove_subject(g, uri)
+    md = _parse_metadata(record)
+
+    g.add((uri, RDF.type, PANOPTES.Threat))
+    g.add((uri, RDFS.label, Literal(_safe_text(record.get("name")))))
+    _add_literal(g, uri, ARGUS.threatDescription, record.get("description"))
+    _add_literal(g, uri, ARGUS.threatLevel, md.get("level"))
+    return uri
+
+
+def add_policy_to_graph(g: Graph, record: Dict[str, Any]) -> URIRef:
+    uri = EX[f"policy/{record['id']}"]
+    _remove_subject(g, uri)
+    md = _parse_metadata(record)
+
+    g.add((uri, RDF.type, PANOPTES.Policy))
+    g.add((uri, RDFS.label, Literal(_safe_text(record.get("name")))))
+    _add_literal(g, uri, ARGUS.policyDescription, record.get("description"))
+    _add_literal(g, uri, ARGUS.ruleId, md.get("rule"))
+    _add_literal(g, uri, ARGUS.threatName, md.get("threat_name"))
+
+    thresholds = md.get("threshold_overrides")
+    if isinstance(thresholds, dict) and thresholds:
+        if len(thresholds) == 1:
+            (_, value), = thresholds.items()
+            if isinstance(value, (int, float)):
+                _add_literal(g, uri, ARGUS.thresholdValue, value, XSD.decimal)
+        _add_literal(g, uri, ARGUS.thresholdJson,
+                     json.dumps(thresholds, ensure_ascii=False, sort_keys=True))
+
+    pilot = md.get("pilot") or _match_pilot_site(record.get("name"), record.get("description"))
+    if pilot:
+        g.add((uri, ARGUS.appliesToSite, EX[f"site/{_make_uri_part(pilot)}"]))
+    return uri
+
+
+def add_decision_to_graph(g: Graph, record: Dict[str, Any]) -> URIRef:
+    uri = EX[f"decision/{record['id']}"]
+    _remove_subject(g, uri)
+    md = _parse_metadata(record)
+
+    g.add((uri, RDF.type, PANOPTES.Decision))
+    g.add((uri, RDFS.label, Literal(_safe_text(record.get("name")))))
+    _add_literal(g, uri, ARGUS.decisionDescription, record.get("description") or md.get("recommendation"))
+    _add_literal(g, uri, ARGUS.urgency, md.get("urgency"))
+    return uri
+
+
+def add_asset_to_graph(g: Graph, record: Dict[str, Any]) -> URIRef:
+    uri = EX[f"asset/{record['id']}"]
+    _remove_subject(g, uri)
+    md = _parse_metadata(record)
+
+    g.add((uri, RDF.type, PANOPTES.Asset))
+    g.add((uri, RDFS.label, Literal(_safe_text(record.get("name")))))
+    _add_literal(g, uri, ARGUS.assetDescription, record.get("description"))
+    _add_literal(g, uri, ARGUS.assetCode, md.get("code"))
+    _add_literal(g, uri, ARGUS.pilotNumber, md.get("pilot_number"), XSD.integer)
+    _add_literal(g, uri, ARGUS.sourceUrl, md.get("source_url"))
+    _add_literal(g, uri, ARGUS.country, md.get("country"))
+
+    pilot = _match_pilot_site(md.get("code"), record.get("name"))
+    if pilot:
+        g.add((uri, ARGUS.atSite, EX[f"site/{_make_uri_part(pilot)}"]))
+    return uri
+
+
+_GOVERNANCE_ADDERS = {
+    "threats": add_threat_to_graph,
+    "policies": add_policy_to_graph,
+    "decisions": add_decision_to_graph,
+    "assets": add_asset_to_graph,
+}
+
+
+def ingest_governance(g: Graph, session: Optional[requests.Session] = None) -> Dict[str, int]:
+    """Fetch threats/policies/decisions/assets and upsert them into the graph."""
+    session = session or _make_session()
+    counts: Dict[str, int] = {}
+    for endpoint in GOVERNANCE_ENDPOINTS:
+        url = f"{API_ROOT}/{endpoint}"
+        records = fetch_all_records(session, url)
+        adder = _GOVERNANCE_ADDERS[endpoint]
+        for record in records:
+            adder(g, record)
+        counts[endpoint] = len(records)
+        print(f"Governance: {endpoint} -> {len(records)} record(s)")
+    return counts
+
+
+# ---------------------------------------------------------------------------
 # Graph I/O
 # ---------------------------------------------------------------------------
 
@@ -615,6 +766,7 @@ def update_kg(
     start_page: int = 1,
     resume: bool = False,
     overlap_pages: int = 2,
+    skip_governance: bool = False,
 ) -> None:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -684,6 +836,9 @@ def update_kg(
     enriched = enrich_existing_nodes(g)
     print(f"Node coordinates refreshed from CSV: {enriched} node(s)")
 
+    if not skip_governance:
+        ingest_governance(g)
+
     _checkpoint()
 
     print()
@@ -717,7 +872,20 @@ def main() -> None:
     parser.add_argument("--strip-raw-json", action="store_true",
                         help="Remove argus:rawJson literals from the existing TTL "
                              "and exit. Raw payloads stay available in the JSONL sidecar.")
+    parser.add_argument("--governance-only", action="store_true",
+                        help="Fetch/upsert threats, policies, decisions and assets "
+                             "into the existing TTL and exit (no readings fetch).")
+    parser.add_argument("--skip-governance", action="store_true",
+                        help="Skip fetching threats/policies/decisions/assets during "
+                             "a normal readings update.")
     args = parser.parse_args()
+
+    if args.governance_only:
+        g = load_graph()
+        counts = ingest_governance(g)
+        save_graph(g)
+        print(f"Governance upsert complete: {counts}")
+        return
 
     if args.strip_raw_json:
         g = load_graph()
@@ -741,6 +909,7 @@ def main() -> None:
         start_page=args.start_page,
         resume=args.resume,
         overlap_pages=args.overlap_pages,
+        skip_governance=args.skip_governance,
     )
 
 

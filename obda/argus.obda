@@ -1,9 +1,10 @@
 [PrefixDeclaration]
-sosa:   http://www.w3.org/ns/sosa/
-argus:  http://www.argus-project.eu/ontology/
-ex:     http://www.argus-project.eu/resource/
-rdfs:   http://www.w3.org/2000/01/rdf-schema#
-xsd:    http://www.w3.org/2001/XMLSchema#
+sosa:     http://www.w3.org/ns/sosa/
+argus:    http://www.argus-project.eu/ontology/
+panoptes: http://www.argus-project.eu/panoptes#
+ex:       http://www.argus-project.eu/resource/
+rdfs:     http://www.w3.org/2000/01/rdf-schema#
+xsd:      http://www.w3.org/2001/XMLSchema#
 
 [MappingDeclaration] @collection [[
 
@@ -55,5 +56,85 @@ target      ex:observation/{observation_id} a sosa:Observation ;
             sosa:resultTime {result_time}^^xsd:dateTime ; argus:unit {unit} .
 source      SELECT observation_id, property_id, value_text, result_time, unit
                    FROM observations WHERE value_text IS NOT NULL
+
+mappingId   threat
+target      ex:threat/{threat_id} a panoptes:Threat ; rdfs:label {label} .
+source      SELECT threat_id, label FROM threats
+
+mappingId   threat_description
+target      ex:threat/{threat_id} argus:threatDescription {description} .
+source      SELECT threat_id, description FROM threats WHERE description IS NOT NULL
+
+mappingId   threat_level
+target      ex:threat/{threat_id} argus:threatLevel {threat_level} .
+source      SELECT threat_id, threat_level FROM threats WHERE threat_level IS NOT NULL
+
+mappingId   policy
+target      ex:policy/{policy_id} a panoptes:Policy ; rdfs:label {label} .
+source      SELECT policy_id, label FROM policies
+
+mappingId   policy_description
+target      ex:policy/{policy_id} argus:policyDescription {description} .
+source      SELECT policy_id, description FROM policies WHERE description IS NOT NULL
+
+mappingId   policy_rule_id
+target      ex:policy/{policy_id} argus:ruleId {rule_id} .
+source      SELECT policy_id, rule_id FROM policies WHERE rule_id IS NOT NULL
+
+mappingId   policy_threat_name
+target      ex:policy/{policy_id} argus:threatName {threat_name} .
+source      SELECT policy_id, threat_name FROM policies WHERE threat_name IS NOT NULL
+
+mappingId   policy_threshold_value
+target      ex:policy/{policy_id} argus:thresholdValue {threshold_value}^^xsd:decimal .
+source      SELECT policy_id, threshold_value FROM policies WHERE threshold_value IS NOT NULL
+
+mappingId   policy_threshold_json
+target      ex:policy/{policy_id} argus:thresholdJson {threshold_json} .
+source      SELECT policy_id, threshold_json FROM policies WHERE threshold_json IS NOT NULL
+
+mappingId   policy_site
+target      ex:policy/{policy_id} argus:appliesToSite ex:site/{site_id} .
+source      SELECT policy_id, site_id FROM policies WHERE site_id IS NOT NULL
+
+mappingId   decision
+target      ex:decision/{decision_id} a panoptes:Decision ; rdfs:label {label} .
+source      SELECT decision_id, label FROM decisions
+
+mappingId   decision_description
+target      ex:decision/{decision_id} argus:decisionDescription {description} .
+source      SELECT decision_id, description FROM decisions WHERE description IS NOT NULL
+
+mappingId   decision_urgency
+target      ex:decision/{decision_id} argus:urgency {urgency} .
+source      SELECT decision_id, urgency FROM decisions WHERE urgency IS NOT NULL
+
+mappingId   asset
+target      ex:asset/{asset_id} a panoptes:Asset ; rdfs:label {label} .
+source      SELECT asset_id, label FROM assets
+
+mappingId   asset_description
+target      ex:asset/{asset_id} argus:assetDescription {description} .
+source      SELECT asset_id, description FROM assets WHERE description IS NOT NULL
+
+mappingId   asset_code
+target      ex:asset/{asset_id} argus:assetCode {asset_code} .
+source      SELECT asset_id, asset_code FROM assets WHERE asset_code IS NOT NULL
+
+mappingId   asset_pilot_number
+target      ex:asset/{asset_id} argus:pilotNumber {pilot_number}^^xsd:integer .
+source      SELECT asset_id, pilot_number FROM assets WHERE pilot_number IS NOT NULL
+
+mappingId   asset_country
+target      ex:asset/{asset_id} argus:country {country} .
+source      SELECT asset_id, country FROM assets WHERE country IS NOT NULL
+
+mappingId   asset_source_url
+target      ex:asset/{asset_id} argus:sourceUrl {source_url} .
+source      SELECT asset_id, source_url FROM assets WHERE source_url IS NOT NULL
+
+mappingId   asset_site
+target      ex:asset/{asset_id} argus:atSite ex:site/{site_id} .
+source      SELECT asset_id, site_id FROM assets WHERE site_id IS NOT NULL
 
 ]]

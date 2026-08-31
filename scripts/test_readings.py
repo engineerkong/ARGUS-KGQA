@@ -5,6 +5,7 @@ JSONL sidecar offline by default; --source api fetches live.
 
     python scripts/test_readings.py --limit 10 --show-triples
     python scripts/test_readings.py --stats-only --limit 500
+    python scripts/test_readings.py --limit 5 --show-raw
 """
 
 from __future__ import annotations
@@ -90,10 +91,14 @@ def _value_kind(value: Any) -> str:
     return type(value).__name__
 
 
-def inspect_reading(reading: Dict[str, Any], show_triples: bool) -> None:
+def inspect_reading(reading: Dict[str, Any], show_triples: bool, show_raw: bool = False) -> None:
     rid = _rd.reading_stable_id(reading)
     payload = reading.get("payload")
     print("=" * 78)
+    if show_raw:
+        print("raw reading:")
+        print(json.dumps(reading, indent=2, ensure_ascii=False, default=str))
+        print()
     print(f"reading id : {rid}")
     print(f"ts         : {reading.get('ts')}")
     print(f"site       : {reading.get('site')}")
@@ -195,6 +200,7 @@ def main() -> None:
     ap.add_argument("--reading-id", type=str, default=None,
                     help="Inspect only the reading whose stable id matches (scans up to --limit).")
     ap.add_argument("--show-triples", action="store_true", help="Also print the RDF each reading becomes.")
+    ap.add_argument("--show-raw", action="store_true", help="Also print the raw fetched reading JSON.")
     ap.add_argument("--stats-only", action="store_true", help="Print only the aggregate summary.")
     args = ap.parse_args()
 
@@ -210,7 +216,7 @@ def main() -> None:
         match = next((r for r in readings if _rd.reading_stable_id(r) == args.reading_id), None)
         if match is None:
             raise SystemExit(f"reading id {args.reading_id} not found in first {load_limit} readings.")
-        inspect_reading(match, args.show_triples)
+        inspect_reading(match, args.show_triples, args.show_raw)
         return
 
     if args.stats_only:
@@ -218,7 +224,7 @@ def main() -> None:
         return
 
     for r in readings:
-        inspect_reading(r, args.show_triples)
+        inspect_reading(r, args.show_triples, args.show_raw)
     print()
     summarize(readings)
 

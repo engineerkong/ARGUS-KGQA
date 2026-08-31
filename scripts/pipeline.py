@@ -26,6 +26,9 @@ _ag = importlib.import_module("3_answer_generator")
 generate = _ag.generate
 prompt_row_stats = _ag.prompt_row_stats
 
+_ek = importlib.import_module("ek_analysis")
+evaluate_ad_rt = _ek.evaluate
+
 _be = importlib.import_module("backend")
 make_backend = _be.make_backend
 
@@ -152,21 +155,30 @@ class Pipeline:
             intent = parse(query, feedback=feedback, history=history)
             t_parse += time.perf_counter() - _t
             parse_calls += 1
+            # AD questions: this fetches the applicable Policy rule(s), labelled
+            # 2a (Step 2b below does the readings work). Normal questions: this
+            # IS the readings retrieval, so it's labelled 2b directly.
+            is_ad = bool(intent.get("anomaly_check"))
+            step2_label = "Step 2a" if is_ad else "Step 2b"
+            step2_topic = "Policy" if is_ad else intent.get("target_class", "Readings")
             if v:
                 print("[Step 1] Intent:", json.dumps(intent, indent=2))
+                if is_ad:
+                    print("[Pipeline] Anomaly-check question — Step 2b will run extra AD-RT "
+                          "rule queries after retrieval, so this may take a bit longer.")
 
-            # ── Step 2: SPARQL Retrieval + Result Unfolding ──────────────────
+            # ── Step 2a/2b: SPARQL Retrieval + Result Unfolding ──────────────
             _t = time.perf_counter()
             sparql = build_sparql(intent)
             if v:
                 print(f"\n{sep}")
-                print("[Step 2] SPARQL query:")
+                print(f"[{step2_label}] SPARQL query on {step2_topic}:")
                 print(sparql)
 
             raw_results = execute(self.backend, sparql)
             t_query += time.perf_counter() - _t
             if v:
-                print(f"[Step 2] {len(raw_results)} raw result(s) returned.")
+                print(f"[{step2_label}] {len(raw_results)} raw result(s) returned.")
 
             if _is_oversized(raw_results):
                 break
@@ -190,7 +202,7 @@ class Pipeline:
                     print(f"\n[Pipeline] Query failed after {self.max_retries} retries — {failure}")
 
         # Oversized ends the turn on the spot (see _is_oversized) — no retry,
-        # no Steps 2b/3, just an explanation.
+        # no Step 2b or Step 3, just an explanation.
         if _is_oversized(raw_results):
             answer = (
                 f"This question matches {len(raw_results)} rows, too many to answer directly "
@@ -220,11 +232,25 @@ class Pipeline:
         t_query += time.perf_counter() - _t
         if v:
             print(f"\n{sep}")
-            print("[Step 2] Unfolded results (URIs resolved to linked properties):")
+            print(f"[{step2_label}] Unfolded results (URIs resolved to linked properties):")
             for r in unfolded[:5]:
                 print("  ", r)
             if len(unfolded) > 5:
                 print(f"  … and {len(unfolded) - 5} more.")
+
+        # ── Step 2b: Readings — AD-RT rule check (AD questions only) ────────
+        # Runs each Policy rule's own windowed/per-sensor Observation queries
+        # (see ek_analysis.RULE_SPECS) — a single generic query can't express
+        # that, so it's a separate retrieval from Step 2a.
+        ad_rt_summary = ""
+        if is_ad:
+            _t = time.perf_counter()
+            ad_rt_summary = evaluate_ad_rt(self.backend, intent)["summary_text"]
+            t_query += time.perf_counter() - _t
+            if v and ad_rt_summary:
+                print(f"\n{sep}")
+                print("[Step 2b] SPARQL query on Readings (per matched rule, windowed/sensor-grouped):")
+                print(ad_rt_summary)
 
         # ── Step 3: Natural Language Answer ─────────────────────────────────
         if v:
@@ -235,7 +261,8 @@ class Pipeline:
                 print(f"[Step 3] Large result set — this answer may take a while.")
             print("[Step 3] Generating natural language answer…")
         _t = time.perf_counter()
-        answer = generate(query, sparql, unfolded)
+        answer = generate(query, sparql, unfolded, ad_rt_summary=ad_rt_summary,
+                          anomaly_check=bool(intent.get("anomaly_check")), verbose=v)
         t_answer = time.perf_counter() - _t
         if v:
             print("[Step 3] Answer:")

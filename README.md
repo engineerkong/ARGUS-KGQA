@@ -10,22 +10,22 @@ Default LLM endpoint: `https://ollama.fit.fraunhofer.de/api`, model `qwen3.6:35b
 ## Requirements
 
 - **Python 3.10+** — the codebase uses `X | None` type hints throughout.
-- **Python packages:** `openai`, `rdflib`, `requests` (core, both modes); `psycopg[binary]` (only for `scripts/0b_online_ingest.py`, the deploy/Postgres path).
+- **Python packages:** `openai`, `rdflib`, `requests` (core, both modes); `psycopg[binary]` (only for the deploy/Postgres ingest scripts).
   ```bash
   pip install openai rdflib requests "psycopg[binary]"
   ```
-- **Docker + Docker Compose** — deploy mode only (`postgres`, `ontop`, `ingest` in `obda/docker-compose.yml`). Not needed for dev mode.
-- An **LLM API key** (`OPENAI_API_KEY`) for the configured endpoint — see [Environment variables](#environment-variables).
+- **Docker + Docker Compose** — deploy mode only (`postgres`, `ontop`, `ingest`, `governance_ingest` in `obda/docker-compose.yml`). Not needed for dev mode.
+- An **LLM API key** (`OPENAI_API_KEY`) for the configured endpoint.
 
 ## Getting started
 
-**Deploy — live data via Postgres + Ontop.** `ingest` creates the schema and
-starts loading on its first cycle, then keeps polling the ARGUS API on a loop
-(default hourly); `ontop` needs those tables to exist, so bring it up after:
+**Deploy — live data via Postgres + Ontop.** `ingest`/`governance_ingest` create
+the schema and start loading on their first cycle; `ontop` needs those tables to
+exist, so bring it up after:
 
 ```bash
 docker compose -f obda/docker-compose.yml up -d postgres
-docker compose -f obda/docker-compose.yml up -d ingest
+docker compose -f obda/docker-compose.yml up -d ingest governance_ingest
 docker compose -f obda/docker-compose.yml up -d ontop
 
 export ARGUS_SPARQL_ENDPOINT=http://localhost:8081/sparql
@@ -60,7 +60,12 @@ print(result["answer"])
    │
    ▼ (per query)
 [Step 1] Semantic parser (LLM)                              1_semantic_parser.py
-         NL query + ontology schema  →  intent JSON
+         NL query + ontology schema → intent JSON (target_class, anomaly_check, as_of)
+   │
+   ▼
+[Anomaly] AD-RT expert-rule check — only when anomaly_check  ek_analysis.py
+         intent's site+quantity → applicable Policy rule(s) → each rule's own
+         windowed/per-sensor Observation queries → EXCEEDS/within verdict
    │
    ▼
 [Step 2] SPARQL retrieval + unfolding                       2_sparql_retriever.py
@@ -73,258 +78,88 @@ print(result["answer"])
    │
    ▼
 [Step 3] Answer generator (LLM)                             3_answer_generator.py
-         query + rows + analysis → concise answer
+         query + rows + analysis + AD-RT verdict → concise answer
 ```
 
 Design principle throughout: **the LLM reasons over data, it does not compute
-over it.** Counts, averages, ranges and distances are produced by SPARQL or by
-`geo_analysis`, never derived by the model from raw rows.
+over it.** Counts, averages, ranges, distances and threshold comparisons are
+produced by SPARQL, `geo_analysis.py` or `ek_analysis.py` — never derived by
+the model from raw rows.
 
-## Query backends
+## Live ingestion
 
-`backend.py` hides where the triples live behind one interface — `intent`, SPARQL
-generation, prompts and analysis are unchanged either way. Switching is one env
-var: unset `ARGUS_SPARQL_ENDPOINT` for local, set it for remote.
+`scripts/0b_online_ingest.py` pulls new readings from the ARGUS API into
+Postgres on a loop; `scripts/0c_ingest_governance_pg.py` does the same for the
+AD-RT expert-rule data (threats/policies/decisions/assets), upserting by the
+API's own id since — unlike readings — it's mutable reference data, not an
+append-only stream. `scripts/0a_offline_readings.py` is the local-dev
+counterpart of both: it writes a TTL snapshot instead of touching Postgres.
+`obda/` holds the Postgres schema and the Ontop mapping that projects those
+tables back into the same SOSA/ARGUS RDF the pipeline queries either way.
 
-| Backend | Selected by | Use |
-|---------|-------------|-----|
-| `RdflibBackend` | default (a `data/argus_readings.ttl` file) | dev / small data, zero setup |
-| `RemoteSparqlBackend` | `ARGUS_SPARQL_ENDPOINT` set | Ontop over Postgres, live/unbounded data |
+## Node coordinates
 
-```bash
-python scripts/test_backend.py  # diagnose a remote endpoint layer by layer
-```
-
-URI *unfolding* (resolving a result URI to its `rdfs:label` and literals) batches
-all URIs into one `VALUES` query via `backend.prefetch()`, so a remote endpoint is
-one round-trip, not one per URI.
-
-### Ontop OBDA (`obda/`)
-
-The observation stream is unbounded and does not belong in an in-memory RDF graph.
-Ontop maps a Postgres schema back to exactly the SOSA/ARGUS RDF the pipeline
-queries, so the pipeline itself is untouched:
-
-```
-Postgres (SQL time series)  ──Ontop mapping (argus.obda)──►  virtual SPARQL endpoint
-  sites / nodes / sensors                                     ex:reading a sosa:ObservationCollection
-  observed_properties                                         argus:hasSite / hasObservation / …
-  readings / observations                                     sosa:hasSimpleResult / resultTime
-```
-
-| File | Role |
-|------|------|
-| `obda/schema.sql` | Postgres DDL — topology tables + the `observations` time series + `ingest_state` |
-| `obda/argus.obda` | Ontop mapping: SQL rows → the classes, predicates and `ex:` URIs `build_sparql` emits |
-| `obda/argus.properties` | Ontop → Postgres JDBC connection |
-| `obda/docker-compose.yml` | Postgres + Ontop endpoint + live `ingest` loop |
-
-For very large deployments, make `observations` a TimescaleDB hypertable and add
-continuous aggregates — the mapping and pipeline are unaffected.
-
-### Live ingestion (`scripts/0b_online_ingest.py`)
-
-Pulls new readings straight from the ARGUS API into Postgres on a loop — no TTL,
-no JSONL sidecar, no local state file. Postgres is the only store; pagination
-bookmarks live in its `ingest_state` table, and every insert is `ON CONFLICT DO
-NOTHING` on the row's primary key, so re-walking the last few pages every cycle
-(for late-arriving records) is always safe.
-
-```bash
-python scripts/0b_online_ingest.py --once   # single cycle, then exit
-python scripts/0b_online_ingest.py          # loop forever, default 3600s
-```
-
-For local dev without Postgres, use `scripts/0a_offline_readings.py` instead — it
-writes a TTL file for the in-memory `RdflibBackend`. The two don't share a data
-store on purpose: `0a` is a disposable local snapshot for zero-setup testing, `0b`
-is the always-current source of truth behind Ontop.
-
-```bash
-python scripts/0a_offline_readings.py                     # full download
-python scripts/0a_offline_readings.py --max-records 500   # limit for testing
-python scripts/0a_offline_readings.py --resume            # incremental update
-python scripts/0a_offline_readings.py --enrich-geo-only   # refresh node coordinates from CSV
-```
-
-### Refreshing node coordinates
-
-Node lat/long/altitude come from `material/ARGUS_nodes.csv` (`site,nodeid,
-latitude,longitude,altitude` — one row per node, all sites). Updating that CSV
-does **not** retroactively update either backend by itself — pick the method
-that matches how you're running the pipeline:
-
-**Method 1 — Postgres + Ontop (`ARGUS_SPARQL_ENDPOINT` set).** New nodes get
-coordinates automatically on their first `0b_online_ingest.py` insert, but
-nodes already in the `nodes` table are skipped (`ON CONFLICT DO NOTHING`), so
-existing rows need a one-off backfill from the CSV, e.g.:
-
-```bash
-docker exec -i <postgres-container> psql -U argus -d argus <<'SQL'
-UPDATE nodes n SET latitude = c.latitude, longitude = c.longitude, altitude = c.altitude
-FROM (VALUES ('<node_id>', <lat>, <lon>, <alt>), ...) AS c(node_id, latitude, longitude, altitude)
-WHERE n.node_id = c.node_id;
-SQL
-```
-(generate the `VALUES` rows from `material/ARGUS_nodes.csv`). Ontop queries
-Postgres live, so the fix is visible immediately — no restart needed.
-
-**Method 2 — local TTL snapshot (`ARGUS_SPARQL_ENDPOINT` unset).**
-
-```bash
-python scripts/0a_offline_readings.py --enrich-geo-only
-```
-
-This attaches coordinates from `material/ARGUS_nodes.csv` to the nodes already
-in `data/argus_readings.ttl` and exits (no API fetch). It also writes
-`data/argus_readings.backup.ttl` first — if that file is owned by a different
-user (e.g. left over from a `sudo`/root run), the write fails with
-`PermissionError`; fix with:
-
-```bash
-sudo chown "$USER" data/argus_readings.backup.ttl
-```
+Node lat/long/altitude come from `material/ARGUS_nodes.csv`. Editing that CSV
+doesn't retroactively update either backend — new nodes pick it up on their
+next ingest automatically, but existing rows need a one-off backfill (SQL for
+the Postgres path, or `0a_offline_readings.py --enrich-geo-only` for the local
+TTL path).
 
 ## Handling large result sets
 
-- **Aggregate first (a correctness rule, not an optimisation).** For any statistic
-  ("average", "total", "how many", "highest"), Step 1 emits an `aggregation` so the
-  figure is computed inside SPARQL — detail rows pass through `SELECT DISTINCT`
-  de-duplication, so averaging them afterwards would be wrong.
-- **No silent truncation.** Every distinct row is sent to the LLM; Step 3's prompt
-  takes counts/ranges/averages from the analysis block (computed over *all* rows),
-  and Step 2 reports row/char counts so a slow turn is expected, not mysterious.
+Aggregate statistics are always computed inside SPARQL, never from
+already-fetched rows — detail rows pass through `SELECT DISTINCT`
+de-duplication, so averaging them client-side would be wrong. Every distinct
+row is still sent to the LLM (no silent truncation); very large result sets
+are rejected with an explanation instead, asking for an aggregation or a
+narrower filter.
 
-Raw API payloads are not queried by the pipeline, so they don't bloat the graph —
-they live in an append-only JSONL sidecar (local/dev path only).
+## Spatial & temporal analysis
 
-## Spatial & temporal analysis (`geo_analysis.py`)
-
-Runs over the full result set before Step 3 and appends structured facts to the
-prompt. Sections appear only when the data supports them:
-
-- **Temporal** — full-timestamp recency (not day-rounded): newest, oldest, span.
-- **Spatial** — when rows carry node coordinates: centroid, bounding box, altitude
-  range, and haversine **distances** (nearest / farthest pairs). Node coordinates
-  come from `material/ARGUS_nodes.csv`, attached to `argus:Node` instances at
-  ingest time — see [Refreshing node coordinates](#refreshing-node-coordinates).
-- **Numeric** — min/max/avg **grouped by observed property**, so a temperature range
-  is never mixed with voltages into one meaningless figure.
+`geo_analysis.py` runs over the full result set before Step 3 and appends
+structured facts to the prompt, appearing only when the data supports them:
+temporal recency (newest/oldest/span), spatial stats (centroid, bounding box,
+altitude range, nearest/farthest node pairs) when rows carry coordinates, and
+numeric ranges grouped by observed property so a temperature range is never
+mixed with voltages into one meaningless figure.
 
 ## Follow-up questions
 
 Interactive mode (`--online`) keeps a short conversation history so follow-ups
-resolve against earlier turns; batch mode stays stateless so preset runs are
-reproducible.
+resolve against earlier turns (e.g. "among these, how many are about
+temperature?"); batch mode stays stateless so preset runs are reproducible. A
+follow-up is self-contained by default — a newly named site/quantity replaces
+the old one rather than adding to it. `reset` clears history.
 
-```
-Q: how many sensors are in baltanas?              → 28
-Q: among these, how many are about temperature?   → 21   (inherits the baltanas
-                                                           set, adds a constraint)
-```
+## Anomaly detection
 
-Each turn's `(question → intent)` plus a compact result summary (row count and
-columns, not the rows) is fed to the next parse. A follow-up is self-contained by
-default; a newly named site/quantity **replaces** the old one, never adds to it.
-`reset` clears history.
+A question asking for a yes/no verdict against a known threshold ("has X
+exceeded threshold", "is there an anomaly") is flagged by Step 1
+(`anomaly_check: true`) and routed to `ek_analysis.py`, which mirrors
+AD-RT's expert-rule table (`AD-RT/RT/rules.py`) rather than recomputing it
+from scratch: each rule's own column matcher, computation shape (direct
+threshold / windowed sum-mean-range / z-score / rate-of-change / normalized
+step-offset / composite) and threshold are looked up, then evaluated against
+real Observation data — grouped by physical sensor first, since a site can
+have several sensors sharing one quantity label, and combined the same way
+AD-RT combines them (elementwise max/min across sensors), never by pooling
+raw readings across sensors into one series. A question can also name a
+specific point in time ("on 2026-05-15") via the intent's `as_of` field,
+evaluated against readings as of that day instead of the latest available.
 
 ## Ontology architecture
 
 All schema knowledge (class/property maps, prompt text, valid `target_class`
-values) is extracted from the OWL files — no hardcoded schema in Python.
+values) is extracted from the OWL files at load time — no hardcoded schema in
+Python. `panoptes3.owl` is the core project ontology (built on SOSA/SSN,
+PROV-O, CIDOC-CRM, …); `panoptes3_extension.owl` adds the sensor-reading
+classes (`Site`, `Node`, `ObservedProperty`, …) and the governance classes
+(`Policy`, `Threat`, `Decision`, `Asset`) that have real instances, so the
+LLM-facing prompt only ever offers classes that can actually return data.
 
-```
-W3C Standards                  ARGUS Project
-─────────────                  ─────────────
-SOSA/SSN, PROV-O, CIDOC-CRM ──► panoptes3.owl (core project ontology)
-GeoSPARQL, OWL-Time, DUL          Asset, Decision, Threat, Policy, …
-                                     │
-                                     ▼
-                              panoptes3_extension.owl (sensor data extension)
-                                argus:Site  → subClassOf sosa:FeatureOfInterest
-                                argus:Node  → subClassOf sosa:Platform
-                                argus:ObservedProperty → sosa:ObservableProperty
-                                     │
-                                     ▼
-                              instance data (TTL file, or Postgres via Ontop)
-                                ex:site/baltanas   a argus:Site
-                                ex:reading/003…    a sosa:ObservationCollection
-```
+## Data model
 
-| Namespace | URI | Role |
-|-----------|-----|------|
-| `sosa:` | `http://www.w3.org/ns/sosa/` | W3C vocabulary for observations and sensors |
-| `argus:` | `http://www.argus-project.eu/ontology/` | Sensor-data extension classes/properties |
-| `ex:` | `http://www.argus-project.eu/resource/` | Instance URIs |
-
-`ontology_schema.py` exposes two views: the **full** vocabulary drives SPARQL name
-resolution, while the **prompt** view describes only `panoptes3_extension.owl` —
-the 7 classes readings actually instantiate — so the base ontology's ~18 unused
-classes are never offered as a `target_class` that could only return nothing.
-
-## Data model (SOSA/ARGUS)
-
-```
-sosa:ObservationCollection          ← one API reading record
-  ├── sosa:resultTime               (xsd:dateTime)
-  ├── argus:hasSite → argus:Site    (rdfs:label: "baltanas", "delos", …)
-  ├── sosa:madeBySensor → sosa:Sensor
-  ├── argus:hasNode → argus:Node    (argus:latitude / longitude / altitude)
-  └── argus:hasObservation → sosa:Observation   (one per measured quantity)
-        ├── sosa:observedProperty → argus:ObservedProperty  ("temperature", …)
-        ├── sosa:hasSimpleResult  (xsd:decimal)
-        └── sosa:resultTime       (xsd:dateTime)
-```
-
-## File structure
-
-| File | Role |
-|------|------|
-| `scripts/0a_offline_readings.py` | Dev — ARGUS API → local TTL (also node-coordinate enrichment, rawJson sidecar) |
-| `scripts/0b_online_ingest.py` | Deploy — ARGUS API → Postgres directly, live loop, no local files |
-| `scripts/1_semantic_parser.py` | Step 1 — LLM: NL query → intent JSON (+ follow-up history) |
-| `scripts/2_sparql_retriever.py` | Step 2 — intent → SPARQL → rows → unfolded rows |
-| `scripts/3_answer_generator.py` | Step 3 — LLM: rows + analysis → answer |
-| `scripts/geo_analysis.py` | Spatial / temporal / grouped-numeric analysis |
-| `scripts/backend.py` | Query backend abstraction (local rdflib / remote SPARQL) |
-| `scripts/pipeline.py` | Orchestrates the steps, retry loop, timing, history |
-| `scripts/demo.py` | Entry point — batch or `--online` |
-| `scripts/test_readings.py` | Inspect raw readings before they become triples |
-| `scripts/test_backend.py` | Diagnose a remote SPARQL endpoint |
-| `scripts/test_llm.py` | Measure LLM endpoint latency |
-| `scripts/ontology_schema.py` | Parses the OWL files; single source of schema truth |
-| `material/panoptes3.owl`, `panoptes3_extension.owl` | Core + extension ontologies |
-| `material/ARGUS_nodes.csv` | Per-node coordinates (site,nodeid,lat/long/altitude — all sites) |
-| `obda/` | Ontop OBDA setup — schema, mapping, connection, compose |
-
-Generated data (in `data/`, gitignored, dev-only): `argus_readings.ttl` (graph),
-`argus_readings_raw.jsonl` (raw payload sidecar), `argus_readings_state.json`
-(download/dedup state), `argus_readings.backup.ttl`.
-
-## Sample queries (`demo.py`)
-
-Grouped by the capability they exercise:
-
-- **Retrieval** — *"Which sensors are available at the baltanas site?"*, *"Which
-  physical quantities are measured at the delos site?"*
-- **Spatial** — *"Where are the sensor nodes at the baltanas site?"*, *"Which two
-  nodes at baltanas are closest together?"*, *"…highest/lowest altitude?"*
-- **Temporal** — *"What are the latest 10 readings?"*, *"What time period do the
-  readings at baltanas cover?"*
-- **Aggregation** — *"What is the average temperature at each site?"*, *"How does the
-  voltage range at delos compare to baltanas?"*
-
-## Environment variables
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `OLLAMA_BASE_URL` | `https://ollama.fit.fraunhofer.de/api` | LLM API endpoint |
-| `OPENAI_API_KEY` | `no-key` | API key for the LLM endpoint |
-| `OLLAMA_MODEL` | `qwen3.6:35b` | Model name |
-| `ARGUS_SPARQL_ENDPOINT` | *(unset → local TTL)* | Remote SPARQL endpoint (Ontop) |
-| `ARGUS_TTL_PATH` | `data/argus_readings.ttl` | Local graph file |
-| `ARGUS_PG_DSN` | `postgresql://argus:argus@localhost:5432/argus` | Postgres DSN for `0b_online_ingest.py` |
-| `ARGUS_INGEST_INTERVAL` | `3600` | Seconds between live ingest cycles |
-| `ARGUS_INGEST_OVERLAP_PAGES` | `2` | API pages re-walked each cycle, for late-arriving records |
-| `ARGUS_KEEP_RAW_JSON` | *(unset)* | `1` re-embeds rawJson in the graph (legacy) |
-| `ARGUS_LLM_TIMEOUT` | `120` | LLM request timeout (seconds) |
+One API reading becomes a `sosa:ObservationCollection` carrying its site,
+sensor, node and timestamp, with one `sosa:Observation` per measured quantity
+(observed property, value, unit). Governance data (Policy/Threat/Decision/
+Asset) lives alongside it, linked to `Site` via `appliesToSite`/`atSite`.

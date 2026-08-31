@@ -15,12 +15,13 @@ from ontology_schema import (
 )
 
 PREFIXES = """\
-PREFIX sosa:  <http://www.w3.org/ns/sosa/>
-PREFIX argus: <http://www.argus-project.eu/ontology/>
-PREFIX ex:    <http://www.argus-project.eu/resource/>
-PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
-PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX sosa:     <http://www.w3.org/ns/sosa/>
+PREFIX argus:    <http://www.argus-project.eu/ontology/>
+PREFIX panoptes: <http://www.argus-project.eu/panoptes#>
+PREFIX ex:       <http://www.argus-project.eu/resource/>
+PREFIX rdfs:     <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd:      <http://www.w3.org/2001/XMLSchema#>
+PREFIX rdf:      <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 """
 
 CLASS_MAP = extract_class_map()

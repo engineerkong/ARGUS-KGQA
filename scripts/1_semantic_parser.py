@@ -56,7 +56,17 @@ Node geo-location (datatype properties on Node; currently populated for baltanas
 
 Variable naming rule: the SPARQL variable for a join's return property is {ClassName}_{property}.
   Site.label → ?site_label        Observation.hasSimpleResult → ?observation_hassimpleresult
-  Use this exact dotted form in group_by and order_by fields.\
+  Use this exact dotted form in group_by and order_by fields.
+
+Governance graph (expert-rule thresholds and pilot metadata — separate from the
+sensor-reading graph above, joined to it only through Site):
+  Policy   —[appliesToSite]→  Site     (policyDescription, ruleId, threatName, thresholdValue, thresholdJson)
+  Asset    —[atSite]→        Site     (assetDescription, assetCode, pilotNumber, country, sourceUrl)
+  Threat   (threatDescription, threatLevel) — standalone, not yet linked to Policy/Asset by ID.
+  Decision (decisionDescription, urgency) — standalone, not linked to Policy/Asset/Threat by ID.
+  thresholdValue is only set when a rule has exactly one threshold parameter; multi-parameter
+  rules (e.g. "R3_hum_cross": {"R3_hum_th": 75, "R3_cross": 9}) carry thresholdJson instead —
+  do not attempt to filter/aggregate on thresholdJson's contents, only return it as-is.\
 """
 
 _FEW_SHOT = """\
@@ -77,6 +87,8 @@ Q: "What are the temperature values recorded at each site?"
   ],
   "aggregation": null,
   "order_by": null, "limit": null,
+  "anomaly_check": false,
+  "as_of": null,
   "explanation": "Lists the individual values, so no aggregation — contrast with 'average temperature', which must aggregate."
 }
 
@@ -96,6 +108,8 @@ Q: "What is the average temperature at each site?"
   "aggregation": {"type": "avg", "group_by": "Site.label",
                   "target": "hasSimpleResult", "distinct": false},
   "order_by": null, "limit": null,
+  "anomaly_check": false,
+  "as_of": null,
   "explanation": "AVG computed in the query over every observation, so de-duplication of detail rows cannot skew it."
 }
 
@@ -113,6 +127,8 @@ Q: "How many sensors are deployed per site?"
   "aggregation": {"type": "count", "group_by": "Site.label",
                   "target": "sensor", "distinct": true},
   "order_by": null, "limit": null,
+  "anomaly_check": false,
+  "as_of": null,
   "explanation": "Count distinct sensors per site."
 }
 
@@ -130,6 +146,8 @@ Q: "What are the latest 10 readings?"
   "aggregation": null,
   "order_by": {"variable": "ObservationCollection.resultTime", "direction": "DESC"},
   "limit": 10,
+  "anomaly_check": false,
+  "as_of": null,
   "explanation": "10 most recent individual readings (Observations), ranked by their collection's resultTime so LIMIT counts readings, not collections."
 }
 
@@ -149,6 +167,8 @@ Q: "Which physical quantities are measured at the delos site?"
   "aggregation": null,
   "order_by": null,
   "limit": null,
+  "anomaly_check": false,
+  "as_of": null,
   "explanation": "Forward-traverse from ObservationCollection to Site (filtered) → Observation → ObservedProperty to list distinct measured quantities."
 }
 
@@ -166,6 +186,8 @@ Q: "Where are the sensor nodes at the baltanas site?"
   "aggregation": null,
   "order_by": null,
   "limit": null,
+  "anomaly_check": false,
+  "as_of": null,
   "explanation": "List baltanas nodes with their coordinates; spatial metrics are derived downstream from lat/long/altitude."
 }
 
@@ -191,7 +213,70 @@ Q: "among these sensors, how many are about temperature?"
   "aggregation": {"type": "count", "group_by": null, "target": "sensor", "distinct": true},
   "order_by": null,
   "limit": null,
+  "anomaly_check": false,
+  "as_of": null,
   "explanation": "Count baltanas sensors (inherited set) that observe temperature (added constraint)."
+}
+
+Q: "What is the rainfall alarm threshold at delos?"
+{
+  "target_class": "Policy",
+  "filters": [{"property": "ruleId", "op": "contains", "value": "rain"}],
+  "return_properties": ["policyDescription", "ruleId", "thresholdValue", "thresholdJson"],
+  "joins": [
+    {"class": "Site", "via": "appliesToSite", "direction": "outgoing",
+     "return_properties": ["label"], "filters": [{"property": "label", "op": "equals", "value": "delos"}]}
+  ],
+  "aggregation": null,
+  "order_by": null, "limit": null,
+  "anomaly_check": false,
+  "as_of": null,
+  "explanation": "Wants the threshold definition, not a verdict, so Policy is the right target_class and anomaly_check stays false."
+}
+
+Q: "Has the temperature range at lucretili exceeded its AD-RT threshold?"
+{
+  "target_class": "Policy",
+  "filters": [{"property": "ruleId", "op": "contains", "value": "temp"}],
+  "return_properties": ["policyDescription", "ruleId", "thresholdValue", "thresholdJson"],
+  "joins": [
+    {"class": "Site", "via": "appliesToSite", "direction": "outgoing",
+     "return_properties": ["label"], "filters": [{"property": "label", "op": "equals", "value": "lucretili"}]}
+  ],
+  "aggregation": null,
+  "order_by": null, "limit": null,
+  "anomaly_check": true,
+  "as_of": null,
+  "explanation": "Retrieve the applicable AD-RT rule(s) and their thresholds first (target_class=Policy) — the same as a pure threshold lookup. anomaly_check=true tells the pipeline to follow up with a separate deterministic step (outside this JSON) that runs each retrieved rule's own windowed/per-sensor Observation queries and compares against these thresholds; do NOT try to also join or aggregate Observation data yourself here."
+}
+
+Q: "Was the temperature range at lucretili anomalous on 2026-05-15?"
+{
+  "target_class": "Policy",
+  "filters": [{"property": "ruleId", "op": "contains", "value": "temp"}],
+  "return_properties": ["policyDescription", "ruleId", "thresholdValue", "thresholdJson"],
+  "joins": [
+    {"class": "Site", "via": "appliesToSite", "direction": "outgoing",
+     "return_properties": ["label"], "filters": [{"property": "label", "op": "equals", "value": "lucretili"}]}
+  ],
+  "aggregation": null,
+  "order_by": null, "limit": null,
+  "anomaly_check": true,
+  "as_of": "2026-05-15",
+  "explanation": "Same Policy lookup as any anomaly_check question — the date is NOT a filter here (Policy has no resultTime), it goes in as_of so the deterministic step checks the rule against readings as of that day instead of the latest available."
+}
+
+Q: "Which country is the Lucretili pilot in, and what threats affect it?"
+{
+  "target_class": "Asset",
+  "filters": [{"property": "label", "op": "contains", "value": "Lucretili"}],
+  "return_properties": ["label", "country", "assetDescription"],
+  "joins": [],
+  "aggregation": null,
+  "order_by": null, "limit": null,
+  "anomaly_check": false,
+  "as_of": null,
+  "explanation": "Asset carries the pilot's country. Threat has no ID-based link to a specific Asset in this data, so it cannot be joined here — a separate Threat query is needed if the user wants that list."
 }
 
 --- END EXAMPLES ---\
@@ -222,6 +307,8 @@ with this exact schema:
   "aggregation": null or {{"type": "count|min|max|avg|sum", "group_by": "ClassName.property", "target": "<class or property>", "distinct": true|false}},
   "order_by": null or {{"variable": "ClassName.property", "direction": "ASC|DESC"}},
   "limit": null or <integer>,
+  "anomaly_check": true|false,
+  "as_of": null or "<ISO date or datetime, e.g. '2026-05-15'>",
   "explanation": "<one sentence>"
 }}
 
@@ -249,6 +336,9 @@ Rules:
   - The property "readingType" holds data-format codes ("reading", "eng_units") — NOT physical measurement types. To filter by measurement type (temperature, humidity, etc.), filter on ObservedProperty.label via the hasObservation → observedProperty chain.
   - "latest/most recent N readings/values/measurements": one reading = one Observation, so set target_class=Observation (NOT ObservationCollection) and limit=N; join ObservationCollection via hasObservation (incoming) returning resultTime, and order_by ObservationCollection.resultTime DESC. This makes LIMIT count individual readings. (A timestamp lives on the ObservationCollection, so reach it through that join.)
   - Location/where/distance/nearest/elevation questions: set target_class=Node and return_properties=["label","latitude","longitude","altitude"]; link to a Site by joining ObservationCollection via hasNode (incoming) then Site via hasSite (outgoing, filtered). Do NOT try to compute distances/centroids in the query — just return the coordinates; the analysis layer computes spatial metrics.
+  - "anomaly_check": true only for a yes/no verdict against a known threshold ("has X exceeded threshold", "is there an anomaly"). False for a plain "what is the threshold for X" lookup, which wants the definition, not a verdict.
+  - When anomaly_check is true: build the intent exactly like a Policy threshold lookup (target_class=Policy, filter by ruleId/label contains the quantity, join Site via appliesToSite) — do NOT join or aggregate Observation data yourself. A separate deterministic step (outside this JSON) takes the rule(s) this query returns and checks each against its threshold; it needs the rule identity first, which is what this query provides. Do not switch off target_class=Policy just because the question mentions a quantity/site.
+  - "as_of": set only when the question names a specific point in time ("on 2026-05-15", "last Tuesday" — resolve relative phrases to an absolute ISO date). Null for "currently"/"now"/unstated, which defaults to the latest available reading. Never put a date into "filters" for an anomaly_check question (Policy has no resultTime) — as_of is the only place it belongs.
 
 Follow-up handling (earlier turns may appear above as question → intent pairs):
   - Treat the current question as SELF-CONTAINED by default. If it can be understood on its own, IGNORE the earlier turns completely.
@@ -332,5 +422,7 @@ def parse(query: str, feedback: str | None = None, history: list[dict] | None = 
             "aggregation": None,
             "order_by": None,
             "limit": 10,
+            "anomaly_check": False,
+            "as_of": None,
             "explanation": f"Fallback intent for: {query}",
         }

@@ -11,6 +11,16 @@
 # scripts/0b_online_ingest.py on a loop (ARGUS_INGEST_INTERVAL seconds, default
 # 3600), pulling straight from the ARGUS API into Postgres — no local files —
 # so Postgres, and therefore Ontop's endpoint, stays current without a restart.
+#
+# Governance data (threats/policies/decisions/assets — the AD-RT expert-rule
+# thresholds ek_analysis.py checks readings against): `docker compose -f
+# obda/docker-compose.yml up -d governance_ingest` runs
+# scripts/0c_ingest_governance_pg.py on its own loop (ARGUS_GOVERNANCE_INTERVAL
+# seconds, default 3600). Separate from `ingest` because it's a small upsert
+# against a handful of API endpoints, not a paginated readings stream. If you
+# edit obda/argus.obda's mapping (e.g. adding these), `ontop` caches the
+# mapping at startup — `docker compose -f obda/docker-compose.yml restart
+# ontop` to pick up the change.
 
 services:
   postgres:
@@ -61,6 +71,21 @@ services:
       ARGUS_INGEST_INTERVAL: "3600"
     volumes:
       - ../material:/app/material    # node-coordinate CSVs; Postgres holds everything else
+    restart: unless-stopped
+
+  governance_ingest:
+    build:
+      context: ..
+      dockerfile: obda/governance_ingest.Dockerfile
+    depends_on:
+      - postgres
+    # Same bridge-networking rationale as `ingest` above.
+    network_mode: bridge
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      ARGUS_PG_DSN: postgresql://argus:argus@host.docker.internal:5432/argus
+      ARGUS_GOVERNANCE_INTERVAL: "3600"
     restart: unless-stopped
 
 volumes:
