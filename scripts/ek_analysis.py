@@ -33,6 +33,7 @@ among ties).
 """
 
 from __future__ import annotations
+from contextvars import ContextVar
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Any
@@ -42,6 +43,25 @@ import re
 KNOWN_PILOT_SITES = ["delos", "baltanas", "lucretili", "ranverso", "schenkenberg"]
 
 RECENT_WINDOW = 20  # most recent observations to check per direct-shape rule
+
+# Set by evaluate() around each rule's dispatch so _query_raw_window and
+# _query_recent_observations_for_spec can log what they fetched without a
+# collector param threaded through every evaluator; ContextVars so concurrent
+# requests don't cross-contaminate each other's log.
+_readings_log: ContextVar[list[str] | None] = ContextVar("_readings_log", default=None)
+_current_rule: ContextVar[str | None] = ContextVar("_current_rule", default=None)
+
+
+def _log_reading_query(site: str, kind: str, values: list[float], times: list[str]) -> None:
+    log = _readings_log.get()
+    if log is None or not values:
+        return
+    rule = _current_rule.get() or "?"
+    t_range = f"{min(times)}..{max(times)}" if times else "n/a"
+    log.append(
+        f"{rule} @ {site}: {kind}, {len(values)} reading(s) over {t_range}, "
+        f"value {min(values):g}..{max(values):g}"
+    )
 
 _PREFIXES = """\
 PREFIX sosa:     <http://www.w3.org/ns/sosa/>
@@ -343,7 +363,13 @@ SELECT ?value ?time WHERE {{
 ORDER BY DESC(?time)
 LIMIT {int(limit)}
 """
-    return [r for r in backend.query(sparql) if "error" not in r]
+    rows = [r for r in backend.query(sparql) if "error" not in r]
+    _log_reading_query(
+        site, "recent readings",
+        [v for v in (_to_float(r.get("value")) for r in rows) if v is not None],
+        [r.get("time") for r in rows if r.get("time")],
+    )
+    return rows
 
 
 def _query_latest_time(backend, site: str, spec: RuleSpec, before: str | None = None) -> str | None:
@@ -441,6 +467,7 @@ ORDER BY ASC(?time)
         v = _to_float(r.get("value"))
         if v is not None:
             out.append((v, r.get("time"), r.get("sensor") or "(unknown sensor)"))
+    _log_reading_query(site, "windowed readings", [v for v, _, _ in out], [t for _, t, _ in out])
     return out
 
 
@@ -851,12 +878,12 @@ CUSTOM_EVALUATORS = {
 
 
 def evaluate(backend, intent: dict) -> dict[str, Any]:
-    """Returns {"summary_text": str}. Empty string when the intent carries no
-    recognisable site+quantity pair — the caller should skip this section then,
-    same convention as geo_analysis.analyze()'s per-section omission."""
+    """Returns {"summary_text", "policies" (raw Policy rows), "readings" (one
+    line per query, for citing separately from the summary text)}. Empty
+    summary_text when the intent has no recognisable site+quantity pair."""
     site, keyword = extract_context(intent)
     if not site or not keyword:
-        return {"summary_text": ""}
+        return {"summary_text": "", "policies": [], "readings": []}
 
     as_of = extract_as_of(intent)
 
@@ -866,33 +893,41 @@ def evaluate(backend, intent: dict) -> dict[str, Any]:
             f"AD-RT rule check: no expert-rule policy found for site={site!r} "
             f"matching quantity {keyword!r} — this cannot be assessed against a "
             f"known AD-RT threshold."
-        )}
+        ), "policies": [], "readings": []}
 
-    as_of_desc = f", as of {as_of}" if as_of else ""
-    lines = [f"AD-RT rule check for site={site!r}, quantity~{keyword!r}{as_of_desc} "
-             f"(computed here, not by the model):"]
-    for p in policies:
-        rule = p.get("ruleid") or p.get("label")
-        threshold = _to_float(p.get("threshold"))
-        spec = RULE_SPECS.get((site, rule))
+    readings_log: list[str] = []
+    log_token = _readings_log.set(readings_log)
+    try:
+        as_of_desc = f", as of {as_of}" if as_of else ""
+        lines = [f"AD-RT rule check for site={site!r}, quantity~{keyword!r}{as_of_desc} "
+                 f"(computed here, not by the model):"]
+        for p in policies:
+            rule = p.get("ruleid") or p.get("label")
+            threshold = _to_float(p.get("threshold"))
+            spec = RULE_SPECS.get((site, rule))
+            rule_token = _current_rule.set(rule)
+            try:
+                if spec is None:
+                    lines.append(f"  - {rule}: unrecognised rule id — not in the AD-RT rule table used here, "
+                                 f"not evaluated numerically.")
+                elif spec.windows:
+                    lines.append(_evaluate_windowed(backend, site, rule, spec, p.get("thresholdjson"), as_of=as_of))
+                elif spec.zscore:
+                    lines.append(_evaluate_zscore(backend, site, rule, spec, threshold, p.get("thresholdjson"), as_of=as_of))
+                elif spec.custom:
+                    lines.append(CUSTOM_EVALUATORS[spec.custom](
+                        backend, site, rule, spec, threshold, p.get("thresholdjson"), as_of=as_of))
+                elif spec.direct:
+                    lines.append(_evaluate_direct(backend, site, rule, spec, threshold, p.get("thresholdjson"), as_of=as_of))
+                else:
+                    thr_display = threshold if threshold is not None else p.get("thresholdjson")
+                    note = f" ({spec.note})" if spec.note else ""
+                    lines.append(f"  - {rule}: threshold={thr_display}, but this rule is a "
+                                 f"{spec.shape} — not a direct reading-vs-threshold comparison, "
+                                 f"so it is not evaluated numerically here, only the definition is known.{note}")
+            finally:
+                _current_rule.reset(rule_token)
+    finally:
+        _readings_log.reset(log_token)
 
-        if spec is None:
-            lines.append(f"  - {rule}: unrecognised rule id — not in the AD-RT rule table used here, "
-                         f"not evaluated numerically.")
-        elif spec.windows:
-            lines.append(_evaluate_windowed(backend, site, rule, spec, p.get("thresholdjson"), as_of=as_of))
-        elif spec.zscore:
-            lines.append(_evaluate_zscore(backend, site, rule, spec, threshold, p.get("thresholdjson"), as_of=as_of))
-        elif spec.custom:
-            lines.append(CUSTOM_EVALUATORS[spec.custom](
-                backend, site, rule, spec, threshold, p.get("thresholdjson"), as_of=as_of))
-        elif spec.direct:
-            lines.append(_evaluate_direct(backend, site, rule, spec, threshold, p.get("thresholdjson"), as_of=as_of))
-        else:
-            thr_display = threshold if threshold is not None else p.get("thresholdjson")
-            note = f" ({spec.note})" if spec.note else ""
-            lines.append(f"  - {rule}: threshold={thr_display}, but this rule is a "
-                         f"{spec.shape} — not a direct reading-vs-threshold comparison, "
-                         f"so it is not evaluated numerically here, only the definition is known.{note}")
-
-    return {"summary_text": "\n".join(lines)}
+    return {"summary_text": "\n".join(lines), "policies": policies, "readings": readings_log}

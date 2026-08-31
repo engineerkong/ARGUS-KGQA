@@ -120,11 +120,33 @@ _UPSERT = {
 _ORDER = ["threats", "policies", "decisions", "assets"]
 
 
+def _apply_schema(conn) -> None:
+    """CREATE TABLE IF NOT EXISTS is not safe under concurrent execution —
+    this and 0b_online_ingest.py both apply schema.sql on startup, and
+    Postgres can raise a transient UniqueViolation on its own pg_type catalog
+    (pg_type_typname_nsp_index) when two sessions create the same table at
+    the same instant, even though exactly one of them ends up creating it
+    either way. Retry instead of surfacing that as a real failure and waiting
+    a full cycle for it to resolve itself."""
+    import psycopg
+    sql = SCHEMA_SQL.read_text()
+    for attempt in range(5):
+        try:
+            with conn.cursor() as cur:
+                cur.execute(sql)
+            conn.commit()
+            return
+        except psycopg.errors.UniqueViolation:
+            conn.rollback()
+            time.sleep(0.5 * (attempt + 1))
+    with conn.cursor() as cur:  # one last try, let a real error surface
+        cur.execute(sql)
+    conn.commit()
+
+
 def ingest_cycle(conn) -> dict[str, int]:
     """One fetch-and-upsert pass against the live API. Returns row counts per table."""
-    with conn.cursor() as cur:
-        cur.execute(SCHEMA_SQL.read_text())
-    conn.commit()
+    _apply_schema(conn)
 
     rows = build_rows()
     with conn.cursor() as cur:

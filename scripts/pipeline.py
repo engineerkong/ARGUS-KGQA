@@ -243,9 +243,14 @@ class Pipeline:
         # (see ek_analysis.RULE_SPECS) — a single generic query can't express
         # that, so it's a separate retrieval from Step 2a.
         ad_rt_summary = ""
+        ad_rt_policies: list[dict[str, Any]] = []
+        ad_rt_readings: list[str] = []
         if is_ad:
             _t = time.perf_counter()
-            ad_rt_summary = evaluate_ad_rt(self.backend, intent)["summary_text"]
+            ad_rt_result = evaluate_ad_rt(self.backend, intent)
+            ad_rt_summary = ad_rt_result["summary_text"]
+            ad_rt_policies = ad_rt_result.get("policies", [])
+            ad_rt_readings = ad_rt_result.get("readings", [])
             t_query += time.perf_counter() - _t
             if v and ad_rt_summary:
                 print(f"\n{sep}")
@@ -283,11 +288,14 @@ class Pipeline:
             del self.history[:-self.max_history]
 
         return {
-            "query":   query,
-            "intent":  intent,
-            "sparql":  sparql,
-            "results": unfolded,
-            "answer":  answer,
+            "query":    query,
+            "intent":   intent,
+            "sparql":   sparql,
+            "results":  unfolded,
+            "answer":   answer,
+            "is_ad":    is_ad,
+            "policies": ad_rt_policies,
+            "readings": ad_rt_readings,
         }
 
     def reset_history(self) -> None:

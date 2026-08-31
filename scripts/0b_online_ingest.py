@@ -121,10 +121,34 @@ def _set_state(cur, key: str, value: str) -> None:
     )
 
 
+def _apply_schema(conn) -> None:
+    """CREATE TABLE IF NOT EXISTS is not safe under concurrent execution —
+    this and 0c_ingest_governance_pg.py both apply schema.sql on startup, and
+    Postgres can raise a transient UniqueViolation on its own pg_type catalog
+    (pg_type_typname_nsp_index) when two sessions create the same table at
+    the same instant, even though exactly one of them ends up creating it
+    either way. Retry instead of surfacing that as a real failure and waiting
+    a full cycle for it to resolve itself."""
+    import psycopg
+    sql = SCHEMA_SQL.read_text()
+    for attempt in range(5):
+        try:
+            with conn.cursor() as cur:
+                cur.execute(sql)
+            conn.commit()
+            return
+        except psycopg.errors.UniqueViolation:
+            conn.rollback()
+            time.sleep(0.5 * (attempt + 1))
+    with conn.cursor() as cur:  # one last try, let a real error surface
+        cur.execute(sql)
+    conn.commit()
+
+
 def ingest_cycle(conn, max_records: int | None = None) -> int:
     """One fetch-and-load pass against the live API. Returns readings loaded."""
+    _apply_schema(conn)
     with conn.cursor() as cur:
-        cur.execute(SCHEMA_SQL.read_text())
         last_page = int(_get_state(cur, "last_successful_page", "0"))
     conn.commit()
 
