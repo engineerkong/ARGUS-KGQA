@@ -26,9 +26,17 @@ _client: OpenAI | None = None
 def _get_client() -> OpenAI:
     global _client
     if _client is None:
+        http_client = None
+        # Temporary escape hatch for an expired cert on the remote endpoint —
+        # unset/false keeps normal verification. Never enable this by default.
+        insecure = os.environ.get("ARGUS_OPENAI_COMPATIBLE_INSECURE_SSL", "").strip().lower() in {"1", "true", "yes", "on"}
+        if insecure:
+            import httpx
+            http_client = httpx.Client(verify=False)
         _client = OpenAI(
             base_url=BASE_URL, api_key=API_KEY,
             timeout=LLM_TIMEOUT, max_retries=LLM_MAX_RETRIES,
+            http_client=http_client,
         )
     return _client
 

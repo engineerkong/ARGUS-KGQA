@@ -137,4 +137,69 @@ mappingId   asset_site
 target      ex:asset/{asset_id} argus:atSite ex:site/{site_id} .
 source      SELECT asset_id, site_id FROM assets WHERE site_id IS NOT NULL
 
+mappingId   physical_quantity_dual_type
+target      ex:quantity/{property_id} a argus:PhysicalQuantity .
+source      SELECT property_id FROM observed_properties
+
+mappingId   location
+target      ex:location/{site_id} a argus:Location ; rdfs:label {label}^^xsd:string .
+source      SELECT site_id, label FROM sites
+
+mappingId   asset_state
+target      ex:asset-state/{site_id} a argus:AssetState ; rdfs:label {label}^^xsd:string ;
+            argus:hasLocation ex:location/{site_id} .
+source      SELECT site_id, label FROM sites
+
+mappingId   asset_state_of_asset
+target      ex:asset-state/{site_id} argus:stateOfAsset ex:asset/{asset_id} .
+source      SELECT site_id, asset_id FROM assets WHERE site_id IS NOT NULL
+
+mappingId   device_type
+target      ex:device-type/{model} a argus:DeviceType ; rdfs:label {model}^^xsd:string .
+source      SELECT DISTINCT model FROM nodes WHERE model IS NOT NULL
+
+mappingId   device
+target      ex:device/{node_id} a argus:Device ; rdfs:label {label}^^xsd:string .
+source      SELECT node_id, label FROM nodes
+
+mappingId   device_has_type
+target      ex:device/{node_id} argus:deviceType ex:device-type/{model} .
+source      SELECT node_id, model FROM nodes WHERE model IS NOT NULL
+
+mappingId   installed_device
+target      ex:installed-device/{node_id} a argus:InstalledDevice ; rdfs:label {label}^^xsd:string ;
+            argus:installsDevice ex:device/{node_id} ; argus:installedOnAssetState ex:asset-state/{site_id} .
+source      SELECT DISTINCT n.node_id, n.label, r.site_id
+                   FROM nodes n JOIN readings r ON r.node_id = n.node_id
+
+mappingId   instrument_type
+target      ex:instrument-type/{model} a argus:InstrumentType ; rdfs:label {model}^^xsd:string .
+source      SELECT DISTINCT model FROM sensors WHERE model IS NOT NULL
+
+mappingId   instrument
+target      ex:instrument/{sensor_id} a argus:Instrument ; rdfs:label {label}^^xsd:string .
+source      SELECT sensor_id, label FROM sensors
+
+mappingId   instrument_has_type
+target      ex:instrument/{sensor_id} argus:instrumentType ex:instrument-type/{model} .
+source      SELECT sensor_id, model FROM sensors WHERE model IS NOT NULL
+
+mappingId   installed_instrument
+target      ex:installed-instrument/{sensor_id} a argus:InstalledInstrument ; rdfs:label {label}^^xsd:string ;
+            argus:installsInstrument ex:instrument/{sensor_id} ; argus:installedOnDevice ex:installed-device/{node_id} .
+source      SELECT DISTINCT s.sensor_id, s.label, r.node_id
+                   FROM sensors s JOIN readings r ON r.sensor_id = s.sensor_id
+
+mappingId   observation_numeric_installed_instrument
+target      ex:observation/{observation_id} sosa:madeBySensor ex:installed-instrument/{sensor_id} .
+source      SELECT o.observation_id, r.sensor_id
+                   FROM observations o JOIN readings r ON r.reading_id = o.reading_id
+                   WHERE o.value IS NOT NULL
+
+mappingId   observation_text_installed_instrument
+target      ex:observation/{observation_id} sosa:madeBySensor ex:installed-instrument/{sensor_id} .
+source      SELECT o.observation_id, r.sensor_id
+                   FROM observations o JOIN readings r ON r.reading_id = o.reading_id
+                   WHERE o.value_text IS NOT NULL
+
 ]]
