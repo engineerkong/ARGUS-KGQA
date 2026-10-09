@@ -15,7 +15,9 @@ from typing import Any, Iterable, Iterator
 
 from rdflib import Graph, URIRef
 
-_PREFETCH_BATCH = 100
+# A 100-URI VALUES query is rejected by Ontop (75 verified OK); a failed batch
+# would be negative-cached, silently dropping every label it should resolve.
+_PREFETCH_BATCH = 50
 
 
 def _run_query(graph: Graph, sparql: str) -> list[dict[str, Any]]:
