@@ -1,8 +1,26 @@
 """
 ARGUS KGQA pipeline: parse → SPARQL → answer, over a KG loaded once at init.
 
-A Step 2 error or empty result is fed back to Step 1 for up to max_retries
-re-parses. Conversation history is opt-in (see Pipeline.keep_history).
+A Step 2 error or empty result is fed back to Step 1 for up to k re-parses.
+Conversation history is opt-in (see Pipeline.keep_history). How much LLM work
+a turn may spend is set by one of three configurations:
+
+                     FAST       BALANCED   THOROUGH
+  parse candidates   1          1          n (voted)
+  retry budget k     0          2          2
+  history turns h    1          2          2
+  answer             template   LLM        LLM + check
+  LLM calls          1          2 to 4     n+1 to n+4
+
+Ablation (w/o analysis, any configuration): the analysis layer still fetches
+each anomaly rule's raw readings but computes nothing, and the answer gets no
+pre-computed temporal/spatial/numeric summary. SPARQL aggregates are unchanged.
+The row cap counts those raw readings too. Per configuration:
+  FAST      template answer lists rows only; anomaly questions are
+            "Cannot be determined" (no LLM and no computed verdict)
+  BALANCED  the LLM computes and judges from rows and raw readings
+  THOROUGH  as BALANCED with voted parsing; the answer check is skipped, since
+            it checks against analysis output (n+1 to n+3 LLM calls)
 """
 
 from __future__ import annotations
@@ -10,12 +28,14 @@ import importlib
 import json
 import os
 import time
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any
 
 
 _sp = importlib.import_module("1_semantic_parser")
 parse = _sp.parse
+parse_voted = _sp.parse_voted
 
 _sr = importlib.import_module("2_sparql_retriever")
 build_sparql = _sr.build_sparql
@@ -25,9 +45,12 @@ unfold_results = _sr.unfold_results
 _ag = importlib.import_module("3_answer_generator")
 generate = _ag.generate
 prompt_row_stats = _ag.prompt_row_stats
+template_answer = _ag.template_answer
+check_answer = _ag.check_answer
 
 _ek = importlib.import_module("ek_analysis")
 evaluate_ad_rt = _ek.evaluate
+fetch_ad_rt_raw = _ek.fetch_raw
 
 _be = importlib.import_module("backend")
 make_backend = _be.make_backend
@@ -46,8 +69,34 @@ MAX_RESULT_ROWS = int(os.environ.get("ARGUS_MAX_RESULT_ROWS", "1000"))
 
 _DEFAULT_TTL_PATH = Path(__file__).resolve().parent.parent / "data" / "argus_readings.ttl"
 DEFAULT_TTL = Path(os.environ.get("ARGUS_TTL_PATH", str(_DEFAULT_TTL_PATH)))
-MAX_RETRIES = 2
-MAX_HISTORY = 2
+
+
+@dataclass(frozen=True)
+class Config:
+    name: str
+    parse_candidates: int   # n; >1 votes over n parses (first turn only, retries parse once)
+    max_retries: int        # k
+    max_history: int        # h
+    answer: str             # "template" | "llm" | "llm+check"
+    analysis: bool = True   # False = w/o-analysis ablation
+
+
+CONFIGS = {
+    "fast":     Config("fast",     parse_candidates=1, max_retries=0, max_history=1, answer="template"),
+    "balanced": Config("balanced", parse_candidates=1, max_retries=2, max_history=2, answer="llm"),
+    "thorough": Config("thorough", parse_candidates=3, max_retries=2, max_history=2, answer="llm+check"),
+}
+
+
+def get_config(name: str = "balanced", n: int | None = None, analysis: bool = True) -> Config:
+    """A named configuration; n overrides THOROUGH's number of parse candidates,
+    analysis=False gives its w/o-analysis ablation."""
+    cfg = CONFIGS[name.lower()]
+    if n is not None and cfg.parse_candidates > 1:
+        cfg = replace(cfg, parse_candidates=n)
+    if not analysis:
+        cfg = replace(cfg, name=cfg.name + "-noanalysis", analysis=False)
+    return cfg
 
 
 MAX_SAMPLE_VALUES = 8
@@ -97,22 +146,30 @@ def _is_oversized(results: list[dict]) -> bool:
     return len(results) > MAX_RESULT_ROWS
 
 
+def _oversized_answer(n_rows: int) -> str:
+    return (
+        f"This question matches {n_rows} rows, too many to answer directly "
+        f"(limit: {MAX_RESULT_ROWS}). Try asking for a statistic (count/average/min/max) "
+        f"or narrow it — e.g. a specific site, property, or a top-N."
+    )
+
+
 class Pipeline:
     def __init__(
         self,
         verbose: bool = True,
         ttl_path: str | Path | None = None,
-        max_retries: int = MAX_RETRIES,
+        config: str | Config = "balanced",
         keep_history: bool = False,
-        max_history: int = MAX_HISTORY,
         sparql_endpoint: str | None = None,
     ):
         self.verbose = verbose
-        self.max_retries = max_retries
+        self.config = get_config(config) if isinstance(config, str) else config
+        self.max_retries = self.config.max_retries
         # Conversation memory is opt-in: interactive sessions need it to resolve
         # follow-ups, batch runs must stay stateless so each query is reproducible.
         self.keep_history = keep_history
-        self.max_history = max_history
+        self.max_history = self.config.max_history
         self.history: list[dict[str, Any]] = []
         ttl = Path(ttl_path) if ttl_path else DEFAULT_TTL
 
@@ -124,6 +181,7 @@ class Pipeline:
         self.backend = make_backend(ttl_path=ttl, endpoint=endpoint)
         if self.verbose:
             print(f"[Step 0] Backend ready — {self.backend.describe()}.")
+            print(f"[Step 0] Configuration: {self.config}")
 
     def run(self, query: str) -> dict[str, Any]:
         v = self.verbose
@@ -136,7 +194,9 @@ class Pipeline:
         # Separated so a slow turn can be attributed to the LLM endpoint (steps 1
         # and 3) rather than to local query work (step 2).
         t_parse = t_query = t_answer = 0.0
-        parse_calls = 0
+        parse_calls = answer_calls = 0
+        vote = None
+        check_feedback = None
         t_total = time.perf_counter()
 
         for attempt in range(1 + self.max_retries):
@@ -152,9 +212,17 @@ class Pipeline:
                 else:
                     print(f"[Step 1] Retry {attempt}/{self.max_retries} — re-parsing with feedback")
             _t = time.perf_counter()
-            intent = parse(query, feedback=feedback, history=history)
+            n = self.config.parse_candidates
+            if attempt == 0 and n > 1:
+                intent, vote = parse_voted(query, n, history=history)
+                parse_calls += n
+                if v:
+                    print(f"[Step 1] Voted over {n} candidates: {vote['distinct']} distinct intent(s), "
+                          f"winner has {vote['winner_votes']} vote(s).")
+            else:
+                intent = parse(query, feedback=feedback, history=history)
+                parse_calls += 1
             t_parse += time.perf_counter() - _t
-            parse_calls += 1
             # AD questions: this fetches the applicable Policy rule(s), labelled
             # 2a (Step 2b below does the readings work). Normal questions: this
             # IS the readings retrieval, so it's labelled 2b directly.
@@ -204,11 +272,7 @@ class Pipeline:
         # Oversized ends the turn on the spot (see _is_oversized) — no retry,
         # no Step 2b or Step 3, just an explanation.
         if _is_oversized(raw_results):
-            answer = (
-                f"This question matches {len(raw_results)} rows, too many to answer directly "
-                f"(limit: {MAX_RESULT_ROWS}). Try asking for a statistic (count/average/min/max) "
-                f"or narrow it — e.g. a specific site, property, or a top-N."
-            )
+            answer = _oversized_answer(len(raw_results))
             if v:
                 print(f"\n{sep}")
                 print(f"[Pipeline] Giving up — {len(raw_results)} rows exceeds MAX_RESULT_ROWS "
@@ -224,7 +288,8 @@ class Pipeline:
                 del self.history[:-self.max_history]
             return {
                 "query": query, "intent": intent, "sparql": sparql,
-                "results": [], "answer": answer,
+                "results": [], "answer": answer, "config": self.config.name, "declined_oversized": True,
+                "llm_calls": parse_calls, "latency_s": round(time.perf_counter() - t_total, 2),
             }
 
         _t = time.perf_counter()
@@ -245,17 +310,47 @@ class Pipeline:
         ad_rt_summary = ""
         ad_rt_policies: list[dict[str, Any]] = []
         ad_rt_readings: list[str] = []
+        ad_rt_raw_rows = 0
         if is_ad:
             _t = time.perf_counter()
-            ad_rt_result = evaluate_ad_rt(self.backend, intent)
+            if self.config.analysis:
+                ad_rt_result = evaluate_ad_rt(self.backend, intent)
+            else:
+                ad_rt_result = fetch_ad_rt_raw(self.backend, intent)
+                ad_rt_raw_rows = ad_rt_result["n_rows"]
             ad_rt_summary = ad_rt_result["summary_text"]
             ad_rt_policies = ad_rt_result.get("policies", [])
             ad_rt_readings = ad_rt_result.get("readings", [])
             t_query += time.perf_counter() - _t
             if v and ad_rt_summary:
                 print(f"\n{sep}")
-                print("[Step 2b] SPARQL query on Readings (per matched rule, windowed/sensor-grouped):")
-                print(ad_rt_summary)
+                if self.config.analysis:
+                    print("[Step 2b] SPARQL query on Readings (per matched rule, windowed/sensor-grouped):")
+                    print(ad_rt_summary)
+                else:
+                    print(f"[Step 2b] Raw readings per matched rule (ablation, nothing computed): "
+                          f"{ad_rt_raw_rows} row(s)")
+                    print("\n".join(ad_rt_summary.splitlines()[:20]))
+
+        # Ablation: the raw readings go to the LLM, so they count toward the same
+        # row cap as Step 2's rows, handled the same way — declined, not truncated.
+        if ad_rt_raw_rows and len(unfolded) + ad_rt_raw_rows > MAX_RESULT_ROWS:
+            n_rows = len(unfolded) + ad_rt_raw_rows
+            answer = _oversized_answer(n_rows)
+            if v:
+                print(f"\n[Pipeline] Giving up — {n_rows} rows (incl. {ad_rt_raw_rows} raw AD-RT readings) "
+                      f"exceeds MAX_RESULT_ROWS ({MAX_RESULT_ROWS}); not sending to the LLM.")
+            if self.keep_history:
+                self.history.append({"query": query, "intent": intent,
+                                     "result_summary": _summarize_results(unfolded)})
+                del self.history[:-self.max_history]
+            return {
+                "query": query, "intent": intent, "sparql": sparql, "results": unfolded,
+                "answer": answer, "is_ad": is_ad, "policies": ad_rt_policies, "readings": ad_rt_readings,
+                "config": self.config.name, "llm_calls": parse_calls,
+                "ad_rt_raw_rows": ad_rt_raw_rows, "declined_oversized": True,
+                "latency_s": round(time.perf_counter() - t_total, 2),
+            }
 
         # ── Step 3: Natural Language Answer ─────────────────────────────────
         if v:
@@ -266,8 +361,26 @@ class Pipeline:
                 print(f"[Step 3] Large result set — this answer may take a while.")
             print("[Step 3] Generating natural language answer…")
         _t = time.perf_counter()
-        answer = generate(query, sparql, unfolded, ad_rt_summary=ad_rt_summary,
-                          anomaly_check=bool(intent.get("anomaly_check")), verbose=v)
+        anomaly = bool(intent.get("anomaly_check"))
+        if self.config.answer == "template":
+            answer = template_answer(query, unfolded, ad_rt_summary=ad_rt_summary, anomaly_check=anomaly,
+                                     with_analysis=self.config.analysis)
+        else:
+            answer = generate(query, sparql, unfolded, ad_rt_summary=ad_rt_summary,
+                              anomaly_check=anomaly, verbose=v, with_analysis=self.config.analysis)
+            answer_calls += 1
+            # THOROUGH: deterministic check against the evidence; one regeneration on failure.
+            # Both of its criteria are defined against analysis output (the computed
+            # verdict and analysis numbers), so the ablation skips it.
+            if self.config.answer == "llm+check" and self.config.analysis:
+                check_feedback = check_answer(answer, query, unfolded, ad_rt_summary=ad_rt_summary,
+                                              anomaly_check=anomaly)
+                if check_feedback:
+                    if v:
+                        print(f"[Step 3] Answer check failed — regenerating:\n{check_feedback}")
+                    answer = generate(query, sparql, unfolded, ad_rt_summary=ad_rt_summary,
+                                      anomaly_check=anomaly, verbose=False, feedback=check_feedback)
+                    answer_calls += 1
         t_answer = time.perf_counter() - _t
         if v:
             print("[Step 3] Answer:")
@@ -276,7 +389,7 @@ class Pipeline:
             llm = t_parse + t_answer
             print(f"\n[Timing] total {total:.1f}s = "
                   f"LLM {llm:.1f}s ({llm/total*100:.0f}%) "
-                  f"[step1 {t_parse:.1f}s ×{parse_calls} call(s), step3 {t_answer:.1f}s] "
+                  f"[step1 {t_parse:.1f}s ×{parse_calls} call(s), step3 {t_answer:.1f}s ×{answer_calls} call(s)] "
                   f"+ local query {t_query:.2f}s")
 
         if self.keep_history:
@@ -296,6 +409,13 @@ class Pipeline:
             "is_ad":    is_ad,
             "policies": ad_rt_policies,
             "readings": ad_rt_readings,
+            "config":   self.config.name,
+            "llm_calls": parse_calls + answer_calls,
+            "vote":     vote,
+            "check_failed": check_feedback,
+            "ad_rt_raw_rows": ad_rt_raw_rows,
+            "declined_oversized": False,
+            "latency_s": round(time.perf_counter() - t_total, 2),
         }
 
     def reset_history(self) -> None:

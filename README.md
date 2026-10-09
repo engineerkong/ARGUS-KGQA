@@ -52,6 +52,53 @@ print(result["answer"])
 # result also holds: intent, sparql, results (unfolded rows), answer
 ```
 
+## Configurations
+
+How much LLM work a turn may spend is one of three configurations, chosen with
+`--config` (default `balanced`, the original behaviour):
+
+|                    | `fast`   | `balanced` | `thorough`    |
+|--------------------|----------|------------|---------------|
+| Parse candidates   | 1        | 1          | n (voted)     |
+| Retry budget k     | 0        | 2          | 2             |
+| History turns h    | 1        | 2          | 2             |
+| Answer             | template | LLM        | LLM + check   |
+| LLM calls          | 1        | 2 to 4     | n+1 to n+4    |
+
+- **Voted parse**: one greedy and n−1 sampled parses (temperature
+  `ARGUS_VOTE_TEMPERATURE`, default 0.7) run in parallel; the most frequent
+  intent wins, ties go to the greedy one. Retries always parse once.
+- **Template answer**: no LLM — the AD-RT verdict, or the result rows plus the
+  pre-computed analysis, rendered as text.
+- **Check**: every number in the answer must appear (up to rounding) in the
+  results, the analysis or the AD-RT summary, and an anomaly answer must lead
+  with the computed verdict; on failure the answer is regenerated once with the
+  problems as feedback.
+
+```bash
+python scripts/demo.py --online --config fast
+python scripts/demo.py --online --config thorough --n 3
+```
+
+**Ablation `--no-analysis`** (any configuration; analysis is on by default)
+removes the deterministic analysis layer: no temporal/spatial/numeric summary,
+and for anomaly questions the rule windows' raw readings are fetched as usual
+but nothing is computed — no per-sensor grouping, window statistics or
+threshold comparison. Statistics are still SPARQL aggregates. Raw readings
+count toward the 1,000-row cap (declined, not truncated, like any oversized
+result).
+
+| | `fast` | `balanced` | `thorough` |
+|---|---|---|---|
+| w/o analysis | rows only; anomaly → "Cannot be determined" | LLM computes and judges from rows and raw readings | as `balanced`, voted parse; answer check skipped (it checks against analysis output), n+1 to n+3 calls |
+
+```python
+from pipeline import Pipeline, get_config
+p = Pipeline(config=get_config("thorough", n=3))
+r = p.run("What is the maximum temperature recorded at Schenkenberg?")
+r["answer"], r["llm_calls"], r["latency_s"]
+```
+
 ## Pipeline
 
 ```

@@ -931,3 +931,160 @@ def evaluate(backend, intent: dict) -> dict[str, Any]:
         _readings_log.reset(log_token)
 
     return {"summary_text": "\n".join(lines), "policies": policies, "readings": readings_log}
+
+
+# ---------------------------------------------------------------------------
+# Ablation (w/o analysis): fetch exactly the readings each rule's evaluator
+# would fetch — same anchor time, same window(s), same column matcher — but
+# compute nothing: no per-sensor grouping, no window statistic, no threshold
+# comparison. The rule's definition and the raw rows go to the LLM instead.
+# ---------------------------------------------------------------------------
+
+_ABLATION_PREAMBLE = (
+    "AD-RT rules and raw readings for site={site!r}, quantity~{keyword!r}{as_of_desc}. "
+    "No verdict has been computed. AD-RT evaluates each sensor separately and a rule fires "
+    "if any sensor's metric crosses its threshold; windows end at the latest matching reading."
+)
+
+
+def _sensor_name(iri: str) -> str:
+    return iri.rstrip("/").rsplit("/", 1)[-1]
+
+
+def _rule_definition(rule: str, spec: RuleSpec | None, p: dict) -> str:
+    parts = [f"Rule {rule} ('{p.get('label')}')"]
+    if p.get("threshold") is not None:
+        parts.append(f"threshold={p.get('threshold')}")
+    if p.get("thresholdjson"):
+        parts.append(f"threshold parameters={p.get('thresholdjson')}")
+    if spec is not None:
+        matcher = []
+        if spec.any_of:
+            matcher.append("label contains any of " + ", ".join(spec.any_of))
+        if spec.all_of:
+            matcher.append("label contains all of " + ", ".join(spec.all_of))
+        if spec.excludes:
+            matcher.append("label contains none of " + ", ".join(spec.excludes))
+        if matcher:
+            parts.append("quantities: " + "; ".join(matcher))
+        if spec.direct:
+            parts.append(f"definition: the latest raw reading compared directly with the threshold "
+                         f"({'fires below' if spec.direction == 'lt' else 'fires above'})")
+        else:
+            parts.append(f"definition: {spec.shape}")
+        if spec.windows:
+            parts.append("windows: " + "; ".join(f"{w.duration} {w.agg} vs threshold '{w.threshold_key}'"
+                                                 for w in spec.windows))
+        if spec.custom_params:
+            parts.append(f"parameters: {spec.custom_params}")
+        if spec.note:
+            parts.append(f"note: {spec.note}")
+    return ", ".join(parts)
+
+
+def _fmt_rows(triples: list[tuple[float, str, str]]) -> list[str]:
+    return [f"    {t} | sensor {_sensor_name(s)} | {v:g}" for v, t, s in triples]
+
+
+def _fetch_rule_rows(backend, site: str, spec: RuleSpec, as_of: str | None) -> tuple[str, list[str]]:
+    """(description of what was fetched, row lines) — mirrors each evaluator's own fetch."""
+    if spec.direct:
+        obs = _query_recent_observations_for_spec(backend, site, spec, RECENT_WINDOW, before=as_of)
+        rows = sorted(((v, o.get("time")) for o in obs if (v := _to_float(o.get("value"))) is not None),
+                      key=lambda vt: vt[1] or "")
+        return (f"last {len(rows)} readings", [f"    {t} | {v:g}" for v, t in rows])
+
+    if spec.custom in ("two_col_closeness", "two_col_composite"):
+        spec_b = RuleSpec(False, any_of=spec.second_any_of, all_of=spec.second_all_of)
+        lines = []
+        for name, s in (("first quantity", spec), ("second quantity", spec_b)):
+            for o in _query_recent_observations_for_spec(backend, site, s, 1, before=as_of):
+                lines.append(f"    {name} ({', '.join(s.any_of + s.all_of)}): {o.get('time')} | {o.get('value')}")
+        return ("latest reading of each of the two quantities", lines)
+
+    if spec.zscore:
+        triples = _query_raw_window(backend, site, spec, None, as_of)
+        return (f"all {len(triples)} available readings" + (f" up to {as_of}" if as_of else ""), _fmt_rows(triples))
+
+    # windows / single-window custom rules: one fetch covering the longest window
+    # the evaluator uses (the shorter ones are its suffixes).
+    if spec.windows:
+        span = max(_parse_duration(w.duration) for w in spec.windows)
+    elif spec.custom == "day_over_day_change":
+        span = timedelta(hours=48)
+    elif spec.custom in CUSTOM_EVALUATORS:
+        p = spec.custom_params
+        span = max(_parse_duration(p[k]) for k in ("short", "long", "window") if k in p)
+    else:
+        return ("", [])
+
+    latest_iso = _query_latest_time(backend, site, spec, before=as_of)
+    if latest_iso is None:
+        return ("no matching readings", [])
+    start_iso = (datetime.fromisoformat(latest_iso) - span).isoformat()
+    triples = _query_raw_window(backend, site, spec, start_iso, latest_iso)
+    return (f"{len(triples)} readings from {start_iso} to {latest_iso}", _fmt_rows(triples))
+
+
+def _evaluator_skips(spec: RuleSpec, p: dict) -> bool:
+    # The evaluators return "no threshold on record — skipped" before fetching
+    # anything in these cases; fetch nothing here either.
+    threshold = _to_float(p.get("threshold"))
+    if spec.direct or spec.zscore:
+        return threshold is None
+    if spec.custom == "two_col_composite":
+        t = _thresholds_from_json(p.get("thresholdjson"))
+        return t.get(spec.custom_params["t_key"]) is None or t.get(spec.custom_params["h_key"]) is None
+    if spec.custom:
+        return _get_threshold_value(threshold, p.get("thresholdjson"), spec.custom_params["threshold_key"]) is None
+    return False
+
+
+def fetch_raw(backend, intent: dict) -> dict[str, Any]:
+    """The ablation counterpart of evaluate(): same keys, plus "n_rows", the
+    number of raw readings in summary_text (they count toward the row cap)."""
+    site, keyword = extract_context(intent)
+    if not site or not keyword:
+        return {"summary_text": "", "policies": [], "readings": [], "n_rows": 0}
+
+    as_of = extract_as_of(intent)
+    policies = _query_policies(backend, site, keyword)
+    if not policies:
+        return {"summary_text": (
+            f"AD-RT rules and raw readings: no expert-rule policy found for site={site!r} "
+            f"matching quantity {keyword!r} — this cannot be assessed against a "
+            f"known AD-RT threshold."
+        ), "policies": [], "readings": [], "n_rows": 0}
+
+    readings_log: list[str] = []
+    log_token = _readings_log.set(readings_log)
+    n_rows = 0
+    try:
+        lines = [_ABLATION_PREAMBLE.format(site=site, keyword=keyword,
+                                           as_of_desc=f", as of {as_of}" if as_of else "")]
+        for p in policies:
+            rule = p.get("ruleid") or p.get("label")
+            spec = RULE_SPECS.get((site, rule))
+            lines.append("  - " + _rule_definition(rule, spec, p))
+            if spec is None:
+                lines.append("    (not in the AD-RT rule table; no readings retrieved)")
+                continue
+            if _evaluator_skips(spec, p):
+                lines.append("    (no threshold on record; no readings retrieved)")
+                continue
+            rule_token = _current_rule.set(rule)
+            try:
+                desc, rows = _fetch_rule_rows(backend, site, spec, as_of)
+            finally:
+                _current_rule.reset(rule_token)
+            if not rows:
+                lines.append(f"    (no readings retrieved{': ' + desc if desc else ''})")
+                continue
+            lines.append(f"    Readings ({desc}):")
+            lines += rows
+            n_rows += len(rows)
+    finally:
+        _readings_log.reset(log_token)
+
+    return {"summary_text": "\n".join(lines), "policies": policies,
+            "readings": readings_log, "n_rows": n_rows}

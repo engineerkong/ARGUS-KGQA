@@ -7,6 +7,8 @@ so follow-up questions resolve against them.
 from __future__ import annotations
 import json
 import os
+from collections import Counter
+from concurrent.futures import ThreadPoolExecutor
 from openai import OpenAI
 from ontology_schema import get_ontology_schema, extract_class_list
 
@@ -372,7 +374,8 @@ def _format_result_summary(summary: dict | None) -> str | None:
     return "; ".join(parts) + "]"
 
 
-def parse(query: str, feedback: str | None = None, history: list[dict] | None = None) -> dict:
+def parse(query: str, feedback: str | None = None, history: list[dict] | None = None,
+          temperature: float = 0.0) -> dict:
     client = _get_client()
 
     user_content = f"Query: {query}"
@@ -408,7 +411,7 @@ def parse(query: str, feedback: str | None = None, history: list[dict] | None = 
     response = client.chat.completions.create(
         model=MODEL,
         messages=messages,
-        temperature=0.0,
+        temperature=temperature,
     )
     raw = response.choices[0].message.content.strip()
 
@@ -434,3 +437,28 @@ def parse(query: str, feedback: str | None = None, history: list[dict] | None = 
             "as_of": None,
             "explanation": f"Fallback intent for: {query}",
         }
+
+
+# Sampling temperature for the extra candidates of a voted parse; the first
+# candidate is always the greedy (temperature 0) one.
+VOTE_TEMPERATURE = float(os.environ.get("ARGUS_VOTE_TEMPERATURE", "0.7"))
+
+
+def _vote_key(intent: dict) -> str:
+    # Two intents vote together when they would compile to the same query —
+    # the free-text explanation does not count.
+    return json.dumps({k: v for k, v in intent.items() if k != "explanation"}, sort_keys=True)
+
+
+def parse_voted(query: str, n: int, history: list[dict] | None = None) -> tuple[dict, dict]:
+    """n parses in parallel (one greedy, n-1 sampled), majority vote on the
+    intent. Ties go to the greedy candidate. Returns (intent, vote info)."""
+    temps = [0.0] + [VOTE_TEMPERATURE] * (n - 1)
+    with ThreadPoolExecutor(n) as ex:
+        candidates = list(ex.map(lambda t: parse(query, history=history, temperature=t), temps))
+    # A candidate that failed to parse as JSON only votes if nothing else did.
+    valid = [c for c in candidates if not str(c.get("explanation", "")).startswith("Fallback intent")] or candidates
+    counts = Counter(_vote_key(c) for c in valid)
+    top = max(counts.values())
+    winner = next(c for c in valid if counts[_vote_key(c)] == top)
+    return winner, {"candidates": n, "distinct": len(counts), "winner_votes": top}

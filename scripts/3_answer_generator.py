@@ -7,6 +7,7 @@ asked to reason over them rather than reformat them.
 from __future__ import annotations
 import json
 import os
+import re
 from openai import OpenAI
 
 from geo_analysis import analyze
@@ -66,6 +67,24 @@ AD-RT rule check (when present in the prompt):
 """
 
 
+# Ablation (w/o analysis): same prompt, except that nothing is pre-computed
+# any more — no spatial/temporal/numeric summary and no AD-RT verdict, only the
+# rule definitions and raw readings. SPARQL aggregates are still computed in
+# the query, so the instruction to report them stays.
+SYSTEM_NO_ANALYSIS = SYSTEM.replace(
+    "You are given a user question, SPARQL results, and a numeric summary.",
+    "You are given a user question and SPARQL results. No numeric summary or analysis is provided.",
+).replace(
+    """- Otherwise the rows are a de-duplicated listing, so do NOT compute an average, total or record count from them; give the values, ranges or examples the rows support and leave it there.""",
+    """- Otherwise the rows are a de-duplicated listing, so do NOT compute an average, total or record count from them.
+- Anything else the question needs — newest/oldest timestamps and time spans, distances between nodes from their coordinates, centroids, value ranges — compute it yourself from the rows.""",
+).replace(
+    """- If a message includes a section starting "AD-RT rule check", that verdict (EXCEEDS/within a threshold) was computed in Python, not by you — report it as-is, do NOT recompute or second-guess it by comparing raw numbers yourself.""",
+    """- If a message includes a section starting "AD-RT rules and raw readings", it lists each applicable rule (definition and threshold) and the raw readings retrieved for it. No verdict has been computed: evaluate each rule yourself from those readings and decide whether it fires.""",
+)
+assert SYSTEM_NO_ANALYSIS.count("compute it yourself") == 1 and "No verdict has been computed" in SYSTEM_NO_ANALYSIS
+
+
 def _dedupe(results: list) -> list:
     seen = set()
     out = []
@@ -84,22 +103,26 @@ def prompt_row_stats(results: list) -> tuple[int, int]:
 
 
 def generate(query: str, sparql: str, results: list, ad_rt_summary: str | None = None,
-             anomaly_check: bool = False, verbose: bool = False) -> str:
+             anomaly_check: bool = False, verbose: bool = False, feedback: str | None = None,
+             with_analysis: bool = True) -> str:
+    """with_analysis=False is the w/o-analysis ablation: no pre-computed
+    summary, and ad_rt_summary holds rule definitions + raw readings
+    (ek_analysis.fetch_raw) instead of verdicts (ek_analysis.evaluate)."""
     client = _get_client()
 
-    analysis = analyze(results)
     deduped = _dedupe(results)
     results_text = json.dumps(deduped, indent=2, ensure_ascii=False)
 
     user_msg = (
         f"User question:\n{query}\n\n"
         f"SPARQL query executed:\n```sparql\n{sparql}\n```\n\n"
-        f"Results — all {len(deduped)} distinct rows ({len(results)} total):\n{results_text}\n\n"
-        f"Pre-computed spatial & temporal analysis:\n"
-        f"{analysis['summary_text']}"
+        f"Results — all {len(deduped)} distinct rows ({len(results)} total):\n{results_text}"
     )
-    if verbose:
-        print(f"[Step 3] Pre-computed spatial & temporal analysis:\n{analysis['summary_text']}")
+    if with_analysis:
+        analysis = analyze(results)
+        user_msg += f"\n\nPre-computed spatial & temporal analysis:\n{analysis['summary_text']}"
+        if verbose:
+            print(f"[Step 3] Pre-computed spatial & temporal analysis:\n{analysis['summary_text']}")
 
     # AD-RT expert-rule threshold check — precomputed by the caller (Step 2b,
     # see pipeline.py) and just passed through here; Step 3 only assembles the
@@ -109,13 +132,118 @@ def generate(query: str, sparql: str, results: list, ad_rt_summary: str | None =
         if anomaly_check:
             user_msg += "\n\n(This is a yes/no anomaly check — lead your answer with Yes/No/Cannot be determined.)"
 
+    # THOROUGH: a previous answer failed check_answer(); say what was wrong.
+    if feedback:
+        user_msg += f"\n\n--- YOUR PREVIOUS ANSWER FAILED A CHECK ---\n{feedback}\nWrite a corrected answer."
+
     response = client.chat.completions.create(
         model=MODEL,
         messages=[
-            {"role": "system", "content": SYSTEM},
+            {"role": "system", "content": SYSTEM if with_analysis else SYSTEM_NO_ANALYSIS},
             {"role": "user",   "content": user_msg},
         ],
         temperature=0.3,
     )
 
     return response.choices[0].message.content.strip()
+
+
+# ── Verdict, template answer (FAST) and answer check (THOROUGH) ─────────────
+
+_FIRED = re.compile(r"→ (EXCEEDS|BELOW|FIRES)")
+_WITHIN = re.compile(r"→ within")
+
+
+def ad_rt_verdict(ad_rt_summary: str | None) -> str:
+    """The Yes/No/Cannot-be-determined verdict implied by ek_analysis's summary:
+    Yes if any evaluated rule fired, No if rules were evaluated and none fired."""
+    if ad_rt_summary and _FIRED.search(ad_rt_summary):
+        return "Yes"
+    if ad_rt_summary and _WITHIN.search(ad_rt_summary):
+        return "No"
+    return "Cannot be determined"
+
+
+_TEMPLATE_ROWS = 10
+
+
+def template_answer(query: str, results: list, ad_rt_summary: str | None = None,
+                    anomaly_check: bool = False, with_analysis: bool = True) -> str:
+    """Deterministic answer with no LLM call: the AD-RT verdict, or the result
+    rows plus the pre-computed analysis, rendered as text. Without the analysis
+    layer nothing computes a verdict, so an anomaly question cannot be decided
+    and only the applicable rules are listed."""
+    if anomaly_check and not with_analysis:
+        rules = [l.strip()[2:] for l in (ad_rt_summary or "").splitlines() if l.startswith("  - ")]
+        n_readings = sum(1 for l in (ad_rt_summary or "").splitlines() if l.startswith("    ") and "|" in l)
+        detail = (f" Applicable rules: {' '.join(rules)} ({n_readings} raw readings retrieved, "
+                  f"no verdict computed.)") if rules else (" " + ad_rt_summary if ad_rt_summary else "")
+        return f"Cannot be determined.{detail}"
+    if anomaly_check:
+        rules = [l.strip() for l in (ad_rt_summary or "").splitlines()[1:] if l.strip()]
+        detail = (" " + " ".join(rules)) if rules else (" " + ad_rt_summary if ad_rt_summary else "")
+        return f"{ad_rt_verdict(ad_rt_summary)}.{detail}"
+
+    if not results or (len(results) == 1 and "error" in results[0]):
+        return "No matching data was found in the knowledge graph for this question."
+
+    rows = _dedupe(results)
+    if len(rows) == 1 and len(rows[0]) == 1:
+        (k, v), = rows[0].items()
+        return f"{k.replace('_', ' ')}: {v}."
+
+    lines = [f"{len(rows)} result(s):"]
+    for row in rows[:_TEMPLATE_ROWS]:
+        lines.append("- " + ", ".join(f"{k.replace('_', ' ')}: {v}" for k, v in row.items()))
+    if len(rows) > _TEMPLATE_ROWS:
+        lines.append(f"- … and {len(rows) - _TEMPLATE_ROWS} more.")
+    facts = [l for l in analyze(results)["summary_text"].splitlines()[1:] if l.strip()] if with_analysis else []
+    if facts:
+        lines.append("Analysis:")
+        lines += facts[:15]
+    return "\n".join(lines)
+
+
+# Unsigned on purpose: "2026-10-08" must yield 10 and 8, the same numbers as
+# "8 October 2026". "18,507" is a thousands separator, not a decimal comma.
+_NUMBER = re.compile(r"\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+(?:\.\d+)?")
+
+
+def _numbers(text: str) -> list[str]:
+    return [m.replace(",", "") for m in _NUMBER.findall(text or "")]
+
+
+def _supported(num: str, evidence: list[float]) -> bool:
+    # The answer may round: 18.4381 supports "18.44", "18.4" and "18".
+    x = float(num)
+    decimals = len(num.split(".")[1]) if "." in num else 0
+    tol = 0.5 * 10 ** -decimals + 1e-9
+    return any(abs(x - e) <= tol or (e and abs(x - e) / abs(e) <= 0.005) for e in evidence)
+
+
+def check_answer(answer: str, query: str, results: list, ad_rt_summary: str | None = None,
+                 anomaly_check: bool = False) -> str | None:
+    """Deterministic check of an LLM answer against the evidence it was given.
+    Returns None when it passes, else feedback for one regeneration:
+      - every number in the answer must appear (up to rounding) in the result
+        rows, the pre-computed analysis, the AD-RT summary or the question;
+      - an anomaly answer must lead with the verdict the AD-RT check computed."""
+    problems = []
+
+    if anomaly_check:
+        expected = ad_rt_verdict(ad_rt_summary)
+        if not answer.strip().lower().startswith(expected.lower()):
+            problems.append(f"The AD-RT rule check computed the verdict '{expected}', "
+                            f"but the answer does not start with it.")
+
+    evidence_text = "\n".join([
+        json.dumps(results, ensure_ascii=False), analyze(results)["summary_text"],
+        ad_rt_summary or "", query,
+    ])
+    evidence = [float(n) for n in _numbers(evidence_text)]
+    unsupported = [n for n in dict.fromkeys(_numbers(answer)) if not _supported(n, evidence)]
+    if unsupported:
+        problems.append("These numbers in the answer are not in the results or the analysis: "
+                        + ", ".join(unsupported) + ". Report only values that are in them.")
+
+    return "\n".join(problems) or None

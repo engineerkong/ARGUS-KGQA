@@ -8,7 +8,7 @@ in pipeline.py. Same setup requirements as demo.py (data + LLM endpoint).
 """
 
 import argparse
-from pipeline import Pipeline
+from pipeline import CONFIGS, Pipeline, get_config
 
 QUERIES = [
     # ── Real data on both sides — full Step 2a/2b split visible, non-trivial
@@ -76,9 +76,19 @@ def main():
                         help="Interactive mode: type queries in terminal")
     parser.add_argument("--quiet", action="store_true",
                         help="Hide intermediate pipeline steps")
+    parser.add_argument("--config", choices=list(CONFIGS), default="balanced",
+                        help="fast: 1 LLM call, template answer; balanced: 2-4 calls; "
+                             "thorough: n voted parses + checked answer, n+1 to n+4 calls")
+    parser.add_argument("--n", type=int, default=3,
+                        help="Parse candidates voted on in the thorough configuration (default 3)")
+    parser.add_argument("--no-analysis", action="store_true",
+                        help="Ablation, with any --config: no analysis layer (no temporal/spatial "
+                             "summary, no AD-RT computation — raw rule readings go to the answer); "
+                             "SPARQL aggregates unchanged. Default: analysis on")
     args = parser.parse_args()
 
-    pipeline = Pipeline(verbose=not args.quiet, keep_history=args.online)
+    pipeline = Pipeline(verbose=not args.quiet, keep_history=args.online,
+                        config=get_config(args.config, n=args.n, analysis=not args.no_analysis))
 
     if args.online:
         run_online(pipeline)
