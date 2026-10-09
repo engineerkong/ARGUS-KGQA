@@ -1,9 +1,11 @@
 """
 Step 0b — live ingest: pull new ARGUS readings straight from the API into
 Postgres, on a loop. Postgres is the only store — no local TTL, sidecar, or
-state file. Pagination bookmarks live in the `ingest_state` table and rows
-dedup via ON CONFLICT DO NOTHING on their primary keys, so re-fetching the
-overlap window on every cycle is always safe. Pairs with obda/ (Ontop) for a
+state file. The API pages newest-first, so each cycle walks from page 1 until
+it reaches readings already in Postgres; the very first run (or one that was
+interrupted) walks all the way back instead, and `ingest_state` records once
+that full backfill has completed. Rows dedup via ON CONFLICT DO NOTHING on
+their primary keys, so re-fetching an overlap window is always safe. Pairs with obda/ (Ontop) for a
 live SPARQL endpoint — see obda/docker-compose.yml's `ingest` service.
 
 For local dev without Postgres, use 0a_offline_readings.py instead (writes a
@@ -28,8 +30,8 @@ _rd = importlib.import_module("0a_offline_readings")
 DSN = os.environ.get("ARGUS_PG_DSN", "postgresql://argus:argus@localhost:5432/argus")
 SCHEMA_SQL = Path(__file__).resolve().parent.parent / "obda" / "schema.sql"
 INTERVAL = int(os.environ.get("ARGUS_INGEST_INTERVAL", "3600"))
-# Re-walk the last few pages each cycle: the API may still be settling records
-# into them, and ON CONFLICT DO NOTHING makes re-processing free.
+# Once backfilled, a cycle stops after this many consecutive pages with no new
+# readings — a little slack for late-arriving records landing behind the head.
 OVERLAP_PAGES = int(os.environ.get("ARGUS_INGEST_OVERLAP_PAGES", "2"))
 
 
@@ -146,25 +148,39 @@ def _apply_schema(conn) -> None:
 
 
 def ingest_cycle(conn, max_records: int | None = None) -> int:
-    """One fetch-and-load pass against the live API. Returns readings loaded."""
+    """One fetch-and-load pass against the live API. Returns new readings loaded."""
     _apply_schema(conn)
     with conn.cursor() as cur:
-        last_page = int(_get_state(cur, "last_successful_page", "0"))
+        backfilled = _get_state(cur, "backfill_complete", "0") == "1"
     conn.commit()
+    if not backfilled:
+        print("Full backfill not completed yet — walking the whole API history.", flush=True)
 
-    start_page = max(1, last_page - OVERLAP_PAGES + 1)
-    pages_iter, progress = _rd.fetch_readings_paginated(max_records=max_records, start_page=start_page)
+    pages_iter, progress = _rd.fetch_readings_paginated(max_records=max_records)
 
-    total = 0
+    total, idle_pages = 0, 0
     with conn.cursor() as cur:
         for page_records in pages_iter:
             rows = build_rows(page_records)
+            ids = [r[0] for r in rows["readings"]]
+            cur.execute("SELECT reading_id FROM readings WHERE reading_id = ANY(%s)", (ids,))
+            new = len(set(ids) - {r[0] for r in cur.fetchall()})
             for table in _ORDER:
                 if rows[table]:
                     cur.executemany(_INSERT[table], rows[table])
-            total += len(page_records)
+            total += new
             _set_state(cur, "last_successful_page", str(progress["last_successful_page"]))
             conn.commit()
+
+            idle_pages = idle_pages + 1 if new == 0 else 0
+            if backfilled and idle_pages >= OVERLAP_PAGES:
+                print(f"Caught up — {idle_pages} page(s) with nothing new.", flush=True)
+                break
+
+        if progress["reached_end"] and not backfilled:
+            _set_state(cur, "backfill_complete", "1")
+            conn.commit()
+            print("Full backfill complete.", flush=True)
 
     return total
 
@@ -175,7 +191,7 @@ def run_once(max_records: int | None = None) -> None:
     print(f"[{ts}] ingest cycle start — {DSN}", flush=True)
     with psycopg.connect(DSN) as conn:
         n = ingest_cycle(conn, max_records=max_records)
-    print(f"[{ts}] ingest cycle done — {n} reading(s) processed.", flush=True)
+    print(f"[{ts}] ingest cycle done — {n} new reading(s).", flush=True)
 
 
 def main() -> None:

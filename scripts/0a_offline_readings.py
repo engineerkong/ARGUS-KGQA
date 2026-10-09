@@ -109,6 +109,8 @@ API_ROOT = BASE_URL.rsplit("/", 1)[0]  # .../api/readings -> .../api
 API_HEADERS = {"Accept": "application/json"}
 REQUEST_TIMEOUT = (10, 180)
 PAGE_SLEEP_SECONDS = 0.5
+# The API defaults to 15 readings/page but honours ?limit= (verified up to 5000).
+READINGS_PAGE_SIZE = int(os.environ.get("ARGUS_PAGE_SIZE", "1000"))
 MAX_CONSECUTIVE_FAILURES = 20
 SAVE_EVERY_PAGES = 50
 
@@ -168,7 +170,7 @@ def _make_session() -> requests.Session:
 def _fetch_page_robust(session: requests.Session, page: int) -> Dict[str, Any]:
     response = session.get(
         BASE_URL, headers=API_HEADERS,
-        params={"page": page}, timeout=REQUEST_TIMEOUT,
+        params={"page": page, "limit": READINGS_PAGE_SIZE}, timeout=REQUEST_TIMEOUT,
     )
     response.raise_for_status()
     payload = response.json()
@@ -184,10 +186,17 @@ def _parse_paginated(payload: Dict[str, Any], fallback_page: int) -> Tuple[List[
         data = []
     if not isinstance(meta, dict):
         meta = {}
-    current_page = int(meta.get("current_page", fallback_page))
-    last_page = int(meta.get("last_page", current_page))
-    total = meta.get("total")
+    current_page = int(meta.get("current_page") or fallback_page)
     records = [item for item in data if isinstance(item, dict)]
+    # /readings uses simple pagination: meta.last_page is null, only links.next
+    # says whether another page exists. Report "one more page" while it does.
+    last_page = meta.get("last_page")
+    if last_page is None:
+        links = payload.get("links") if isinstance(payload.get("links"), dict) else {}
+        has_next = bool(links.get("next")) and bool(records)
+        last_page = current_page + 1 if has_next else current_page
+    last_page = int(last_page)
+    total = meta.get("total")
     return records, current_page, last_page, total
 
 
@@ -218,6 +227,7 @@ def fetch_readings_paginated(
         "last_page": None,
         "total": None,
         "records_downloaded_this_run": 0,
+        "reached_end": False,
     }
 
     def _iter_pages() -> Iterator[List[Dict[str, Any]]]:
@@ -254,6 +264,7 @@ def fetch_readings_paginated(
                     print(f"Stopped after max_records={max_records}")
                     return
                 if current_page >= last_page_value:
+                    progress["reached_end"] = True
                     return
 
                 page = current_page + 1

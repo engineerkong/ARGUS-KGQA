@@ -1,0 +1,6 @@
+openai
+httpx
+rdflib
+requests
+urllib3
+psycopg[binary]
