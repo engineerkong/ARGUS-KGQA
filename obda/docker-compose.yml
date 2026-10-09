@@ -51,6 +51,26 @@ services:
       - ./argus.properties:/opt/ontop/input/argus.properties:ro
       - ./jdbc:/opt/ontop/jdbc:ro
 
+  # Read-only experiment snapshot: same mapping, database argus_snapshot
+  # (restored from argus_postgres_20261001_180439.dump; ingest never writes to it).
+  #   export ARGUS_SPARQL_ENDPOINT=http://localhost:8082/sparql
+  ontop_snapshot:
+    image: ontop/ontop:5.5.0
+    depends_on:
+      - postgres
+    ports:
+      - "8082:8080"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      ONTOP_MAPPING_FILE: /opt/ontop/input/argus.obda
+      ONTOP_PROPERTIES_FILE: /opt/ontop/input/argus_snapshot.properties
+      ONTOP_CORS_ALLOWED_ORIGINS: "*"
+    volumes:
+      - ./argus.obda:/opt/ontop/input/argus.obda:ro
+      - ./argus_snapshot.properties:/opt/ontop/input/argus_snapshot.properties:ro
+      - ./jdbc:/opt/ontop/jdbc:ro
+
   ingest:
     build:
       context: ..
