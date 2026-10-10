@@ -128,6 +128,16 @@ def _summarize_results(results: list[dict[str, Any]]) -> dict[str, Any]:
             "sample_values": values, "sample_of": label_col}
 
 
+def _drop_empty_aggregate(results: list[dict]) -> list[dict]:
+    """An aggregate over nothing still returns a row (COUNT 0, AVG/SUM 0, MIN/MAX
+    unbound). Treat "matched no values" as no results, so it is retried and,
+    failing that, answered as "no data" rather than as a measured 0."""
+    if (len(results) == 1 and "error" not in results[0]
+            and str(results[0].get("n_values", results[0].get("count", ""))) == "0"):
+        return []
+    return results
+
+
 def _is_failed(results: list[dict]) -> str | None:
     """Return a feedback string if results indicate failure, else None."""
     if not results:
@@ -246,6 +256,7 @@ class Pipeline:
             print("[Step 0] Run `python scripts/0a_offline_readings.py --max-records 500` to fetch data first.")
         self.backend = make_backend(ttl_path=ttl, endpoint=endpoint)
         latest = self.latest_reading()  # fetched up front, so no question pays for it
+        self.vocabulary = self._vocabulary()
         if self.verbose:
             print(f"[Step 0] Backend ready — {self.backend.describe()}.")
             print(f"[Step 0] Configuration: {self.config}")
@@ -270,6 +281,33 @@ SELECT (MAX(?t) AS ?latest) WHERE { ?o a sosa:Observation ; sosa:resultTime ?t .
                 latest = latest.replace(tzinfo=timezone.utc)
         self._latest_cache = (time.monotonic(), latest)
         return latest
+
+    _VOCAB_SPARQL = """PREFIX argus: <http://www.argus-project.eu/ontology/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT DISTINCT ?cls ?label WHERE {
+  { ?x a argus:ObservedProperty ; rdfs:label ?label . BIND("ObservedProperty" AS ?cls) }
+  UNION { ?x a argus:Site ; rdfs:label ?label . BIND("Site" AS ?cls) }
+  UNION { ?x a argus:Node ; rdfs:label ?label . BIND("Node" AS ?cls) }
+}"""
+
+    def _vocabulary(self) -> str | None:
+        """The KG's own quantity and site labels for the parser, so a filter
+        uses "soil_temperature", not "soil temperature" (which matches nothing)
+        or "voltage" with contains (which also matches voltage_polynomial_4)."""
+        rows = [r for r in self.backend.query(self._VOCAB_SPARQL) if "error" not in r]
+        if not rows:
+            return None
+        by_cls: dict[str, list[str]] = {}
+        for r in rows:
+            by_cls.setdefault(r["cls"], []).append(r["label"])
+        lines = ["Labels in this knowledge graph — filter on them verbatim with op equals (or in), choosing the "
+                 "label that matches the user's wording (e.g. \"soil temperature\" → soil_temperature, "
+                 "\"voltage\" → voltage, not voltage_1). A quantity named in the question is ONE label: use equals, "
+                 "never contains (contains \"voltage\" also matches voltage_1 and voltage_polynomial_4). Use contains "
+                 "only when the user explicitly asks for a family (\"all voltage channels\"). A name that appears "
+                 "under Node.label is a sensor node, not a quantity."]
+        lines += [f"{cls}.label: {', '.join(sorted(set(v)))}" for cls, v in sorted(by_cls.items())]
+        return "\n".join(lines)
 
     def run(self, query: str) -> dict[str, Any]:
         v = self.verbose
@@ -305,13 +343,15 @@ SELECT (MAX(?t) AS ?latest) WHERE { ?o a sosa:Observation ; sosa:resultTime ?t .
             _t = time.perf_counter()
             n = self.config.parse_candidates
             if attempt == 0 and n > 1:
-                intent, vote = parse_voted(query, n, history=history, reference_time=ref)
+                intent, vote = parse_voted(query, n, history=history, reference_time=ref,
+                                           vocabulary=self.vocabulary)
                 parse_calls += n
                 if v:
                     print(f"[Step 1] Voted over {n} candidates: {vote['distinct']} distinct intent(s), "
                           f"winner has {vote['winner_votes']} vote(s).")
             else:
-                intent = parse(query, feedback=feedback, history=history, reference_time=ref)
+                intent = parse(query, feedback=feedback, history=history, reference_time=ref,
+                                vocabulary=self.vocabulary)
                 parse_calls += 1
             t_parse += time.perf_counter() - _t
             # AD questions: this fetches the applicable Policy rule(s), labelled
@@ -330,15 +370,18 @@ SELECT (MAX(?t) AS ?latest) WHERE { ?o a sosa:Observation ; sosa:resultTime ?t .
             _t = time.perf_counter()
             # An intent that cannot compile (e.g. an unsupported aggregation type)
             # is reported as an execution error, so it goes through the same retry.
-            intent, window, problem = _apply_relative_time(intent, latest)
-            problem = problem or validate_intent(intent)
+            if intent.get("parse_error"):
+                window, problem = None, intent["parse_error"]
+            else:
+                intent, window, problem = _apply_relative_time(intent, latest)
+                problem = problem or validate_intent(intent)
             sparql = f"# not compiled: {problem}" if problem else build_sparql(intent)
             if v:
                 print(f"\n{sep}")
                 print(f"[{step2_label}] SPARQL query on {step2_topic}:")
                 print(sparql)
 
-            raw_results = [{"error": problem}] if problem else execute(self.backend, sparql)
+            raw_results = [{"error": problem}] if problem else _drop_empty_aggregate(execute(self.backend, sparql))
             t_query += time.perf_counter() - _t
             if v:
                 print(f"[{step2_label}] {len(raw_results)} raw result(s) returned.")

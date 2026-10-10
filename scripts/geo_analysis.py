@@ -64,8 +64,21 @@ def _find_key(row: dict, needle: str) -> Any:
     return None
 
 
+_MAX_DISTANCE_TABLE = 25  # per-node distance lists only for result sets up to this many nodes
+
+
+def _point_label(row: dict) -> str:
+    # A located row is a node: prefer its own label over a joined site label.
+    for key in ("label", "node_label", "Node_label", "name"):
+        v = row.get(key)
+        if v and not str(v).startswith("http"):
+            return str(v)[:50]
+    return _row_label(row)
+
+
 def _extract_points(results: list[dict]) -> list[dict]:
-    # One point per distinct (label, lat, lon); altitude optional.
+    # One point per distinct (label, lat, lon) — co-located nodes stay separate
+    # nodes; altitude and site optional.
     seen = set()
     points = []
     for row in results:
@@ -81,11 +94,14 @@ def _extract_points(results: list[dict]) -> list[dict]:
             alt_f = float(alt) if alt is not None else None
         except (ValueError, TypeError):
             alt_f = None
-        key = (lat_f, lon_f)
+        label = _point_label(row)
+        key = (label, lat_f, lon_f)
         if key in seen:
             continue
         seen.add(key)
-        points.append({"label": _row_label(row), "lat": lat_f, "lon": lon_f, "alt": alt_f})
+        site = _find_key(row, "site_label")
+        points.append({"label": label, "lat": lat_f, "lon": lon_f, "alt": alt_f,
+                       "site": str(site) if site is not None else None})
     return points
 
 
@@ -116,6 +132,30 @@ def _spatial_lines(points: list[dict]) -> list[str]:
                     near = (d, points[i]["label"], points[j]["label"])
         lines.append(f"  max separation: {far[0]:.1f} m between {far[1]} and {far[2]}")
         lines.append(f"  closest pair: {near[0]:.1f} m between {near[1]} and {near[2]}")
+
+    # Distances from every node to every other one, nearest first — what
+    # "closest to X", "within R m of X" and "distance between A and B" need.
+    if 2 <= n <= _MAX_DISTANCE_TABLE:
+        lines.append("  distances from each node (m), nearest first:")
+        for p in points:
+            others = sorted((_haversine_m(p["lat"], p["lon"], q["lat"], q["lon"]), q["label"])
+                            for q in points if q is not p)
+            lines.append(f"    {p['label']}: " + ", ".join(f"{lbl} {d:.1f}" for d, lbl in others))
+
+    # Several sites in one result: a centroid per site and the distances between them.
+    sites = sorted({p["site"] for p in points if p["site"]})
+    if len(sites) >= 2:
+        cents = {}
+        lines.append("  per-site centroids:")
+        for st in sites:
+            ps = [p for p in points if p["site"] == st]
+            cents[st] = (sum(p["lat"] for p in ps) / len(ps), sum(p["lon"] for p in ps) / len(ps))
+            lines.append(f"    {st}: {cents[st][0]:.6f}, {cents[st][1]:.6f} ({len(ps)} nodes)")
+        lines.append("  distances between site centroids:")
+        for i, a in enumerate(sites):
+            for b in sites[i + 1:]:
+                d = _haversine_m(*cents[a], *cents[b])
+                lines.append(f"    {a} – {b}: {d / 1000:.1f} km")
 
     lines.append("  points (label: lat, lon, alt):")
     for p in points[:_MAX_RECENCY_ROWS]:

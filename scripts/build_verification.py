@@ -139,11 +139,11 @@ def resolve(q: str, prev: dict | None = None) -> dict:
         return {"kind": "obs_count", "site": SITE_OF[x[2]], "prop": PROP_OF[x[1]]}
     if x := m(r"^How many sensors measure (.+) at (\w+)\?$"):
         return {"kind": "sensors_measuring", "site": SITE_OF[x[2]], "prop": PROP_OF[x[1]]}
-    if x := m(r"^Which heritage site has the (highest|lowest) average temperature\?$"):
+    if x := m(r"^Among Baltanas, Delos, Lucretili, Ranverso and Schenkenberg, which site has the (highest|lowest) average temperature\?$"):
         return {"kind": "site_compare_temp", "order": "DESC" if x[1] == "highest" else "ASC"}
-    if q == "Which heritage site has the most sensor nodes?":
+    if q == "Among Baltanas, Delos, Lucretili, Ranverso and Schenkenberg, which site has the most sensor nodes?":
         return {"kind": "site_compare_nodes"}
-    if q == "Which heritage site has the most readings?":
+    if q == "Among Baltanas, Delos, Lucretili, Ranverso and Schenkenberg, which site has the most readings?":
         return {"kind": "site_compare_readings"}
 
     if x := m(r"^How far apart are the two most distant sensor nodes at (\w+)\?$"):

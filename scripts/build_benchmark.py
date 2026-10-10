@@ -111,6 +111,8 @@ class Bench:
         return self.con.execute(sql, args).fetchall()
 
     def add(self, qtype, template, question, reference, value, answerable=True, **extra):
+        if isinstance(value, float):
+            value = round(value, 6)  # Postgres' parallel AVG varies in the last digits between runs
         self.items[qtype].append({
             "type": qtype, "template": template, "question": question,
             "reference": reference, "reference_value": value, "answerable": answerable, **extra,
@@ -197,15 +199,15 @@ def gen_basic(b: Bench, d):
                   plural(d['sensors_q'][(s, p)], "sensor") + ".", d["sensors_q"][(s, p)])
     avgs = {s: float(d["stats"][(s, "temperature")]["avg"]) for s in SITES}
     hi, lo = max(avgs, key=avgs.get), min(avgs, key=avgs.get)
-    b.add("basic", "site_compare", "Which heritage site has the highest average temperature?",
+    b.add("basic", "site_compare", "Among Baltanas, Delos, Lucretili, Ranverso and Schenkenberg, which site has the highest average temperature?",
           f"{SITE[hi]} ({fnum(avgs[hi])}).", SITE[hi])
-    b.add("basic", "site_compare", "Which heritage site has the lowest average temperature?",
+    b.add("basic", "site_compare", "Among Baltanas, Delos, Lucretili, Ranverso and Schenkenberg, which site has the lowest average temperature?",
           f"{SITE[lo]} ({fnum(avgs[lo])}).", SITE[lo])
     most_nodes = max(SITES, key=lambda s: d["nodes_n"][s])
-    b.add("basic", "site_compare", "Which heritage site has the most sensor nodes?",
+    b.add("basic", "site_compare", "Among Baltanas, Delos, Lucretili, Ranverso and Schenkenberg, which site has the most sensor nodes?",
           f"{SITE[most_nodes]} ({d['nodes_n'][most_nodes]} nodes).", SITE[most_nodes])
     most_r = max(SITES, key=lambda s: d["span"][s][2])
-    b.add("basic", "site_compare", "Which heritage site has the most readings?",
+    b.add("basic", "site_compare", "Among Baltanas, Delos, Lucretili, Ranverso and Schenkenberg, which site has the most readings?",
           f"{SITE[most_r]} ({d['span'][most_r][2]} readings).", SITE[most_r])
     for s, what in [("baltanas", "relative humidity"), ("delos", "wind speed"), ("lucretili", "CO2 concentration"),
                     ("ranverso", "barometric pressure"), ("schenkenberg", "relative humidity"), ("delos", "solar radiation")]:

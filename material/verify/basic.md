@@ -462,7 +462,7 @@ WHERE r.site_id = 'schenkenberg' AND o.property_id = 'pgaComposed' AND o.value I
 
 **Question:** What is the average potentiometer displacement observed at Delos?  
 **Reference:** 22.623.  
-**Recomputed:** `22.623179094883845` → **MATCH**
+**Recomputed:** `22.623179094883824` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -498,7 +498,7 @@ WHERE r.site_id = 'ranverso' AND o.property_id = 'rainfall' AND o.value IS NOT N
 
 **Question:** What is the average soil temperature observed at Baltanas?  
 **Reference:** 28.216.  
-**Recomputed:** `28.215602357394136` → **MATCH**
+**Recomputed:** `28.215602357394108` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -516,7 +516,7 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'soil_temperature' AND o.value 
 
 **Question:** What is the average soil water potential recorded at Baltanas?  
 **Reference:** 93.517.  
-**Recomputed:** `93.51713541789607` → **MATCH**
+**Recomputed:** `93.51713541789604` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -534,7 +534,7 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'soil_water_potential' AND o.va
 
 **Question:** What is the average temperature measured at Schenkenberg?  
 **Reference:** 23.672 °C.  
-**Recomputed:** `23.672202985963782` → **MATCH**
+**Recomputed:** `23.672202985963768` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -552,7 +552,7 @@ WHERE r.site_id = 'schenkenberg' AND o.property_id = 'temperature' AND o.value I
 
 **Question:** What is the average temperature observed at Delos?  
 **Reference:** 26.087.  
-**Recomputed:** `26.08703019975384` → **MATCH**
+**Recomputed:** `26.087030199753862` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -570,7 +570,7 @@ WHERE r.site_id = 'delos' AND o.property_id = 'temperature' AND o.value IS NOT N
 
 **Question:** What is the average temperature recorded at Baltanas?  
 **Reference:** 21.722 °C.  
-**Recomputed:** `21.72190526521377` → **MATCH**
+**Recomputed:** `21.721905265213735` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -588,7 +588,7 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Question:** What is the average temperature recorded at Ranverso?  
 **Reference:** 24.209 °C.  
-**Recomputed:** `24.208592263792024` → **MATCH**
+**Recomputed:** `24.208592263792017` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -606,7 +606,7 @@ WHERE r.site_id = 'ranverso' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Question:** What is the average voltage measured at Lucretili?  
 **Reference:** 0.142.  
-**Recomputed:** `0.1416362646084934` → **MATCH**
+**Recomputed:** `0.14163626460849382` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -624,7 +624,7 @@ WHERE r.site_id = 'lucretili' AND o.property_id = 'voltage' AND o.value IS NOT N
 
 **Question:** What is the average voltage observed at Baltanas?  
 **Reference:** 0.935.  
-**Recomputed:** `0.9349161758575463` → **MATCH**
+**Recomputed:** `0.9349161758575423` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -642,7 +642,7 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'voltage' AND o.value IS NOT NU
 
 **Question:** What is the average voltage observed at Delos?  
 **Reference:** 1.656.  
-**Recomputed:** `1.6559220909441201` → **MATCH**
+**Recomputed:** `1.6559220909441212` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -1687,7 +1687,7 @@ WHERE r.site_id = 'ranverso' AND o.property_id = 'voltage';
 
 ## B091 · site_compare
 
-**Question:** Which heritage site has the highest average temperature?  
+**Question:** Among Baltanas, Delos, Lucretili, Ranverso and Schenkenberg, which site has the highest average temperature?  
 **Reference:** Delos (26.087).  
 **Recomputed:** `Delos` → **MATCH**
 
@@ -1709,7 +1709,7 @@ GROUP BY 1 ORDER BY 2 DESC;
 
 ## B092 · site_compare
 
-**Question:** Which heritage site has the lowest average temperature?  
+**Question:** Among Baltanas, Delos, Lucretili, Ranverso and Schenkenberg, which site has the lowest average temperature?  
 **Reference:** Baltanas (21.722).  
 **Recomputed:** `Baltanas` → **MATCH**
 
@@ -1731,7 +1731,7 @@ GROUP BY 1 ORDER BY 2 ASC;
 
 ## B093 · site_compare
 
-**Question:** Which heritage site has the most readings?  
+**Question:** Among Baltanas, Delos, Lucretili, Ranverso and Schenkenberg, which site has the most readings?  
 **Reference:** Baltanas (676272 readings).  
 **Recomputed:** `Baltanas` → **MATCH**
 
@@ -1752,7 +1752,7 @@ GROUP BY 1 ORDER BY 2 DESC;
 
 ## B094 · site_compare
 
-**Question:** Which heritage site has the most sensor nodes?  
+**Question:** Among Baltanas, Delos, Lucretili, Ranverso and Schenkenberg, which site has the most sensor nodes?  
 **Reference:** Delos (15 nodes).  
 **Recomputed:** `Delos` → **MATCH**
 

@@ -176,7 +176,7 @@
   "template": "avg_quantity",
   "question": "What is the average composed RMS acceleration (rmsComposed) recorded at Schenkenberg?",
   "reference": "4.334 mg.",
-  "reference_value": 4.333864541832705,
+  "reference_value": 4.333865,
   "answerable": true,
   "unit": "mg"
  },
@@ -186,7 +186,7 @@
   "template": "avg_quantity",
   "question": "What is the average composed peak ground acceleration (pgaComposed) recorded at Schenkenberg?",
   "reference": "6.288 mg.",
-  "reference_value": 6.288152610441741,
+  "reference_value": 6.288153,
   "answerable": true,
   "unit": "mg"
  },
@@ -196,7 +196,7 @@
   "template": "avg_quantity",
   "question": "What is the average potentiometer displacement observed at Delos?",
   "reference": "22.623.",
-  "reference_value": 22.623179094883845,
+  "reference_value": 22.623179,
   "answerable": true,
   "unit": ""
  },
@@ -206,7 +206,7 @@
   "template": "avg_quantity",
   "question": "What is the average rainfall observed at Ranverso?",
   "reference": "0.012.",
-  "reference_value": 0.011753643629525154,
+  "reference_value": 0.011754,
   "answerable": true,
   "unit": ""
  },
@@ -216,7 +216,7 @@
   "template": "avg_quantity",
   "question": "What is the average soil temperature observed at Baltanas?",
   "reference": "28.216.",
-  "reference_value": 28.215602357393347,
+  "reference_value": 28.215602,
   "answerable": true,
   "unit": ""
  },
@@ -226,7 +226,7 @@
   "template": "avg_quantity",
   "question": "What is the average soil water potential recorded at Baltanas?",
   "reference": "93.517.",
-  "reference_value": 93.51713541789596,
+  "reference_value": 93.517135,
   "answerable": true,
   "unit": ""
  },
@@ -236,7 +236,7 @@
   "template": "avg_quantity",
   "question": "What is the average temperature measured at Schenkenberg?",
   "reference": "23.672 °C.",
-  "reference_value": 23.67220298596386,
+  "reference_value": 23.672203,
   "answerable": true,
   "unit": "°C"
  },
@@ -246,7 +246,7 @@
   "template": "avg_quantity",
   "question": "What is the average temperature observed at Delos?",
   "reference": "26.087.",
-  "reference_value": 26.08703019975363,
+  "reference_value": 26.08703,
   "answerable": true,
   "unit": ""
  },
@@ -256,7 +256,7 @@
   "template": "avg_quantity",
   "question": "What is the average temperature recorded at Baltanas?",
   "reference": "21.722 °C.",
-  "reference_value": 21.721905265213916,
+  "reference_value": 21.721905,
   "answerable": true,
   "unit": "°C"
  },
@@ -266,7 +266,7 @@
   "template": "avg_quantity",
   "question": "What is the average temperature recorded at Ranverso?",
   "reference": "24.209 °C.",
-  "reference_value": 24.20859226379209,
+  "reference_value": 24.208592,
   "answerable": true,
   "unit": "°C"
  },
@@ -276,7 +276,7 @@
   "template": "avg_quantity",
   "question": "What is the average voltage measured at Lucretili?",
   "reference": "0.142.",
-  "reference_value": 0.1416362646084903,
+  "reference_value": 0.141636,
   "answerable": true,
   "unit": ""
  },
@@ -286,7 +286,7 @@
   "template": "avg_quantity",
   "question": "What is the average voltage observed at Baltanas?",
   "reference": "0.935.",
-  "reference_value": 0.9349161758575635,
+  "reference_value": 0.934916,
   "answerable": true,
   "unit": ""
  },
@@ -296,7 +296,7 @@
   "template": "avg_quantity",
   "question": "What is the average voltage observed at Delos?",
   "reference": "1.656.",
-  "reference_value": 1.6559220909441026,
+  "reference_value": 1.655922,
   "answerable": true,
   "unit": ""
  },
@@ -306,7 +306,7 @@
   "template": "avg_quantity",
   "question": "What is the average voltage observed at Ranverso?",
   "reference": "1.543.",
-  "reference_value": 1.5432252862907965,
+  "reference_value": 1.543225,
   "answerable": true,
   "unit": ""
  },
@@ -336,7 +336,7 @@
   "template": "max_quantity",
   "question": "What is the maximum potentiometer displacement recorded at Delos?",
   "reference": "49.5.",
-  "reference_value": 49.50000644,
+  "reference_value": 49.500006,
   "answerable": true,
   "unit": ""
  },
@@ -436,7 +436,7 @@
   "template": "max_quantity",
   "question": "What is the maximum voltage measured at Ranverso?",
   "reference": "4.428.",
-  "reference_value": 4.4280627,
+  "reference_value": 4.428063,
   "answerable": true,
   "unit": ""
  },
@@ -476,7 +476,7 @@
   "template": "min_quantity",
   "question": "What is the minimum potentiometer displacement recorded at Delos?",
   "reference": "0.87.",
-  "reference_value": 0.869739059999995,
+  "reference_value": 0.869739,
   "answerable": true,
   "unit": ""
  },
@@ -556,7 +556,7 @@
   "template": "min_quantity",
   "question": "What is the minimum voltage measured at Baltanas?",
   "reference": "-0.001.",
-  "reference_value": -0.0011721,
+  "reference_value": -0.001172,
   "answerable": true,
   "unit": ""
  },
@@ -566,7 +566,7 @@
   "template": "min_quantity",
   "question": "What is the minimum voltage recorded at Delos?",
   "reference": "-0.002.",
-  "reference_value": -0.0016764,
+  "reference_value": -0.001676,
   "answerable": true,
   "unit": ""
  },
@@ -576,7 +576,7 @@
   "template": "min_quantity",
   "question": "What is the minimum voltage recorded at Lucretili?",
   "reference": "0.004.",
-  "reference_value": 0.0036663,
+  "reference_value": 0.003666,
   "answerable": true,
   "unit": ""
  },
@@ -854,7 +854,7 @@
   "id": "B091",
   "type": "basic",
   "template": "site_compare",
-  "question": "Which heritage site has the highest average temperature?",
+  "question": "Among Baltanas, Delos, Lucretili, Ranverso and Schenkenberg, which site has the highest average temperature?",
   "reference": "Delos (26.087).",
   "reference_value": "Delos",
   "answerable": true
@@ -863,7 +863,7 @@
   "id": "B092",
   "type": "basic",
   "template": "site_compare",
-  "question": "Which heritage site has the lowest average temperature?",
+  "question": "Among Baltanas, Delos, Lucretili, Ranverso and Schenkenberg, which site has the lowest average temperature?",
   "reference": "Baltanas (21.722).",
   "reference_value": "Baltanas",
   "answerable": true
@@ -872,7 +872,7 @@
   "id": "B093",
   "type": "basic",
   "template": "site_compare",
-  "question": "Which heritage site has the most readings?",
+  "question": "Among Baltanas, Delos, Lucretili, Ranverso and Schenkenberg, which site has the most readings?",
   "reference": "Baltanas (676272 readings).",
   "reference_value": "Baltanas",
   "answerable": true
@@ -881,7 +881,7 @@
   "id": "B094",
   "type": "basic",
   "template": "site_compare",
-  "question": "Which heritage site has the most sensor nodes?",
+  "question": "Among Baltanas, Delos, Lucretili, Ranverso and Schenkenberg, which site has the most sensor nodes?",
   "reference": "Delos (15 nodes).",
   "reference_value": "Delos",
   "answerable": true
@@ -2293,7 +2293,7 @@
   "template": "relative_window",
   "question": "What was the average temperature at Baltanas over the last 24 hours?",
   "reference": "25.871 (4713 observations, window ending 2026-08-12 09:15 UTC).",
-  "reference_value": 25.87095268406533,
+  "reference_value": 25.870953,
   "answerable": true
  },
  {
@@ -2302,7 +2302,7 @@
   "template": "relative_window",
   "question": "What was the average temperature at Baltanas over the last 7 days?",
   "reference": "24.263 (32913 observations, window ending 2026-08-12 09:15 UTC).",
-  "reference_value": 24.26275028104394,
+  "reference_value": 24.26275,
   "answerable": true
  },
  {
@@ -2311,7 +2311,7 @@
   "template": "relative_window",
   "question": "What was the average temperature at Delos over the last 24 hours?",
   "reference": "27.706 (232 observations, window ending 2026-08-12 09:15 UTC).",
-  "reference_value": 27.706034482758625,
+  "reference_value": 27.706034,
   "answerable": true
  },
  {
@@ -2320,7 +2320,7 @@
   "template": "relative_window",
   "question": "What was the average temperature at Delos over the last 7 days?",
   "reference": "28.315 (1735 observations, window ending 2026-08-12 09:15 UTC).",
-  "reference_value": 28.314639769452437,
+  "reference_value": 28.31464,
   "answerable": true
  },
  {
@@ -2329,7 +2329,7 @@
   "template": "relative_window",
   "question": "What was the average temperature at Lucretili over the last 24 hours?",
   "reference": "28.431 (3635 observations, window ending 2026-08-12 09:15 UTC).",
-  "reference_value": 28.430508940852818,
+  "reference_value": 28.430509,
   "answerable": true
  },
  {
@@ -2338,7 +2338,7 @@
   "template": "relative_window",
   "question": "What was the average temperature at Lucretili over the last 7 days?",
   "reference": "27.191 (23894 observations, window ending 2026-08-12 09:15 UTC).",
-  "reference_value": 27.19104377668035,
+  "reference_value": 27.191044,
   "answerable": true
  },
  {
@@ -2347,7 +2347,7 @@
   "template": "relative_window",
   "question": "What was the average temperature at Ranverso over the last 24 hours?",
   "reference": "26.247 (209 observations, window ending 2026-08-12 09:15 UTC).",
-  "reference_value": 26.247368421052627,
+  "reference_value": 26.247368,
   "answerable": true
  },
  {
@@ -2356,7 +2356,7 @@
   "template": "relative_window",
   "question": "What was the average temperature at Schenkenberg over the last 24 hours?",
   "reference": "29.107 (171 observations, window ending 2026-08-12 09:15 UTC).",
-  "reference_value": 29.107017543859644,
+  "reference_value": 29.107018,
   "answerable": true
  },
  {
@@ -2374,7 +2374,7 @@
   "template": "daily_avg",
   "question": "What was the average soil temperature at Baltanas on 2026-06-17?",
   "reference": "27.895.",
-  "reference_value": 27.894711033274948,
+  "reference_value": 27.894711,
   "answerable": true
  },
  {
@@ -2383,7 +2383,7 @@
   "template": "daily_avg",
   "question": "What was the average soil temperature at Baltanas on 2026-06-24?",
   "reference": "28.933.",
-  "reference_value": 28.93314236111107,
+  "reference_value": 28.933142,
   "answerable": true
  },
  {
@@ -2392,7 +2392,7 @@
   "template": "daily_avg",
   "question": "What was the average temperature at Baltanas on 2026-06-18?",
   "reference": "22.54.",
-  "reference_value": 22.539979716024344,
+  "reference_value": 22.53998,
   "answerable": true
  },
  {
@@ -2401,7 +2401,7 @@
   "template": "daily_avg",
   "question": "What was the average temperature at Baltanas on 2026-08-10?",
   "reference": "23.981.",
-  "reference_value": 23.98112050739959,
+  "reference_value": 23.981121,
   "answerable": true
  },
  {
@@ -2410,7 +2410,7 @@
   "template": "daily_avg",
   "question": "What was the average temperature at Lucretili on 2026-07-31?",
   "reference": "29.166.",
-  "reference_value": 29.16618030224072,
+  "reference_value": 29.16618,
   "answerable": true
  },
  {
@@ -2419,7 +2419,7 @@
   "template": "daily_avg",
   "question": "What was the average temperature at Lucretili on 2026-08-11?",
   "reference": "28.258.",
-  "reference_value": 28.257662624035234,
+  "reference_value": 28.257663,
   "answerable": true
  },
  {
@@ -2428,7 +2428,7 @@
   "template": "daily_avg",
   "question": "What was the average temperature at Ranverso on 2026-05-21?",
   "reference": "17.879.",
-  "reference_value": 17.8787037037037,
+  "reference_value": 17.878704,
   "answerable": true
  },
  {
@@ -2437,7 +2437,7 @@
   "template": "daily_avg",
   "question": "What was the average temperature at Ranverso on 2026-06-09?",
   "reference": "22.154.",
-  "reference_value": 22.15416666666667,
+  "reference_value": 22.154167,
   "answerable": true
  },
  {
@@ -2446,7 +2446,7 @@
   "template": "daily_avg",
   "question": "What was the average temperature at Ranverso on 2026-06-20?",
   "reference": "25.803.",
-  "reference_value": 25.802525252525257,
+  "reference_value": 25.802525,
   "answerable": true
  },
  {
@@ -2689,7 +2689,7 @@
   "template": "range_avg",
   "question": "What was the average temperature at Baltanas between 2026-05-19 and 2026-05-25?",
   "reference": "19.074 (31989 observations, both days inclusive).",
-  "reference_value": 19.07406295914221,
+  "reference_value": 19.074063,
   "answerable": true
  },
  {
@@ -2698,7 +2698,7 @@
   "template": "range_avg",
   "question": "What was the average temperature at Baltanas between 2026-06-18 and 2026-06-24?",
   "reference": "23.44 (34506 observations, both days inclusive).",
-  "reference_value": 23.439610502521298,
+  "reference_value": 23.439611,
   "answerable": true
  },
  {
@@ -2707,7 +2707,7 @@
   "template": "range_avg",
   "question": "What was the average temperature at Baltanas between 2026-07-27 and 2026-08-02?",
   "reference": "24.215 (34409 observations, both days inclusive).",
-  "reference_value": 24.215089075532575,
+  "reference_value": 24.215089,
   "answerable": true
  },
  {
@@ -2716,7 +2716,7 @@
   "template": "range_avg",
   "question": "What was the average temperature at Delos between 2026-05-20 and 2026-05-26?",
   "reference": "21.651 (1663 observations, both days inclusive).",
-  "reference_value": 21.650691521346964,
+  "reference_value": 21.650692,
   "answerable": true
  },
  {
@@ -2725,7 +2725,7 @@
   "template": "range_avg",
   "question": "What was the average temperature at Delos between 2026-06-29 and 2026-07-05?",
   "reference": "28.318 (1680 observations, both days inclusive).",
-  "reference_value": 28.317559523809525,
+  "reference_value": 28.31756,
   "answerable": true
  },
  {
@@ -2734,7 +2734,7 @@
   "template": "range_avg",
   "question": "What was the average temperature at Lucretili between 2026-07-04 and 2026-07-10?",
   "reference": "23.698 (27435 observations, both days inclusive).",
-  "reference_value": 23.698487333697848,
+  "reference_value": 23.698487,
   "answerable": true
  },
  {
@@ -2743,7 +2743,7 @@
   "template": "range_avg",
   "question": "What was the average temperature at Lucretili between 2026-07-06 and 2026-07-12?",
   "reference": "24.241 (27290 observations, both days inclusive).",
-  "reference_value": 24.24065225357275,
+  "reference_value": 24.240652,
   "answerable": true
  },
  {
@@ -2752,7 +2752,7 @@
   "template": "range_avg",
   "question": "What was the average temperature at Lucretili between 2026-07-08 and 2026-07-14?",
   "reference": "25.067 (27656 observations, both days inclusive).",
-  "reference_value": 25.066690772345954,
+  "reference_value": 25.066691,
   "answerable": true
  },
  {
@@ -2761,7 +2761,7 @@
   "template": "range_avg",
   "question": "What was the average temperature at Ranverso between 2026-06-20 and 2026-06-26?",
   "reference": "26.529 (1359 observations, both days inclusive).",
-  "reference_value": 26.528697571743923,
+  "reference_value": 26.528698,
   "answerable": true
  },
  {
@@ -2770,7 +2770,7 @@
   "template": "range_avg",
   "question": "What was the average temperature at Ranverso between 2026-06-29 and 2026-07-05?",
   "reference": "26.248 (1512 observations, both days inclusive).",
-  "reference_value": 26.247751322751316,
+  "reference_value": 26.247751,
   "answerable": true
  },
  {
@@ -2779,7 +2779,7 @@
   "template": "range_avg",
   "question": "What was the average temperature at Schenkenberg between 2026-06-07 and 2026-06-13?",
   "reference": "16.821 (2332 observations, both days inclusive).",
-  "reference_value": 16.82092624356775,
+  "reference_value": 16.820926,
   "answerable": true
  },
  {
@@ -2788,7 +2788,7 @@
   "template": "range_avg",
   "question": "What was the average temperature at Schenkenberg between 2026-07-10 and 2026-07-16?",
   "reference": "27.677 (1610 observations, both days inclusive).",
-  "reference_value": 27.676894409937894,
+  "reference_value": 27.676894,
   "answerable": true
  },
  {
@@ -4007,7 +4007,7 @@
   "template": "what_about_site",
   "question": "What about Baltanas?",
   "reference": "21.722 °C.",
-  "reference_value": 21.721905265213916,
+  "reference_value": 21.721905,
   "answerable": true,
   "history": [
    {
@@ -4022,7 +4022,7 @@
   "template": "what_about_site",
   "question": "What about Baltanas?",
   "reference": "21.722 °C.",
-  "reference_value": 21.721905265213916,
+  "reference_value": 21.721905,
   "answerable": true,
   "history": [
    {
@@ -4037,7 +4037,7 @@
   "template": "what_about_site",
   "question": "What about Baltanas?",
   "reference": "0.935.",
-  "reference_value": 0.9349161758575635,
+  "reference_value": 0.934916,
   "answerable": true,
   "history": [
    {
@@ -4052,7 +4052,7 @@
   "template": "what_about_site",
   "question": "What about Delos?",
   "reference": "26.087.",
-  "reference_value": 26.08703019975363,
+  "reference_value": 26.08703,
   "answerable": true,
   "history": [
    {
@@ -4067,7 +4067,7 @@
   "template": "what_about_site",
   "question": "What about Delos?",
   "reference": "26.087.",
-  "reference_value": 26.08703019975363,
+  "reference_value": 26.08703,
   "answerable": true,
   "history": [
    {
@@ -4082,7 +4082,7 @@
   "template": "what_about_site",
   "question": "What about Delos?",
   "reference": "26.087.",
-  "reference_value": 26.08703019975363,
+  "reference_value": 26.08703,
   "answerable": true,
   "history": [
    {
@@ -4097,7 +4097,7 @@
   "template": "what_about_site",
   "question": "What about Delos?",
   "reference": "1.656.",
-  "reference_value": 1.6559220909441026,
+  "reference_value": 1.655922,
   "answerable": true,
   "history": [
    {
@@ -4112,7 +4112,7 @@
   "template": "what_about_site",
   "question": "What about Lucretili?",
   "reference": "0.142.",
-  "reference_value": 0.1416362646084903,
+  "reference_value": 0.141636,
   "answerable": true,
   "history": [
    {
@@ -4127,7 +4127,7 @@
   "template": "what_about_site",
   "question": "What about Ranverso?",
   "reference": "1.543.",
-  "reference_value": 1.5432252862907965,
+  "reference_value": 1.543225,
   "answerable": true,
   "history": [
    {
@@ -4142,7 +4142,7 @@
   "template": "what_about_site",
   "question": "What about Ranverso?",
   "reference": "24.209 °C.",
-  "reference_value": 24.20859226379209,
+  "reference_value": 24.208592,
   "answerable": true,
   "history": [
    {
@@ -4157,7 +4157,7 @@
   "template": "what_about_site",
   "question": "What about Ranverso?",
   "reference": "1.543.",
-  "reference_value": 1.5432252862907965,
+  "reference_value": 1.543225,
   "answerable": true,
   "history": [
    {
@@ -4172,7 +4172,7 @@
   "template": "what_about_site",
   "question": "What about Schenkenberg?",
   "reference": "23.672 °C.",
-  "reference_value": 23.67220298596386,
+  "reference_value": 23.672203,
   "answerable": true,
   "history": [
    {
@@ -4262,7 +4262,7 @@
   "template": "and_the_minimum",
   "question": "And the minimum?",
   "reference": "0.001.",
-  "reference_value": 0.0010206,
+  "reference_value": 0.001021,
   "answerable": true,
   "history": [
    {
@@ -4307,7 +4307,7 @@
   "template": "and_the_minimum",
   "question": "And the minimum?",
   "reference": "-0.002.",
-  "reference_value": -0.0016764,
+  "reference_value": -0.001676,
   "answerable": true,
   "history": [
    {
@@ -4817,7 +4817,7 @@
   "template": "next_day",
   "question": "And on the following day?",
   "reference": "21.27.",
-  "reference_value": 21.269759615384615,
+  "reference_value": 21.26976,
   "answerable": true,
   "history": [
    {
@@ -4832,7 +4832,7 @@
   "template": "next_day",
   "question": "And on the following day?",
   "reference": "24.908.",
-  "reference_value": 24.908150406504088,
+  "reference_value": 24.90815,
   "answerable": true,
   "history": [
    {
@@ -4847,7 +4847,7 @@
   "template": "next_day",
   "question": "And on the following day?",
   "reference": "23.098.",
-  "reference_value": 23.097539244802732,
+  "reference_value": 23.097539,
   "answerable": true,
   "history": [
    {
@@ -4862,7 +4862,7 @@
   "template": "next_day",
   "question": "And on the following day?",
   "reference": "28.817.",
-  "reference_value": 28.81652173913044,
+  "reference_value": 28.816522,
   "answerable": true,
   "history": [
    {
@@ -4877,7 +4877,7 @@
   "template": "next_day",
   "question": "And on the following day?",
   "reference": "23.945.",
-  "reference_value": 23.944534577164866,
+  "reference_value": 23.944535,
   "answerable": true,
   "history": [
    {
@@ -4892,7 +4892,7 @@
   "template": "next_day",
   "question": "And on the following day?",
   "reference": "17.686.",
-  "reference_value": 17.685934489402705,
+  "reference_value": 17.685934,
   "answerable": true,
   "history": [
    {
@@ -4907,7 +4907,7 @@
   "template": "next_day",
   "question": "And on the following day?",
   "reference": "23.265.",
-  "reference_value": 23.26481481481482,
+  "reference_value": 23.264815,
   "answerable": true,
   "history": [
    {
@@ -4922,7 +4922,7 @@
   "template": "next_day",
   "question": "And on the following day?",
   "reference": "30.13.",
-  "reference_value": 30.129629629629644,
+  "reference_value": 30.12963,
   "answerable": true,
   "history": [
    {
@@ -4937,7 +4937,7 @@
   "template": "next_day",
   "question": "And on the following day?",
   "reference": "21.737.",
-  "reference_value": 21.73693693693694,
+  "reference_value": 21.736937,
   "answerable": true,
   "history": [
    {
@@ -4952,7 +4952,7 @@
   "template": "next_day",
   "question": "And on the following day?",
   "reference": "23.947.",
-  "reference_value": 23.94689977637735,
+  "reference_value": 23.9469,
   "answerable": true,
   "history": [
    {
@@ -4967,7 +4967,7 @@
   "template": "next_day",
   "question": "And on the following day?",
   "reference": "23.981.",
-  "reference_value": 23.98112050739959,
+  "reference_value": 23.981121,
   "answerable": true,
   "history": [
    {

@@ -6,7 +6,7 @@ Run `SET TIME ZONE 'UTC';` in psql first (`psql -h localhost -U argus -d argus_s
 
 **Turn 1:** What is the average temperature at Schenkenberg?  
 **Answer given in history:** The average temperature at Schenkenberg is 23.672 °C.  
-**Recomputed:** `23.672202985963786`
+**Recomputed:** `23.67220298596378`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -19,7 +19,7 @@ WHERE r.site_id = 'schenkenberg' AND o.property_id = 'temperature' AND o.value I
 
 **Question:** What about Baltanas?  
 **Reference:** 21.722 °C.  
-**Recomputed:** `21.721905265213728` → **MATCH**
+**Recomputed:** `21.72190526521375` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -37,7 +37,7 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Turn 1:** What is the average temperature at Delos?  
 **Answer given in history:** The average temperature at Delos is 26.087.  
-**Recomputed:** `26.08703019975385`
+**Recomputed:** `26.087030199753862`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -50,7 +50,7 @@ WHERE r.site_id = 'delos' AND o.property_id = 'temperature' AND o.value IS NOT N
 
 **Question:** What about Baltanas?  
 **Reference:** 21.722 °C.  
-**Recomputed:** `21.72190526521377` → **MATCH**
+**Recomputed:** `21.721905265213735` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -68,7 +68,7 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Turn 1:** What is the average voltage at Ranverso?  
 **Answer given in history:** The average voltage at Ranverso is 1.543.  
-**Recomputed:** `1.5432252862908102`
+**Recomputed:** `1.5432252862908113`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -81,7 +81,7 @@ WHERE r.site_id = 'ranverso' AND o.property_id = 'voltage' AND o.value IS NOT NU
 
 **Question:** What about Baltanas?  
 **Reference:** 0.935.  
-**Recomputed:** `0.9349161758575465` → **MATCH**
+**Recomputed:** `0.9349161758575442` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -99,7 +99,7 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'voltage' AND o.value IS NOT NU
 
 **Turn 1:** What is the average temperature at Schenkenberg?  
 **Answer given in history:** The average temperature at Schenkenberg is 23.672 °C.  
-**Recomputed:** `23.672202985963786`
+**Recomputed:** `23.672202985963775`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -130,7 +130,7 @@ WHERE r.site_id = 'delos' AND o.property_id = 'temperature' AND o.value IS NOT N
 
 **Turn 1:** What is the average temperature at Ranverso?  
 **Answer given in history:** The average temperature at Ranverso is 24.209 °C.  
-**Recomputed:** `24.208592263792028`
+**Recomputed:** `24.208592263792024`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -143,7 +143,7 @@ WHERE r.site_id = 'ranverso' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Question:** What about Delos?  
 **Reference:** 26.087.  
-**Recomputed:** `26.08703019975385` → **MATCH**
+**Recomputed:** `26.08703019975386` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -161,7 +161,7 @@ WHERE r.site_id = 'delos' AND o.property_id = 'temperature' AND o.value IS NOT N
 
 **Turn 1:** What is the average temperature at Baltanas?  
 **Answer given in history:** The average temperature at Baltanas is 21.722 °C.  
-**Recomputed:** `21.721905265213753`
+**Recomputed:** `21.721905265213756`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -192,7 +192,7 @@ WHERE r.site_id = 'delos' AND o.property_id = 'temperature' AND o.value IS NOT N
 
 **Turn 1:** What is the average voltage at Lucretili?  
 **Answer given in history:** The average voltage at Lucretili is 0.142.  
-**Recomputed:** `0.1416362646084932`
+**Recomputed:** `0.14163626460849335`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -205,7 +205,7 @@ WHERE r.site_id = 'lucretili' AND o.property_id = 'voltage' AND o.value IS NOT N
 
 **Question:** What about Delos?  
 **Reference:** 1.656.  
-**Recomputed:** `1.6559220909441192` → **MATCH**
+**Recomputed:** `1.6559220909441186` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -223,7 +223,7 @@ WHERE r.site_id = 'delos' AND o.property_id = 'voltage' AND o.value IS NOT NULL;
 
 **Turn 1:** What is the average voltage at Baltanas?  
 **Answer given in history:** The average voltage at Baltanas is 0.935.  
-**Recomputed:** `0.9349161758575444`
+**Recomputed:** `0.9349161758575434`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -236,7 +236,7 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'voltage' AND o.value IS NOT NU
 
 **Question:** What about Lucretili?  
 **Reference:** 0.142.  
-**Recomputed:** `0.14163626460849402` → **MATCH**
+**Recomputed:** `0.14163626460849377` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -254,7 +254,7 @@ WHERE r.site_id = 'lucretili' AND o.property_id = 'voltage' AND o.value IS NOT N
 
 **Turn 1:** What is the average voltage at Baltanas?  
 **Answer given in history:** The average voltage at Baltanas is 0.935.  
-**Recomputed:** `0.9349161758575425`
+**Recomputed:** `0.9349161758575459`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -267,7 +267,7 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'voltage' AND o.value IS NOT NU
 
 **Question:** What about Ranverso?  
 **Reference:** 1.543.  
-**Recomputed:** `1.54322528629081` → **MATCH**
+**Recomputed:** `1.5432252862908102` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -285,7 +285,7 @@ WHERE r.site_id = 'ranverso' AND o.property_id = 'voltage' AND o.value IS NOT NU
 
 **Turn 1:** What is the average temperature at Delos?  
 **Answer given in history:** The average temperature at Delos is 26.087.  
-**Recomputed:** `26.08703019975386`
+**Recomputed:** `26.08703019975385`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -298,7 +298,7 @@ WHERE r.site_id = 'delos' AND o.property_id = 'temperature' AND o.value IS NOT N
 
 **Question:** What about Ranverso?  
 **Reference:** 24.209 °C.  
-**Recomputed:** `24.20859226379203` → **MATCH**
+**Recomputed:** `24.20859226379201` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -316,7 +316,7 @@ WHERE r.site_id = 'ranverso' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Turn 1:** What is the average voltage at Delos?  
 **Answer given in history:** The average voltage at Delos is 1.656.  
-**Recomputed:** `1.6559220909441181`
+**Recomputed:** `1.6559220909441186`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -329,7 +329,7 @@ WHERE r.site_id = 'delos' AND o.property_id = 'voltage' AND o.value IS NOT NULL;
 
 **Question:** What about Ranverso?  
 **Reference:** 1.543.  
-**Recomputed:** `1.5432252862908111` → **MATCH**
+**Recomputed:** `1.5432252862908105` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -347,7 +347,7 @@ WHERE r.site_id = 'ranverso' AND o.property_id = 'voltage' AND o.value IS NOT NU
 
 **Turn 1:** What is the average temperature at Ranverso?  
 **Answer given in history:** The average temperature at Ranverso is 24.209 °C.  
-**Recomputed:** `24.208592263792017`
+**Recomputed:** `24.20859226379203`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -360,7 +360,7 @@ WHERE r.site_id = 'ranverso' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Question:** What about Schenkenberg?  
 **Reference:** 23.672 °C.  
-**Recomputed:** `23.672202985963786` → **MATCH**
+**Recomputed:** `23.672202985963768` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -885,11 +885,11 @@ ORDER BY o.value DESC, o.result_time ASC LIMIT 5;
 ```
 | value | result_time | sensor_id |
 |---|---|---|
+| 50 | 2026-07-31 11:30:00 | 82508f60-8269-11f0-b6dc-556f88243956 |
 | 50 | 2026-07-31 11:30:00 | 8250dd80-8269-11f0-9283-e956b63ef652 |
 | 50 | 2026-07-31 11:30:00 | 0cf22310-81be-11f0-9283-e956b63ef652 |
-| 50 | 2026-07-31 11:30:00 | 82508f60-8269-11f0-b6dc-556f88243956 |
-| 50 | 2026-08-01 11:30:00 | 0cf22310-81be-11f0-9283-e956b63ef652 |
 | 50 | 2026-08-01 11:30:00 | 8250dd80-8269-11f0-9283-e956b63ef652 |
+| 50 | 2026-08-01 11:30:00 | 82508f60-8269-11f0-b6dc-556f88243956 |
 
 - The maximum occurs more than once; the reference uses the earliest.
 
@@ -1839,7 +1839,7 @@ FROM n a JOIN n b ON a.node_id < b.node_id ORDER BY meters DESC LIMIT 5;
 
 **Turn 1:** What was the average temperature at Lucretili on 2026-06-09?  
 **Answer given in history:** 21.503.  
-**Recomputed:** `21.50324285371126`
+**Recomputed:** `21.503242853711274`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -1852,7 +1852,7 @@ WHERE r.site_id = 'lucretili' AND o.property_id = 'temperature' AND o.value IS N
 
 **Question:** And on the following day?  
 **Reference:** 21.27.  
-**Recomputed:** `21.26975961538461` → **MATCH**
+**Recomputed:** `21.269759615384604` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -1870,7 +1870,7 @@ WHERE r.site_id = 'lucretili' AND o.property_id = 'temperature' AND o.value IS N
 
 **Turn 1:** What was the average temperature at Baltanas on 2026-07-22?  
 **Answer given in history:** 24.493.  
-**Recomputed:** `24.49279902359643`
+**Recomputed:** `24.492799023596426`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -1883,7 +1883,7 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Question:** And on the following day?  
 **Reference:** 24.908.  
-**Recomputed:** `24.908150406504053` → **MATCH**
+**Recomputed:** `24.90815040650405` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -1901,7 +1901,7 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Turn 1:** What was the average temperature at Baltanas on 2026-08-04?  
 **Answer given in history:** 23.591.  
-**Recomputed:** `23.59085508168898`
+**Recomputed:** `23.590855081688975`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -1932,7 +1932,7 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Turn 1:** What was the average temperature at Schenkenberg on 2026-08-06?  
 **Answer given in history:** 28.812.  
-**Recomputed:** `28.812037037037044`
+**Recomputed:** `28.812037037037037`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -1976,7 +1976,7 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Question:** And on the following day?  
 **Reference:** 23.945.  
-**Recomputed:** `23.944534577164884` → **MATCH**
+**Recomputed:** `23.944534577164898` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -2025,7 +2025,7 @@ WHERE r.site_id = 'schenkenberg' AND o.property_id = 'temperature' AND o.value I
 
 **Turn 1:** What was the average temperature at Ranverso on 2026-05-27?  
 **Answer given in history:** 22.828.  
-**Recomputed:** `22.827777777777783`
+**Recomputed:** `22.82777777777778`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -2118,7 +2118,7 @@ WHERE r.site_id = 'ranverso' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Turn 1:** What was the average temperature at Baltanas on 2026-07-06?  
 **Answer given in history:** 26.049.  
-**Recomputed:** `26.04888211382117`
+**Recomputed:** `26.048882113821165`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -2131,7 +2131,7 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Question:** And on the following day?  
 **Reference:** 23.947.  
-**Recomputed:** `23.946899776377283` → **MATCH**
+**Recomputed:** `23.94689977637729` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -2149,7 +2149,7 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Turn 1:** What was the average temperature at Baltanas on 2026-08-09?  
 **Answer given in history:** 24.346.  
-**Recomputed:** `24.345837746240207`
+**Recomputed:** `24.34583774624021`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -2162,7 +2162,7 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Question:** And on the following day?  
 **Reference:** 23.981.  
-**Recomputed:** `23.981120507399563` → **MATCH**
+**Recomputed:** `23.98112050739958` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -3756,7 +3756,7 @@ SELECT count(*) AS readings FROM readings WHERE site_id = 'baltanas'
 
 **Turn 1:** What is the average temperature at Lucretili?  
 **Answer given in history:** 23.639 °C.  
-**Recomputed:** `23.638578549545585`
+**Recomputed:** `23.63857854954556`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -3769,7 +3769,7 @@ WHERE r.site_id = 'lucretili' AND o.property_id = 'temperature' AND o.value IS N
 
 **Turn 2:** What about Baltanas?  
 **Answer given in history:** 21.722 °C.  
-**Recomputed:** `21.721905265213742`
+**Recomputed:** `21.721905265213707`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -3800,7 +3800,7 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Turn 1:** What is the average temperature at Delos?  
 **Answer given in history:** 26.087.  
-**Recomputed:** `26.08703019975385`
+**Recomputed:** `26.08703019975384`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -3813,7 +3813,7 @@ WHERE r.site_id = 'delos' AND o.property_id = 'temperature' AND o.value IS NOT N
 
 **Turn 2:** What about Ranverso?  
 **Answer given in history:** 24.209 °C.  
-**Recomputed:** `24.208592263792024`
+**Recomputed:** `24.20859226379203`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -3844,7 +3844,7 @@ WHERE r.site_id = 'ranverso' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Turn 1:** What is the average temperature at Delos?  
 **Answer given in history:** 26.087.  
-**Recomputed:** `26.08703019975385`
+**Recomputed:** `26.08703019975386`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -3888,7 +3888,7 @@ WHERE r.site_id = 'schenkenberg' AND o.property_id = 'temperature' AND o.value I
 
 **Turn 1:** What is the average temperature at Baltanas?  
 **Answer given in history:** 21.722 °C.  
-**Recomputed:** `21.721905265213774`
+**Recomputed:** `21.721905265213753`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -3901,7 +3901,7 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Turn 2:** What about Ranverso?  
 **Answer given in history:** 24.209 °C.  
-**Recomputed:** `24.208592263792017`
+**Recomputed:** `24.208592263792013`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -3932,7 +3932,7 @@ WHERE r.site_id = 'ranverso' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Turn 1:** What is the average temperature at Schenkenberg?  
 **Answer given in history:** 23.672 °C.  
-**Recomputed:** `23.672202985963782`
+**Recomputed:** `23.672202985963793`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -3945,7 +3945,7 @@ WHERE r.site_id = 'schenkenberg' AND o.property_id = 'temperature' AND o.value I
 
 **Turn 2:** What about Ranverso?  
 **Answer given in history:** 24.209 °C.  
-**Recomputed:** `24.20859226379202`
+**Recomputed:** `24.208592263792006`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -3976,7 +3976,7 @@ WHERE r.site_id = 'ranverso' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Turn 1:** What is the average temperature at Ranverso?  
 **Answer given in history:** 24.209 °C.  
-**Recomputed:** `24.20859226379203`
+**Recomputed:** `24.208592263792017`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -3989,7 +3989,7 @@ WHERE r.site_id = 'ranverso' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Turn 2:** What about Lucretili?  
 **Answer given in history:** 23.639 °C.  
-**Recomputed:** `23.638578549545574`
+**Recomputed:** `23.63857854954555`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -4020,7 +4020,7 @@ WHERE r.site_id = 'lucretili' AND o.property_id = 'temperature' AND o.value IS N
 
 **Turn 1:** What is the average temperature at Lucretili?  
 **Answer given in history:** 23.639 °C.  
-**Recomputed:** `23.63857854954565`
+**Recomputed:** `23.63857854954556`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -4033,7 +4033,7 @@ WHERE r.site_id = 'lucretili' AND o.property_id = 'temperature' AND o.value IS N
 
 **Turn 2:** What about Ranverso?  
 **Answer given in history:** 24.209 °C.  
-**Recomputed:** `24.208592263792024`
+**Recomputed:** `24.20859226379203`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -4064,7 +4064,7 @@ WHERE r.site_id = 'ranverso' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Turn 1:** What is the average temperature at Schenkenberg?  
 **Answer given in history:** 23.672 °C.  
-**Recomputed:** `23.672202985963793`
+**Recomputed:** `23.672202985963786`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -4077,7 +4077,7 @@ WHERE r.site_id = 'schenkenberg' AND o.property_id = 'temperature' AND o.value I
 
 **Turn 2:** What about Baltanas?  
 **Answer given in history:** 21.722 °C.  
-**Recomputed:** `21.721905265213746`
+**Recomputed:** `21.721905265213735`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -4108,7 +4108,7 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Turn 1:** What is the average temperature at Ranverso?  
 **Answer given in history:** 24.209 °C.  
-**Recomputed:** `24.208592263792017`
+**Recomputed:** `24.20859226379203`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -4121,7 +4121,7 @@ WHERE r.site_id = 'ranverso' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Turn 2:** What about Delos?  
 **Answer given in history:** 26.087.  
-**Recomputed:** `26.08703019975385`
+**Recomputed:** `26.087030199753862`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -4165,7 +4165,7 @@ WHERE r.site_id = 'ranverso' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Turn 2:** What about Schenkenberg?  
 **Answer given in history:** 23.672 °C.  
-**Recomputed:** `23.672202985963793`
+**Recomputed:** `23.672202985963775`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -4196,7 +4196,7 @@ WHERE r.site_id = 'schenkenberg' AND o.property_id = 'temperature' AND o.value I
 
 **Turn 1:** What is the average temperature at Lucretili?  
 **Answer given in history:** 23.639 °C.  
-**Recomputed:** `23.6385785495456`
+**Recomputed:** `23.63857854954556`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -4209,7 +4209,7 @@ WHERE r.site_id = 'lucretili' AND o.property_id = 'temperature' AND o.value IS N
 
 **Turn 2:** What about Schenkenberg?  
 **Answer given in history:** 23.672 °C.  
-**Recomputed:** `23.672202985963786`
+**Recomputed:** `23.672202985963796`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -4240,7 +4240,7 @@ WHERE r.site_id = 'schenkenberg' AND o.property_id = 'temperature' AND o.value I
 
 **Turn 1:** What is the average temperature at Delos?  
 **Answer given in history:** 26.087.  
-**Recomputed:** `26.08703019975386`
+**Recomputed:** `26.087030199753862`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -4253,7 +4253,7 @@ WHERE r.site_id = 'delos' AND o.property_id = 'temperature' AND o.value IS NOT N
 
 **Turn 2:** What about Baltanas?  
 **Answer given in history:** 21.722 °C.  
-**Recomputed:** `21.721905265213763`
+**Recomputed:** `21.721905265213756`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -4284,7 +4284,7 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Turn 1:** What is the average temperature at Baltanas?  
 **Answer given in history:** 21.722 °C.  
-**Recomputed:** `21.721905265213753`
+**Recomputed:** `21.721905265213735`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -4313,7 +4313,7 @@ _(no rows)_
 
 **Turn 1:** What is the average temperature at Lucretili?  
 **Answer given in history:** 23.639 °C.  
-**Recomputed:** `23.638578549545564`
+**Recomputed:** `23.638578549545674`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit

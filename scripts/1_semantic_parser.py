@@ -91,7 +91,7 @@ Q: "What are the temperature values recorded at each site?"
     {"class": "Observation", "via": "hasObservation", "direction": "outgoing",
      "return_properties": ["hasSimpleResult"], "filters": []},
     {"class": "ObservedProperty", "via": "observedProperty", "direction": "outgoing",
-     "return_properties": [], "filters": [{"property": "label", "op": "contains", "value": "temperature"}]},
+     "return_properties": [], "filters": [{"property": "label", "op": "equals", "value": "temperature"}]},
     {"class": "Site", "via": "hasSite", "direction": "outgoing",
      "return_properties": ["label"], "filters": []}
   ],
@@ -317,7 +317,7 @@ with this exact schema:
 {{
   "target_class": "<class name, one of: {extract_class_list()}>",
   "filters": [
-    {{"property": "<property>", "op": "contains|equals|gt|lt|after|before", "value": "<string>"}}
+    {{"property": "<property>", "op": "contains|equals|in|gt|lt|after|before", "value": "<string, or a list for in>"}}
   ],
   "return_properties": ["<list of properties to SELECT>"],
   "joins": [
@@ -327,11 +327,11 @@ with this exact schema:
       "direction": "outgoing|incoming",
       "return_properties": ["<properties of the related class>"],
       "filters": [
-        {{"property": "<property>", "op": "contains|equals|gt|lt|after|before", "value": "<string>"}}
+        {{"property": "<property>", "op": "contains|equals|in|gt|lt|after|before", "value": "<string, or a list for in>"}}
       ]
     }}
   ],
-  "aggregation": null or {{"type": "count|min|max|avg|sum", "group_by": "ClassName.property", "target": "<class or property>", "distinct": true|false}},
+  "aggregation": null or {{"type": "count|min|max|avg|sum|range", "group_by": "ClassName.property", "target": "<class or property>", "distinct": true|false}},
   "order_by": null or {{"variable": "ClassName.property", "direction": "ASC|DESC"}},
   "limit": null or <integer>,
   "anomaly_check": true|false,
@@ -346,6 +346,7 @@ Operator guide:
   gt / lt   — numeric comparison (for measured values)
   after     — datetime is after the given ISO value (for resultTime)
   before    — datetime is before the given ISO value
+  in        — matches any of a list of values (case-insensitive), e.g. two named nodes or several sites
 
 {_GRAPH_PATHS}
 
@@ -363,6 +364,10 @@ Rules:
   - When asking to LIST instances of a class (e.g. "which sensors", "what sites"), set target_class to that class directly and join ObservationCollection as needed for filtering — EXCEPT for "what quantities/properties are measured/observed at site X": use target_class=ObservationCollection and forward-join Site (filtered), Observation, ObservedProperty (as shown in example 5).
   - The property "readingType" holds data-format codes ("reading", "eng_units") — NOT physical measurement types. To filter by measurement type (temperature, humidity, etc.), filter on ObservedProperty.label via the hasObservation → observedProperty chain.
   - "latest/most recent N readings/values/measurements": one reading = one Observation, so set target_class=Observation (NOT ObservationCollection) and limit=N; join ObservationCollection via hasObservation (incoming) returning resultTime, and order_by ObservationCollection.resultTime DESC. This makes LIMIT count individual readings. (A timestamp lives on the ObservationCollection, so reach it through that join.)
+  - WHICH entity / WHEN / WHERE an extreme occurs ("which node is highest", "when was the maximum temperature recorded", "which day was hottest"): the answer is the entity or time, so use order_by on that value with limit 1 and return the label / resultTime — NOT an aggregation, which returns only the value. Use aggregation only when the value itself is asked ("what is the maximum temperature").
+  - "range" aggregation: min and max together (and their difference for numbers) — for "what range", "how much spread", "what time period do the readings cover" (target resultTime). Never invent other aggregation types.
+  - Several values of the same property (two named nodes, several sites): ONE filter with op "in" and a list — two "equals" filters on the same property can never both match.
+  - Distances: between two named nodes, target Node with label "in" [both names]; nearest node / nodes within R m of a node, return all nodes of that site; between sites, target Node joined to Site with label "in" [the sites] and return Site.label. Always return the coordinates — the distances from each node, and per-site centroids, are computed downstream.
   - Location/where/distance/nearest/elevation questions: set target_class=Node and return_properties=["label","latitude","longitude","altitude"]; link to a Site by joining ObservationCollection via hasNode (incoming) then Site via hasSite (outgoing, filtered). Do NOT try to compute distances/centroids in the query — just return the coordinates; the analysis layer computes spatial metrics.
   - "anomaly_check": true only for a yes/no verdict against a known threshold ("has X exceeded threshold", "is there an anomaly"). False for a plain "what is the threshold for X" lookup, which wants the definition, not a verdict.
   - When anomaly_check is true: build the intent exactly like a Policy threshold lookup (target_class=Policy, filter by ruleId/label contains the quantity, join Site via appliesToSite) — do NOT join or aggregate Observation data yourself. A separate deterministic step (outside this JSON) takes the rule(s) this query returns and checks each against its threshold; it needs the rule identity first, which is what this query provides. Do not switch off target_class=Policy just because the question mentions a quantity/site.
@@ -394,7 +399,7 @@ def _format_result_summary(summary: dict | None) -> str | None:
 
 
 def parse(query: str, feedback: str | None = None, history: list[dict] | None = None,
-          temperature: float = 0.0, reference_time: str | None = None) -> dict:
+          temperature: float = 0.0, reference_time: str | None = None, vocabulary: str | None = None) -> dict:
     client = _get_client()
 
     user_content = f"Query: {query}"
@@ -411,7 +416,8 @@ def parse(query: str, feedback: str | None = None, history: list[dict] | None = 
         )
 
     messages = [
-        {"role": "system", "content": PARSE_SYSTEM + "\n\nOntology schema:\n" + ONTOLOGY_SCHEMA},
+        {"role": "system", "content": PARSE_SYSTEM + "\n\nOntology schema:\n" + ONTOLOGY_SCHEMA
+                                      + (f"\n\n{vocabulary}" if vocabulary else "")},
     ]
     # Prior turns as (question → intent) pairs, so the model can resolve references
     # in a follow-up. Each turn's result shape is prepended to the NEXT question, so
@@ -444,19 +450,18 @@ def parse(query: str, feedback: str | None = None, history: list[dict] | None = 
     raw = raw.strip()
 
     try:
-        return json.loads(raw)
-    except json.JSONDecodeError as e:
+        intent = json.loads(raw)
+        if not isinstance(intent, dict):
+            raise ValueError(f"expected one JSON object, got {type(intent).__name__}")
+        return intent
+    except (json.JSONDecodeError, ValueError) as e:
         print(f"[SemanticParser] JSON parse error: {e}. Raw: {raw[:200]}")
+        # No query is run for an unparseable output: the pipeline treats
+        # parse_error like an execution error (retry with feedback, else an
+        # honest "could not interpret"), instead of answering from arbitrary rows.
         return {
-            "target_class": "ObservationCollection",
-            "filters": [],
-            "return_properties": [],
-            "joins": [],
-            "aggregation": None,
-            "order_by": None,
-            "limit": 10,
-            "anomaly_check": False,
-            "as_of": None,
+            "parse_error": (f"Your output was not a single valid JSON object ({e}). Output exactly one JSON "
+                            f"object following the schema, with nothing before or after it."),
             "explanation": f"Fallback intent for: {query}",
         }
 
@@ -473,13 +478,13 @@ def _vote_key(intent: dict) -> str:
 
 
 def parse_voted(query: str, n: int, history: list[dict] | None = None,
-                reference_time: str | None = None) -> tuple[dict, dict]:
+                reference_time: str | None = None, vocabulary: str | None = None) -> tuple[dict, dict]:
     """n parses in parallel (one greedy, n-1 sampled), majority vote on the
     intent. Ties go to the greedy candidate. Returns (intent, vote info)."""
     temps = [0.0] + [VOTE_TEMPERATURE] * (n - 1)
     with ThreadPoolExecutor(n) as ex:
         candidates = list(ex.map(lambda t: parse(query, history=history, temperature=t,
-                                                 reference_time=reference_time), temps))
+                                                 reference_time=reference_time, vocabulary=vocabulary), temps))
     # A candidate that failed to parse as JSON only votes if nothing else did.
     valid = [c for c in candidates if not str(c.get("explanation", "")).startswith("Fallback intent")] or candidates
     counts = Counter(_vote_key(c) for c in valid)

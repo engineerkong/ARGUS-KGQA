@@ -57,8 +57,12 @@ def _var(*parts: str) -> str:
     return "_".join(cleaned).lower()
 
 
-def _filter_expr(fvar: str, op: str, val: str) -> str:
-    v = val.replace('"', '\\"')
+def _filter_expr(fvar: str, op: str, val) -> str:
+    if op == "in":
+        vals = val if isinstance(val, list) else [x.strip() for x in str(val).split(",")]
+        opts = ", ".join('LCASE("' + str(x).replace('"', '\\"') + '")' for x in vals)
+        return f'  FILTER(LCASE(STR({fvar})) IN ({opts}))'
+    v = str(val).replace('"', '\\"')
     if op == "contains":
         return f'  FILTER(CONTAINS(LCASE(STR({fvar})), LCASE("{v}")))'
     elif op == "equals":
@@ -123,7 +127,7 @@ def _bind_order_join(cls: str, prop: str, joins: list,
     return ovar
 
 
-SUPPORTED_AGGREGATIONS = {"count", "min", "max", "avg", "sum"}
+SUPPORTED_AGGREGATIONS = {"count", "min", "max", "avg", "sum", "range"}
 
 
 def validate_intent(intent: dict) -> str | None:
@@ -135,6 +139,21 @@ def validate_intent(intent: dict) -> str | None:
         if t not in SUPPORTED_AGGREGATIONS:
             return (f"Unsupported aggregation type {t!r}; use one of {', '.join(sorted(SUPPORTED_AGGREGATIONS))}, "
                     f"or no aggregation to list the values.")
+    scopes = [(intent.get("target_class", ""), intent.get("filters") or [])]
+    scopes += [(j.get("class", ""), j.get("filters") or []) for j in intent.get("joins") or []]
+    for cls, filters in scopes:
+        equals = {}
+        for f in filters:
+            prop = str(f.get("property", ""))
+            if "." in prop or "/" in prop:
+                return (f"Filter property {prop!r} on {cls} is a path; a filter applies to the class's own "
+                        f"property — add a join to the related class and put the filter on that join.")
+            if f.get("op") == "equals":
+                equals.setdefault(prop.lower(), []).append(f.get("value"))
+        for prop, vals in equals.items():
+            if len(vals) > 1:
+                return (f"{cls}.{prop} has several 'equals' filters ({vals}), which can never all match; use one "
+                        f"filter with op 'in' and a list of values.")
     return None
 
 
@@ -482,8 +501,11 @@ def build_sparql(intent: dict) -> str:
                 known_prop_vars.add(_var(j["class"], p))
                 known_prop_vars.add(_var(p))
 
+        # value_owner: the entity each aggregated value belongs to (an Observation
+        # for a measured value, a Node for an altitude) — what n_values counts.
         if raw_agg_target in known_class_vars:
             agg_target = "?" + raw_agg_target
+            value_owner = agg_target
         elif raw_agg_target in known_prop_vars:
             agg_target = "?" + raw_agg_target
             prop_key = _strip_prefix(aggregation.get("target", ""))
@@ -493,6 +515,7 @@ def build_sparql(intent: dict) -> str:
             required_line = f"  {anchor} {prop_full} {agg_target} ."
             if required_line not in lines:
                 lines.append(required_line)
+            value_owner = anchor
         elif _strip_prefix(aggregation.get("target", "")) in PROP_MAP:
             agg_target = "?" + raw_agg_target
             prop_key = _strip_prefix(aggregation.get("target", ""))
@@ -500,8 +523,17 @@ def build_sparql(intent: dict) -> str:
             domain = PROP_DOMAIN.get(prop_key)
             anchor = join_vars.get(domain, target_var) if domain else target_var
             lines.append(f"  {anchor} {prop_full} {agg_target} .")
+            value_owner = anchor
+        elif raw_agg_target and aggregation.get("type", "count").lower() != "count":
+            # A property the schema maps don't list (e.g. altitude) and nobody
+            # projected: bind it on the target — aggregating the target's URI
+            # itself would make MIN/MAX/AVG meaningless.
+            agg_target = "?" + raw_agg_target
+            lines.append(f"  {target_var} {_prop(aggregation.get('target', ''))} {agg_target} .")
+            value_owner = target_var
         else:
             agg_target = target_var
+            value_owner = target_var
 
         group_name = _resolve_group_var(aggregation.get("group_by"), joins)
         group_var = f"?{group_name}" if group_name else ""
@@ -510,7 +542,20 @@ def build_sparql(intent: dict) -> str:
 
         use_distinct = aggregation.get("distinct", agg_type == "COUNT")
         distinct_kw = "DISTINCT " if use_distinct else ""
-        agg_expr = f"({agg_type}({distinct_kw}{agg_target}) AS {agg_var})"
+        if agg_type == "RANGE":
+            # min and max together (a value range, a time span); their difference
+            # only for numbers — xsd:dateTime subtraction is not portable SPARQL.
+            agg_var = "?min"
+            agg_expr = f"(MIN({agg_target}) AS ?min) (MAX({agg_target}) AS ?max)"
+            if "time" not in agg_target.lower() and "date" not in agg_target.lower():
+                agg_expr += f" ((MAX({agg_target}) - MIN({agg_target})) AS ?range)"
+        else:
+            agg_expr = f"({agg_type}({distinct_kw}{agg_target}) AS {agg_var})"
+        if agg_type != "COUNT":
+            # How many values the aggregate ran over (distinct value owners, e.g.
+            # observations or nodes — not joined rows). 0 means nothing matched,
+            # which AVG/SUM would otherwise report as a plain 0.
+            agg_expr += f" (COUNT(DISTINCT {value_owner}) AS ?n_values)"
         # No group_by → a single ungrouped total, so no GROUP BY clause.
         select_clause = f"SELECT {group_var} {agg_expr}" if group_var else f"SELECT {agg_expr}"
         group_clause = f"\nGROUP BY {group_var}" if group_var else ""
@@ -524,6 +569,10 @@ def build_sparql(intent: dict) -> str:
     order_clause = ""
     if order_by:
         ovar = "?" + _resolve_group_var(order_by.get("variable", ""), joins)
+        if aggregation and ovar != group_var:
+            # Grouped rows can only be ranked by the group key or the aggregate;
+            # anything else ("avg_hasSimpleResult", "hasSimpleResult") means the aggregate.
+            ovar = agg_var
         odir = order_by.get("direction", "ASC")
         order_clause = f"\nORDER BY {odir}({ovar})"
         if limit and not aggregation:

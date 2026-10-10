@@ -501,11 +501,11 @@ ORDER BY o.value DESC, o.result_time ASC LIMIT 5;
 ```
 | value | result_time | sensor_id |
 |---|---|---|
-| 50 | 2026-07-31 11:30:00 | 82508f60-8269-11f0-b6dc-556f88243956 |
-| 50 | 2026-07-31 11:30:00 | 0cf22310-81be-11f0-9283-e956b63ef652 |
 | 50 | 2026-07-31 11:30:00 | 8250dd80-8269-11f0-9283-e956b63ef652 |
+| 50 | 2026-07-31 11:30:00 | 0cf22310-81be-11f0-9283-e956b63ef652 |
+| 50 | 2026-07-31 11:30:00 | 82508f60-8269-11f0-b6dc-556f88243956 |
 | 50 | 2026-08-01 11:30:00 | 82508f60-8269-11f0-b6dc-556f88243956 |
-| 50 | 2026-08-01 11:30:00 | 0cf22310-81be-11f0-9283-e956b63ef652 |
+| 50 | 2026-08-01 11:30:00 | 8250dd80-8269-11f0-9283-e956b63ef652 |
 
 - The maximum occurs more than once; the reference uses the earliest.
 
@@ -935,7 +935,7 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'soil_temperature' AND o.value 
 
 **Question:** What was the average temperature at Baltanas on 2026-06-18?  
 **Reference:** 22.54.  
-**Recomputed:** `22.53997971602436` → **MATCH**
+**Recomputed:** `22.539979716024355` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -953,7 +953,7 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Question:** What was the average temperature at Baltanas on 2026-08-10?  
 **Reference:** 23.981.  
-**Recomputed:** `23.981120507399563` → **MATCH**
+**Recomputed:** `23.98112050739956` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -971,7 +971,7 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Question:** What was the average temperature at Lucretili on 2026-07-31?  
 **Reference:** 29.166.  
-**Recomputed:** `29.16618030224075` → **MATCH**
+**Recomputed:** `29.166180302240747` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -1587,7 +1587,7 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Question:** What was the average temperature at Baltanas between 2026-06-18 and 2026-06-24?  
 **Reference:** 23.44 (34506 observations, both days inclusive).  
-**Recomputed:** `23.439610502521294` → **MATCH**
+**Recomputed:** `23.43961050252129` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -1605,7 +1605,7 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Question:** What was the average temperature at Baltanas between 2026-07-27 and 2026-08-02?  
 **Reference:** 24.215 (34409 observations, both days inclusive).  
-**Recomputed:** `24.21508907553261` → **MATCH**
+**Recomputed:** `24.215089075532603` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -1659,7 +1659,7 @@ WHERE r.site_id = 'delos' AND o.property_id = 'temperature' AND o.value IS NOT N
 
 **Question:** What was the average temperature at Lucretili between 2026-07-04 and 2026-07-10?  
 **Reference:** 23.698 (27435 observations, both days inclusive).  
-**Recomputed:** `23.698487333697848` → **MATCH**
+**Recomputed:** `23.698487333697827` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -1677,7 +1677,7 @@ WHERE r.site_id = 'lucretili' AND o.property_id = 'temperature' AND o.value IS N
 
 **Question:** What was the average temperature at Lucretili between 2026-07-06 and 2026-07-12?  
 **Reference:** 24.241 (27290 observations, both days inclusive).  
-**Recomputed:** `24.240652253572772` → **MATCH**
+**Recomputed:** `24.24065225357278` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -1695,7 +1695,7 @@ WHERE r.site_id = 'lucretili' AND o.property_id = 'temperature' AND o.value IS N
 
 **Question:** What was the average temperature at Lucretili between 2026-07-08 and 2026-07-14?  
 **Reference:** 25.067 (27656 observations, both days inclusive).  
-**Recomputed:** `25.066690772346004` → **MATCH**
+**Recomputed:** `25.066690772345996` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -1713,7 +1713,7 @@ WHERE r.site_id = 'lucretili' AND o.property_id = 'temperature' AND o.value IS N
 
 **Question:** What was the average temperature at Ranverso between 2026-06-20 and 2026-06-26?  
 **Reference:** 26.529 (1359 observations, both days inclusive).  
-**Recomputed:** `26.52869757174393` → **MATCH**
+**Recomputed:** `26.528697571743923` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -1731,7 +1731,7 @@ WHERE r.site_id = 'ranverso' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Question:** What was the average temperature at Ranverso between 2026-06-29 and 2026-07-05?  
 **Reference:** 26.248 (1512 observations, both days inclusive).  
-**Recomputed:** `26.247751322751313` → **MATCH**
+**Recomputed:** `26.247751322751316` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -1749,7 +1749,7 @@ WHERE r.site_id = 'ranverso' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Question:** What was the average temperature at Schenkenberg between 2026-06-07 and 2026-06-13?  
 **Reference:** 16.821 (2332 observations, both days inclusive).  
-**Recomputed:** `16.820926243567758` → **MATCH**
+**Recomputed:** `16.82092624356776` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -1767,7 +1767,7 @@ WHERE r.site_id = 'schenkenberg' AND o.property_id = 'temperature' AND o.value I
 
 **Question:** What was the average temperature at Schenkenberg between 2026-07-10 and 2026-07-16?  
 **Reference:** 27.677 (1610 observations, both days inclusive).  
-**Recomputed:** `27.676894409937887` → **MATCH**
+**Recomputed:** `27.67689440993789` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, count(*) AS n FROM observations o JOIN readings r USING (reading_id)

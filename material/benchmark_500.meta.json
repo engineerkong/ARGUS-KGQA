@@ -13,5 +13,5 @@
  },
  "unanswerable": 15,
  "conventions": "- all times UTC; \"on <date>\" = that UTC calendar day;\n  - relative times (\"last 24 hours\") end at the snapshot's last reading;\n  - distances are haversine on a 6,371,000 m sphere; a centroid is the mean\n    latitude/longitude of the nodes; only nodes with coordinates count;\n  - AD-RT verdicts follow each rule's definition: windows end at the latest\n    matching reading at or before the end of the named day (or the snapshot\n    end), every (sensor, quantity) series is evaluated separately and a rule\n    fires if any series crosses its threshold; a question's verdict is Yes if\n    any applicable rule fires, No if at least one was evaluated and none fired,\n    Cannot be determined if none could be evaluated.",
- "built_at": "2026-10-09T15:33:01.288928+00:00"
+ "built_at": "2026-10-10T11:20:22.971847+00:00"
 }

@@ -58,6 +58,7 @@ Statistics:
 - When the query already computed an aggregate (a count/avg/min/max/sum column), report that value — it is the authoritative one.
 - Otherwise the rows are a de-duplicated listing, so do NOT compute an average, total or record count from them; give the values, ranges or examples the rows support and leave it there.
 - With many rows, summarise and name a few representative examples rather than enumerating everything.
+- If the query has a LIMIT, the rows are only the top N it asked for — do not claim they are the only ones that exist.
 
 AD-RT rule check (when present in the prompt):
 - If a message includes a section starting "AD-RT rule check", that verdict (EXCEEDS/within a threshold) was computed in Python, not by you — report it as-is, do NOT recompute or second-guess it by comparing raw numbers yourself.
@@ -184,7 +185,9 @@ def template_answer(query: str, results: list, ad_rt_summary: str | None = None,
         detail = (" " + " ".join(rules)) if rules else (" " + ad_rt_summary if ad_rt_summary else "")
         return f"{ad_rt_verdict(ad_rt_summary)}.{detail}"
 
-    if not results or (len(results) == 1 and "error" in results[0]):
+    if len(results) == 1 and "error" in results[0]:
+        return "The question could not be answered: the query could not be built or executed."
+    if not results:
         return "No matching data was found in the knowledge graph for this question."
 
     rows = _dedupe(results)
