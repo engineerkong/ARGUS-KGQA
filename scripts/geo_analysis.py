@@ -160,8 +160,11 @@ def _numeric_lines(results: list[dict]) -> list[str]:
 
 # ── Entry point ──────────────────────────────────────────────────────────────
 
-def analyze(results: list[dict[str, Any]]) -> dict[str, Any]:
-    now = datetime.now(timezone.utc)
+def analyze(results: list[dict[str, Any]], now: datetime | None = None) -> dict[str, Any]:
+    """`now` is the reference time for recency (days_ago): the latest reading in
+    the knowledge graph, so relative statements hold for a frozen snapshot or a
+    feed that lags — the wall clock is only the fallback."""
+    now = now or datetime.now(timezone.utc)
 
     timed = []
     for row in results:

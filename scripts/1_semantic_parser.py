@@ -14,7 +14,7 @@ from ontology_schema import get_ontology_schema, extract_class_list
 
 BASE_URL = os.environ.get("OLLAMA_BASE_URL", "https://ollama.fit.fraunhofer.de/api")
 API_KEY  = os.environ.get("OPENAI_API_KEY", "no-key")
-MODEL    = os.environ.get("OLLAMA_MODEL", "qwen3.6:35b")
+MODEL    = os.environ.get("OLLAMA_MODEL", "llama3.3:70b")
 
 # The SDK default is a 600s timeout with silent retries, so a stalled endpoint
 # hangs the pipeline for many minutes with no output.
@@ -289,6 +289,23 @@ Q: "Which country is the Lucretili pilot in, and what threats affect it?"
   "explanation": "Asset carries the pilot's country. Threat has no ID-based link to a specific Asset in this data, so it cannot be joined here — a separate Threat query is needed if the user wants that list."
 }
 
+Q: "How many readings were recorded at ranverso in the last 48 hours?"
+{
+  "target_class": "ObservationCollection",
+  "filters": [],
+  "return_properties": [],
+  "joins": [
+    {"class": "Site", "via": "hasSite", "direction": "outgoing",
+     "return_properties": [], "filters": [{"property": "label", "op": "equals", "value": "ranverso"}]}
+  ],
+  "aggregation": {"type": "count", "group_by": null, "target": "observationcollection", "distinct": true},
+  "order_by": null, "limit": null,
+  "anomaly_check": false,
+  "as_of": null,
+  "relative_time": {"amount": 48, "unit": "hours"},
+  "explanation": "A window ending at the latest reading; it becomes a resultTime filter downstream, so no date is written here."
+}
+
 --- END EXAMPLES ---\
 """
 
@@ -319,6 +336,7 @@ with this exact schema:
   "limit": null or <integer>,
   "anomaly_check": true|false,
   "as_of": null or "<ISO date or datetime, e.g. '2026-05-15'>",
+  "relative_time": null or {{"amount": <integer>, "unit": "hours|days|weeks"}},
   "explanation": "<one sentence>"
 }}
 
@@ -348,7 +366,8 @@ Rules:
   - Location/where/distance/nearest/elevation questions: set target_class=Node and return_properties=["label","latitude","longitude","altitude"]; link to a Site by joining ObservationCollection via hasNode (incoming) then Site via hasSite (outgoing, filtered). Do NOT try to compute distances/centroids in the query — just return the coordinates; the analysis layer computes spatial metrics.
   - "anomaly_check": true only for a yes/no verdict against a known threshold ("has X exceeded threshold", "is there an anomaly"). False for a plain "what is the threshold for X" lookup, which wants the definition, not a verdict.
   - When anomaly_check is true: build the intent exactly like a Policy threshold lookup (target_class=Policy, filter by ruleId/label contains the quantity, join Site via appliesToSite) — do NOT join or aggregate Observation data yourself. A separate deterministic step (outside this JSON) takes the rule(s) this query returns and checks each against its threshold; it needs the rule identity first, which is what this query provides. Do not switch off target_class=Policy just because the question mentions a quantity/site.
-  - "as_of": set only when the question names a specific point in time ("on 2026-05-15", "last Tuesday" — resolve relative phrases to an absolute ISO date). Null for "currently"/"now"/unstated, which defaults to the latest available reading. Never put a date into "filters" for an anomaly_check question (Policy has no resultTime) — as_of is the only place it belongs.
+  - "relative_time": set for a window that ends now ("in the last 24 hours", "over the past 7 days", "this past week" = 1 week). "Now" is the latest reading in the knowledge graph (given with the query as the reference time), not today's date; the window is turned into a resultTime filter downstream, so do NOT also add resultTime filters for it. Null otherwise.
+  - "as_of": set only when the question names a specific point in time ("on 2026-05-15", "last Tuesday" — resolve relative phrases to an absolute ISO date against the reference time). Null for "currently"/"now"/unstated, which defaults to the latest available reading. Never put a date into "filters" for an anomaly_check question (Policy has no resultTime) — as_of is the only place it belongs.
 
 Follow-up handling (earlier turns may appear above as question → intent pairs):
   - Treat the current question as SELF-CONTAINED by default. If it can be understood on its own, IGNORE the earlier turns completely.
@@ -375,10 +394,13 @@ def _format_result_summary(summary: dict | None) -> str | None:
 
 
 def parse(query: str, feedback: str | None = None, history: list[dict] | None = None,
-          temperature: float = 0.0) -> dict:
+          temperature: float = 0.0, reference_time: str | None = None) -> dict:
     client = _get_client()
 
     user_content = f"Query: {query}"
+    if reference_time:
+        user_content = (f"[Reference time — the latest reading in the knowledge graph: {reference_time} UTC. "
+                        f"Relative time expressions refer to this time, not to today's date.]\n{user_content}")
     if feedback:
         user_content += (
             "\n\n--- FEEDBACK FROM PREVIOUS ATTEMPT ---\n"
@@ -450,12 +472,14 @@ def _vote_key(intent: dict) -> str:
     return json.dumps({k: v for k, v in intent.items() if k != "explanation"}, sort_keys=True)
 
 
-def parse_voted(query: str, n: int, history: list[dict] | None = None) -> tuple[dict, dict]:
+def parse_voted(query: str, n: int, history: list[dict] | None = None,
+                reference_time: str | None = None) -> tuple[dict, dict]:
     """n parses in parallel (one greedy, n-1 sampled), majority vote on the
     intent. Ties go to the greedy candidate. Returns (intent, vote info)."""
     temps = [0.0] + [VOTE_TEMPERATURE] * (n - 1)
     with ThreadPoolExecutor(n) as ex:
-        candidates = list(ex.map(lambda t: parse(query, history=history, temperature=t), temps))
+        candidates = list(ex.map(lambda t: parse(query, history=history, temperature=t,
+                                                 reference_time=reference_time), temps))
     # A candidate that failed to parse as JSON only votes if nothing else did.
     valid = [c for c in candidates if not str(c.get("explanation", "")).startswith("Fallback intent")] or candidates
     counts = Counter(_vote_key(c) for c in valid)

@@ -5,7 +5,7 @@ the SOSA/ARGUS RDF vocabularies. A question is parsed into a structured intent,
 compiled to SPARQL, executed against a knowledge graph, and turned into a concise
 answer — with the statistics computed *in the query*, not guessed by the LLM.
 
-Default LLM endpoint: `https://ollama.fit.fraunhofer.de/api`, model `qwen3.6:35b`.
+Default LLM endpoint: `https://ollama.fit.fraunhofer.de/api`, model `llama3.3:70b` (override with `OLLAMA_BASE_URL` / `OLLAMA_MODEL`). The experiments and the baselines (TextRAG, Interactive-KBQA) all use `llama3.3:70b`.
 
 ## Requirements
 
@@ -51,6 +51,24 @@ result = p.run("What is the average temperature at each site?")
 print(result["answer"])
 # result also holds: intent, sparql, results (unfolded rows), answer
 ```
+
+## Time anchoring
+
+"Now" is the newest observation in the knowledge graph, not the wall clock —
+readings arrive late and a snapshot never moves. The pipeline looks it up at
+start-up (cached for `ARGUS_LATEST_TTL` seconds, default 3600, the ingest
+interval) and uses it three ways:
+
+- **Relative windows** ("last 24 hours", "past week"): the parser only emits
+  `relative_time: {amount, unit}`; the pipeline turns it into an absolute
+  `resultTime` filter ending at the newest observation. The parser is also
+  given that time to resolve calendar phrases ("yesterday") into dates.
+- **Recency** in `geo_analysis` (days ago) is measured from it.
+- **Every answer ends with the data it rests on**, appended by code, e.g.
+  `(Data: readings from 2026-08-11 09:15 UTC to 2026-08-12 09:15 UTC.)`.
+
+AD-RT rule windows were already anchored to the newest matching reading (or
+to the date the question names).
 
 ## Configurations
 

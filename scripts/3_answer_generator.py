@@ -14,7 +14,7 @@ from geo_analysis import analyze
 
 BASE_URL = os.environ.get("OLLAMA_BASE_URL", "https://ollama.fit.fraunhofer.de/api")
 API_KEY  = os.environ.get("OPENAI_API_KEY", "no-key")
-MODEL    = os.environ.get("OLLAMA_MODEL", "qwen3.6:35b")
+MODEL    = os.environ.get("OLLAMA_MODEL", "llama3.3:70b")
 
 # The SDK default is a 600s timeout with silent retries, so a stalled endpoint
 # hangs the pipeline for many minutes with no output.
@@ -104,7 +104,7 @@ def prompt_row_stats(results: list) -> tuple[int, int]:
 
 def generate(query: str, sparql: str, results: list, ad_rt_summary: str | None = None,
              anomaly_check: bool = False, verbose: bool = False, feedback: str | None = None,
-             with_analysis: bool = True) -> str:
+             with_analysis: bool = True, reference_time=None) -> str:
     """with_analysis=False is the w/o-analysis ablation: no pre-computed
     summary, and ad_rt_summary holds rule definitions + raw readings
     (ek_analysis.fetch_raw) instead of verdicts (ek_analysis.evaluate)."""
@@ -119,7 +119,7 @@ def generate(query: str, sparql: str, results: list, ad_rt_summary: str | None =
         f"Results — all {len(deduped)} distinct rows ({len(results)} total):\n{results_text}"
     )
     if with_analysis:
-        analysis = analyze(results)
+        analysis = analyze(results, now=reference_time)
         user_msg += f"\n\nPre-computed spatial & temporal analysis:\n{analysis['summary_text']}"
         if verbose:
             print(f"[Step 3] Pre-computed spatial & temporal analysis:\n{analysis['summary_text']}")
@@ -168,7 +168,7 @@ _TEMPLATE_ROWS = 10
 
 
 def template_answer(query: str, results: list, ad_rt_summary: str | None = None,
-                    anomaly_check: bool = False, with_analysis: bool = True) -> str:
+                    anomaly_check: bool = False, with_analysis: bool = True, reference_time=None) -> str:
     """Deterministic answer with no LLM call: the AD-RT verdict, or the result
     rows plus the pre-computed analysis, rendered as text. Without the analysis
     layer nothing computes a verdict, so an anomaly question cannot be decided
@@ -197,7 +197,8 @@ def template_answer(query: str, results: list, ad_rt_summary: str | None = None,
         lines.append("- " + ", ".join(f"{k.replace('_', ' ')}: {v}" for k, v in row.items()))
     if len(rows) > _TEMPLATE_ROWS:
         lines.append(f"- … and {len(rows) - _TEMPLATE_ROWS} more.")
-    facts = [l for l in analyze(results)["summary_text"].splitlines()[1:] if l.strip()] if with_analysis else []
+    facts = ([l for l in analyze(results, now=reference_time)["summary_text"].splitlines()[1:] if l.strip()]
+             if with_analysis else [])
     if facts:
         lines.append("Analysis:")
         lines += facts[:15]
@@ -222,7 +223,7 @@ def _supported(num: str, evidence: list[float]) -> bool:
 
 
 def check_answer(answer: str, query: str, results: list, ad_rt_summary: str | None = None,
-                 anomaly_check: bool = False) -> str | None:
+                 anomaly_check: bool = False, reference_time=None) -> str | None:
     """Deterministic check of an LLM answer against the evidence it was given.
     Returns None when it passes, else feedback for one regeneration:
       - every number in the answer must appear (up to rounding) in the result
@@ -237,7 +238,7 @@ def check_answer(answer: str, query: str, results: list, ad_rt_summary: str | No
                             f"but the answer does not start with it.")
 
     evidence_text = "\n".join([
-        json.dumps(results, ensure_ascii=False), analyze(results)["summary_text"],
+        json.dumps(results, ensure_ascii=False), analyze(results, now=reference_time)["summary_text"],
         ad_rt_summary or "", query,
     ])
     evidence = [float(n) for n in _numbers(evidence_text)]

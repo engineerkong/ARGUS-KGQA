@@ -123,6 +123,49 @@ def _bind_order_join(cls: str, prop: str, joins: list,
     return ovar
 
 
+SUPPORTED_AGGREGATIONS = {"count", "min", "max", "avg", "sum"}
+
+
+def validate_intent(intent: dict) -> str | None:
+    """A problem that would make build_sparql emit invalid SPARQL, as feedback
+    for the parser's retry loop; None when the intent can be compiled."""
+    agg = intent.get("aggregation")
+    if agg:
+        t = str(agg.get("type", "count")).lower()
+        if t not in SUPPORTED_AGGREGATIONS:
+            return (f"Unsupported aggregation type {t!r}; use one of {', '.join(sorted(SUPPORTED_AGGREGATIONS))}, "
+                    f"or no aggregation to list the values.")
+    return None
+
+
+def _join_anchor_class(j: dict, target_class: str, joined: set) -> str:
+    # The class a join hangs off — same routing rule as the join emitters below.
+    via_short = _strip_prefix(j.get("via", ""))
+    if j.get("direction", "outgoing") == "incoming":
+        rng = PROP_RANGE.get(via_short)
+        return rng if rng in joined else target_class
+    dom = PROP_DOMAIN.get(via_short)
+    return dom if dom and dom != target_class and dom in joined else target_class
+
+
+def _required_join_classes(joins: list, target_class: str) -> set:
+    """Classes of joins that constrain the result: joins with filters, plus every
+    join on the path from the target to them, and joins a later join hangs off."""
+    joined, anchor = set(), {}
+    for j in joins:
+        anchor[j.get("class", "")] = _join_anchor_class(j, target_class, joined)
+        joined.add(j.get("class", ""))
+    required = {j.get("class", "") for j in joins if j.get("filters")}
+    required |= {a for c, a in anchor.items() if a != target_class}
+    frontier = list(required)
+    while frontier:
+        a = anchor.get(frontier.pop())
+        if a and a != target_class and a not in required:
+            required.add(a)
+            frontier.append(a)
+    return required
+
+
 def _build_subquery_sparql(
     target_class: str, target_var: str,
     filters: list, return_props: list,
@@ -148,6 +191,29 @@ def _build_subquery_sparql(
         inner_lines.append(f"    {target_var} {_prop(prop)} {fvar} .")
         inner_lines.append("    " + _filter_expr(fvar, op, val))
 
+    # Constraining joins (filters and the path to them) go inside, so LIMIT ranks
+    # only entities that satisfy them — not the first N entities overall.
+    required = _required_join_classes(joins, target_class)
+    inner_join_vars = {target_class: target_var}
+    for j in joins:
+        jclass = j.get("class", "")
+        if jclass not in required:
+            continue
+        via, direction = j.get("via", ""), j.get("direction", "outgoing")
+        jvar = "?" + jclass.lower()
+        avar = inner_join_vars.get(_join_anchor_class(j, target_class, set(inner_join_vars)), target_var)
+        if direction == "outgoing":
+            inner_lines.append(f"    {avar} {_prop(via)} {jvar} .")
+        else:
+            inner_lines.append(f"    {jvar} {_prop(via)} {avar} .")
+        if not _type_check_redundant(jclass, via, direction):
+            inner_lines.append(f"    {jvar} a {_class(jclass)} .")
+        inner_join_vars[jclass] = jvar
+        for f in j.get("filters", []):
+            fvar = f"?_jf_{_var(jclass, f.get('property', ''))}"
+            inner_lines.append(f"    {jvar} {_prop(f.get('property', ''))} {fvar} .")
+            inner_lines.append("    " + _filter_expr(fvar, f.get("op", "contains"), f.get("value", "")))
+
     inner_order = ""
     if order_by:
         raw_ovar = order_by.get("variable", "")
@@ -163,10 +229,13 @@ def _build_subquery_sparql(
             ovar = "?" + _resolve_group_var(raw_ovar, joins)
         if ovar and ovar in inner_vars:
             inner_order = f"\n    ORDER BY {order_by.get('direction', 'DESC')}({ovar})"
+            # Ranking needs the value: SPARQL sorts unbound first in ASC order,
+            # so an entity without it would otherwise be "the lowest".
+            inner_lines.append(f"    FILTER(BOUND({ovar}))")
 
     inner_block = (
         "  {\n"
-        f"  SELECT {' '.join(inner_vars)}\n"
+        f"  SELECT DISTINCT {' '.join(inner_vars)}\n"
         f"  WHERE {{\n" + "\n".join(inner_lines) + "\n  }"
         + inner_order
         + f"\n  LIMIT {int(limit)}\n"
@@ -198,7 +267,10 @@ def _build_subquery_sparql(
                 else target_var
             )
 
-        use_optional = not jfilters
+        # A join that later joins hang off (or that filters) must not be OPTIONAL:
+        # a variable bound only inside an OPTIONAL and reused outside it turns
+        # into a cross product.
+        use_optional = not jfilters and jclass not in required
         if use_optional:
             outer_lines.append("  OPTIONAL {")
         if direction == "outgoing":
@@ -454,6 +526,9 @@ def build_sparql(intent: dict) -> str:
         ovar = "?" + _resolve_group_var(order_by.get("variable", ""), joins)
         odir = order_by.get("direction", "ASC")
         order_clause = f"\nORDER BY {odir}({ovar})"
+        if limit and not aggregation:
+            # top-N ranks by the value: unbound sorts first in ASC (see subquery path)
+            where_clause = where_clause[:-2] + f"\n  FILTER(BOUND({ovar}))\n}}"
 
     limit_clause = ""
     if limit:

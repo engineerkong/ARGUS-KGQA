@@ -29,6 +29,7 @@ import json
 import os
 import time
 from dataclasses import dataclass, replace
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -39,6 +40,7 @@ parse_voted = _sp.parse_voted
 
 _sr = importlib.import_module("2_sparql_retriever")
 build_sparql = _sr.build_sparql
+validate_intent = _sr.validate_intent
 execute      = _sr.execute
 unfold_results = _sr.unfold_results
 
@@ -100,6 +102,7 @@ def get_config(name: str = "balanced", n: int | None = None, analysis: bool = Tr
 
 
 MAX_SAMPLE_VALUES = 8
+LATEST_TTL = float(os.environ.get("ARGUS_LATEST_TTL", "3600"))
 
 
 def _summarize_results(results: list[dict[str, Any]]) -> dict[str, Any]:
@@ -146,6 +149,69 @@ def _is_oversized(results: list[dict]) -> bool:
     return len(results) > MAX_RESULT_ROWS
 
 
+_REL_HOURS = {"hour": 1, "hours": 1, "day": 24, "days": 24, "week": 168, "weeks": 168}
+_TIME_CLASSES = ("ObservationCollection", "Observation")
+
+
+def _iso(t: datetime) -> str:
+    # Same lexical form as the endpoint's xsd:dateTime values, so the string
+    # comparison the "after"/"before" filters compile to stays correct.
+    return t.astimezone(timezone.utc).isoformat()
+
+
+def _fmt(t: datetime) -> str:
+    return t.astimezone(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+
+
+def _apply_relative_time(intent: dict, latest: datetime | None):
+    """A relative window ("last 24 hours") ends at the latest reading in the KG,
+    not at the wall clock: turn the parser's relative_time into an absolute
+    resultTime filter. Returns (intent, (start, end) or None, problem or None)."""
+    rt = intent.get("relative_time")
+    if not rt or intent.get("anomaly_check") or latest is None:
+        return intent, None, None
+    try:
+        hours = float(rt.get("amount")) * _REL_HOURS[str(rt.get("unit", "")).lower()]
+    except (AttributeError, KeyError, TypeError, ValueError):
+        return intent, None, (f"Invalid relative_time {rt!r}; use {{\"amount\": <integer>, "
+                              f"\"unit\": \"hours|days|weeks\"}}.")
+    start = latest - timedelta(hours=hours)
+    flt = {"property": "resultTime", "op": "after", "value": _iso(start)}
+    intent = json.loads(json.dumps(intent))
+    if intent.get("target_class") in _TIME_CLASSES:
+        intent.setdefault("filters", []).append(flt)
+    else:
+        j = next((j for j in intent.get("joins") or [] if j.get("class") in _TIME_CLASSES), None)
+        if j is None:
+            return intent, None, ("relative_time needs readings: join ObservationCollection "
+                                  "(it carries resultTime) or target it directly.")
+        j.setdefault("filters", []).append(flt)
+    return intent, (start, latest), None
+
+
+def _data_note(intent: dict | None, latest: datetime | None, window) -> str:
+    """Which data the answer rests on — appended to every answer, so it always
+    states the timestamp of the data used rather than leaving it to the model."""
+    if window:
+        return f"(Data: readings from {_fmt(window[0])} to {_fmt(window[1])}.)"
+    if intent and intent.get("anomaly_check") and intent.get("as_of"):
+        return f"(Data: readings up to {intent['as_of']}, the date the question names.)"
+    bounds = {}
+    for f in [*(intent or {}).get("filters", []), *[f for j in (intent or {}).get("joins", []) or [] for f in j.get("filters", [])]]:
+        if str(f.get("property", "")).lower().endswith("resulttime") and f.get("op") in ("after", "before"):
+            bounds[f["op"]] = f.get("value")
+    if bounds:
+        return f"(Data: readings {'from ' + bounds['after'] if 'after' in bounds else ''}" \
+               f"{' ' if len(bounds) == 2 else ''}{'up to ' + bounds['before'] if 'before' in bounds else ''}.)"
+    if latest is not None:
+        return f"(Data: readings up to {_fmt(latest)}, the latest in the knowledge graph.)"
+    return ""
+
+
+def _with_note(answer: str, note: str) -> str:
+    return f"{answer}\n\n{note}" if note else answer
+
+
 def _oversized_answer(n_rows: int) -> str:
     return (
         f"This question matches {n_rows} rows, too many to answer directly "
@@ -179,13 +245,38 @@ class Pipeline:
             print(f"[Step 0] WARNING: TTL file not found: {ttl}")
             print("[Step 0] Run `python scripts/0a_offline_readings.py --max-records 500` to fetch data first.")
         self.backend = make_backend(ttl_path=ttl, endpoint=endpoint)
+        latest = self.latest_reading()  # fetched up front, so no question pays for it
         if self.verbose:
             print(f"[Step 0] Backend ready — {self.backend.describe()}.")
             print(f"[Step 0] Configuration: {self.config}")
+            print(f"[Step 0] Latest reading (reference time for relative questions): {latest}")
+
+    _LATEST_SPARQL = """PREFIX sosa: <http://www.w3.org/ns/sosa/>
+SELECT (MAX(?t) AS ?latest) WHERE { ?o a sosa:Observation ; sosa:resultTime ?t . }"""
+
+    def latest_reading(self) -> datetime | None:
+        """Time of the newest observation (measured value) in the KG — the "now"
+        relative times refer to; a reading with no observations does not count.
+        Cached for ARGUS_LATEST_TTL seconds (default 3600, the live ingest
+        interval: the newest reading only changes once per ingest cycle)."""
+        cached = getattr(self, "_latest_cache", None)
+        if cached and time.monotonic() - cached[0] < LATEST_TTL:
+            return cached[1]
+        rows = self.backend.query(self._LATEST_SPARQL)
+        latest = None
+        if rows and "error" not in rows[0] and rows[0].get("latest"):
+            latest = datetime.fromisoformat(rows[0]["latest"].replace("Z", "+00:00"))
+            if latest.tzinfo is None:
+                latest = latest.replace(tzinfo=timezone.utc)
+        self._latest_cache = (time.monotonic(), latest)
+        return latest
 
     def run(self, query: str) -> dict[str, Any]:
         v = self.verbose
         sep = "─" * 60
+        latest = self.latest_reading()
+        ref = _fmt(latest)[:-4] if latest else None
+        window = None
 
         feedback = None
         intent = None
@@ -214,13 +305,13 @@ class Pipeline:
             _t = time.perf_counter()
             n = self.config.parse_candidates
             if attempt == 0 and n > 1:
-                intent, vote = parse_voted(query, n, history=history)
+                intent, vote = parse_voted(query, n, history=history, reference_time=ref)
                 parse_calls += n
                 if v:
                     print(f"[Step 1] Voted over {n} candidates: {vote['distinct']} distinct intent(s), "
                           f"winner has {vote['winner_votes']} vote(s).")
             else:
-                intent = parse(query, feedback=feedback, history=history)
+                intent = parse(query, feedback=feedback, history=history, reference_time=ref)
                 parse_calls += 1
             t_parse += time.perf_counter() - _t
             # AD questions: this fetches the applicable Policy rule(s), labelled
@@ -237,13 +328,17 @@ class Pipeline:
 
             # ── Step 2a/2b: SPARQL Retrieval + Result Unfolding ──────────────
             _t = time.perf_counter()
-            sparql = build_sparql(intent)
+            # An intent that cannot compile (e.g. an unsupported aggregation type)
+            # is reported as an execution error, so it goes through the same retry.
+            intent, window, problem = _apply_relative_time(intent, latest)
+            problem = problem or validate_intent(intent)
+            sparql = f"# not compiled: {problem}" if problem else build_sparql(intent)
             if v:
                 print(f"\n{sep}")
                 print(f"[{step2_label}] SPARQL query on {step2_topic}:")
                 print(sparql)
 
-            raw_results = execute(self.backend, sparql)
+            raw_results = [{"error": problem}] if problem else execute(self.backend, sparql)
             t_query += time.perf_counter() - _t
             if v:
                 print(f"[{step2_label}] {len(raw_results)} raw result(s) returned.")
@@ -272,7 +367,7 @@ class Pipeline:
         # Oversized ends the turn on the spot (see _is_oversized) — no retry,
         # no Step 2b or Step 3, just an explanation.
         if _is_oversized(raw_results):
-            answer = _oversized_answer(len(raw_results))
+            answer = _with_note(_oversized_answer(len(raw_results)), _data_note(intent, latest, window))
             if v:
                 print(f"\n{sep}")
                 print(f"[Pipeline] Giving up — {len(raw_results)} rows exceeds MAX_RESULT_ROWS "
@@ -336,7 +431,7 @@ class Pipeline:
         # row cap as Step 2's rows, handled the same way — declined, not truncated.
         if ad_rt_raw_rows and len(unfolded) + ad_rt_raw_rows > MAX_RESULT_ROWS:
             n_rows = len(unfolded) + ad_rt_raw_rows
-            answer = _oversized_answer(n_rows)
+            answer = _with_note(_oversized_answer(n_rows), _data_note(intent, latest, window))
             if v:
                 print(f"\n[Pipeline] Giving up — {n_rows} rows (incl. {ad_rt_raw_rows} raw AD-RT readings) "
                       f"exceeds MAX_RESULT_ROWS ({MAX_RESULT_ROWS}); not sending to the LLM.")
@@ -364,24 +459,28 @@ class Pipeline:
         anomaly = bool(intent.get("anomaly_check"))
         if self.config.answer == "template":
             answer = template_answer(query, unfolded, ad_rt_summary=ad_rt_summary, anomaly_check=anomaly,
-                                     with_analysis=self.config.analysis)
+                                     with_analysis=self.config.analysis, reference_time=latest)
         else:
             answer = generate(query, sparql, unfolded, ad_rt_summary=ad_rt_summary,
-                              anomaly_check=anomaly, verbose=v, with_analysis=self.config.analysis)
+                              anomaly_check=anomaly, verbose=v, with_analysis=self.config.analysis,
+                              reference_time=latest)
             answer_calls += 1
             # THOROUGH: deterministic check against the evidence; one regeneration on failure.
             # Both of its criteria are defined against analysis output (the computed
             # verdict and analysis numbers), so the ablation skips it.
             if self.config.answer == "llm+check" and self.config.analysis:
                 check_feedback = check_answer(answer, query, unfolded, ad_rt_summary=ad_rt_summary,
-                                              anomaly_check=anomaly)
+                                              anomaly_check=anomaly, reference_time=latest)
                 if check_feedback:
                     if v:
                         print(f"[Step 3] Answer check failed — regenerating:\n{check_feedback}")
                     answer = generate(query, sparql, unfolded, ad_rt_summary=ad_rt_summary,
-                                      anomaly_check=anomaly, verbose=False, feedback=check_feedback)
+                                      anomaly_check=anomaly, verbose=False, feedback=check_feedback,
+                                      reference_time=latest)
                     answer_calls += 1
         t_answer = time.perf_counter() - _t
+        # Added after the answer check, so it never counts as an unsupported number.
+        answer = _with_note(answer, _data_note(intent, latest, window))
         if v:
             print("[Step 3] Answer:")
             print(answer)

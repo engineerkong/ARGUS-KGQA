@@ -39,9 +39,13 @@ def main():
         if path.exists():
             continue
         pipeline.reset_history()
-        for h in d.get("history") or []:
-            pipeline.run(h["question"])
-        r = pipeline.run(d["question"])
+        try:
+            for h in d.get("history") or []:
+                pipeline.run(h["question"])
+            r = pipeline.run(d["question"])
+        except Exception as e:  # e.g. an LLM endpoint timeout: leave it for the next run
+            print(f"{d['id']} FAILED: {type(e).__name__}: {e}", flush=True)
+            continue
         res = {
             **d,
             "prediction": r["answer"],
