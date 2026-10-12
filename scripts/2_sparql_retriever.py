@@ -6,8 +6,11 @@ there is no hardcoded schema knowledge here.
 """
 
 from __future__ import annotations
+import json
+import re
 from typing import Any
 from rdflib import Graph
+from analysis_temp import TIME_OPS, TIME_BUCKETS, TIME_CLASSES, time_bounds, bucket_bind
 from ontology_schema import (
     EX,
     extract_class_map, extract_prop_map,
@@ -71,10 +74,9 @@ def _filter_expr(fvar: str, op: str, val) -> str:
         return f'  FILTER(xsd:decimal({fvar}) > {v})'
     elif op == "lt":
         return f'  FILTER(xsd:decimal({fvar}) < {v})'
-    elif op == "after":
-        return f'  FILTER(STR({fvar}) > "{v}")'
-    elif op == "before":
-        return f'  FILTER(STR({fvar}) < "{v}")'
+    elif op in TIME_OPS:
+        cmp, bound = time_bounds(op, val)
+        return f'  FILTER(STR({fvar}) {cmp} "{bound}")'
     else:
         return f'  FILTER(CONTAINS(LCASE(STR({fvar})), LCASE("{v}")))'
 
@@ -139,6 +141,9 @@ def validate_intent(intent: dict) -> str | None:
         if t not in SUPPORTED_AGGREGATIONS:
             return (f"Unsupported aggregation type {t!r}; use one of {', '.join(sorted(SUPPORTED_AGGREGATIONS))}, "
                     f"or no aggregation to list the values.")
+        bucket = agg.get("time_bucket")
+        if bucket and bucket not in TIME_BUCKETS:
+            return f"Unsupported time_bucket {bucket!r}; use one of {', '.join(TIME_BUCKETS)} or null."
     scopes = [(intent.get("target_class", ""), intent.get("filters") or [])]
     scopes += [(j.get("class", ""), j.get("filters") or []) for j in intent.get("joins") or []]
     for cls, filters in scopes:
@@ -167,14 +172,16 @@ def _join_anchor_class(j: dict, target_class: str, joined: set) -> str:
     return dom if dom and dom != target_class and dom in joined else target_class
 
 
-def _required_join_classes(joins: list, target_class: str) -> set:
-    """Classes of joins that constrain the result: joins with filters, plus every
-    join on the path from the target to them, and joins a later join hangs off."""
+def _required_join_classes(joins: list, target_class: str, extra: tuple = ()) -> set:
+    """Classes of joins that constrain the result: joins with filters (and the
+    `extra` ones, e.g. the class the ranking is on), plus every join on the
+    path from the target to them, and joins a later join hangs off."""
     joined, anchor = set(), {}
     for j in joins:
         anchor[j.get("class", "")] = _join_anchor_class(j, target_class, joined)
         joined.add(j.get("class", ""))
-    required = {j.get("class", "") for j in joins if j.get("filters")}
+    known = {j.get("class", "") for j in joins}
+    required = {j.get("class", "") for j in joins if j.get("filters")} | {c for c in extra if c in known}
     required |= {a for c, a in anchor.items() if a != target_class}
     frontier = list(required)
     while frontier:
@@ -210,9 +217,26 @@ def _build_subquery_sparql(
         inner_lines.append(f"    {target_var} {_prop(prop)} {fvar} .")
         inner_lines.append("    " + _filter_expr(fvar, op, val))
 
+    # What the LIMIT ranks by: (class, property). A bare name is the target's own
+    # property unless a join returns it.
+    order_cls = order_prop = None
+    if order_by and order_by.get("variable"):
+        raw_ovar = order_by["variable"]
+        if "." in raw_ovar:
+            order_cls, order_prop = raw_ovar.split(".", 1)
+        else:
+            order_cls, order_prop = target_class, raw_ovar
+            for j in joins:
+                if any(_var(p) == _var(raw_ovar) for p in j.get("return_properties", [])):
+                    order_cls = j.get("class", "")
+        order_cls = next((j.get("class", "") for j in joins
+                          if j.get("class", "").lower() == order_cls.lower()), order_cls)
+
     # Constraining joins (filters and the path to them) go inside, so LIMIT ranks
-    # only entities that satisfy them — not the first N entities overall.
-    required = _required_join_classes(joins, target_class)
+    # only entities that satisfy them — not the first N entities overall. So does
+    # the join carrying the ranking value.
+    extra = (order_cls,) if order_cls and order_cls.lower() != target_class.lower() else ()
+    required = _required_join_classes(joins, target_class, extra)
     inner_join_vars = {target_class: target_var}
     for j in joins:
         jclass = j.get("class", "")
@@ -234,20 +258,32 @@ def _build_subquery_sparql(
             inner_lines.append("    " + _filter_expr(fvar, f.get("op", "contains"), f.get("value", "")))
 
     inner_order = ""
-    if order_by:
-        raw_ovar = order_by.get("variable", "")
-        if "." in raw_ovar:
-            cls, prop = raw_ovar.split(".", 1)
-            if cls.lower() == target_class.lower():
-                ovar = "?" + _var(prop)  # target's own property, bound above
-            else:
-                # Ordering by a joined entity's property: bind the join edge and
-                # the property inside the subquery so LIMIT ranks target entities.
-                ovar = _bind_order_join(cls, prop, joins, target_var, inner_lines, inner_vars)
+    if order_cls:
+        # Bind the ranking value inside the subquery — on the target itself or on
+        # the (now inner) join carrying it — so LIMIT keeps the top-ranked
+        # entities. Without it the LIMIT kept an arbitrary one.
+        if order_cls.lower() == target_class.lower():
+            ovar = "?" + _var(order_prop)
+            if ovar not in inner_vars:
+                inner_lines.append(f"    {target_var} {_prop(order_prop)} {ovar} .")
+                inner_vars.append(ovar)
+        elif order_cls in inner_join_vars:
+            ovar = f"?{_var(order_cls, order_prop)}"
+            inner_lines.append(f"    {inner_join_vars[order_cls]} {_prop(order_prop)} {ovar} .")
+            inner_vars.append(ovar)
         else:
-            ovar = "?" + _resolve_group_var(raw_ovar, joins)
+            ovar = _bind_order_join(order_cls, order_prop, joins, target_var, inner_lines, inner_vars)
         if ovar and ovar in inner_vars:
-            inner_order = f"\n    ORDER BY {order_by.get('direction', 'DESC')}({ovar})"
+            keys = [f"{order_by.get('direction', 'DESC')}({ovar})"]
+            # Ranking readings by value: ties go to the earliest reading (the
+            # time the maximum was first reached), so the answer is deterministic.
+            # Entities (nodes, sensors) are not readings — no tie-break by time.
+            if _strip_prefix(target_class) in TIME_CLASSES and "time" not in ovar:
+                time_owner = target_var
+                inner_lines.append(f"    {time_owner} sosa:resultTime ?tie_resulttime .")
+                inner_vars.append("?tie_resulttime")
+                keys.append("ASC(?tie_resulttime)")
+            inner_order = f"\n    ORDER BY {' '.join(keys)}"
             # Ranking needs the value: SPARQL sorts unbound first in ASC order,
             # so an entity without it would otherwise be "the lowest".
             inner_lines.append(f"    FILTER(BOUND({ovar}))")
@@ -355,8 +391,26 @@ def _augment_value_projection(intent: dict) -> dict:
     return intent
 
 
+def _augment_in_projection(intent: dict) -> dict:
+    # A filter matching several values ("in" [delos, schenkenberg]) leaves the
+    # rows unable to say which value each one matched, so per-value analysis
+    # (per-site centroids, per-node distances) has nothing to group on.
+    # Return the filtered property as well.
+    def needs(filters, returned):
+        return [f["property"] for f in filters or []
+                if f.get("op") == "in" and isinstance(f.get("value"), list) and len(f["value"]) > 1
+                and f.get("property") and f["property"] not in returned]
+    intent = json.loads(json.dumps(intent))
+    intent["return_properties"] = (intent.get("return_properties") or []) + needs(
+        intent.get("filters"), intent.get("return_properties") or [])
+    for j in intent.get("joins") or []:
+        j["return_properties"] = (j.get("return_properties") or []) + needs(
+            j.get("filters"), j.get("return_properties") or [])
+    return intent
+
+
 def build_sparql(intent: dict) -> str:
-    intent = _augment_value_projection(intent)
+    intent = _augment_value_projection(_augment_in_projection(intent))
     target_class = intent.get("target_class", "ObservationCollection")
     filters      = intent.get("filters", [])
     return_props = intent.get("return_properties", [])
@@ -536,7 +590,20 @@ def build_sparql(intent: dict) -> str:
             value_owner = target_var
 
         group_name = _resolve_group_var(aggregation.get("group_by"), joins)
-        group_var = f"?{group_name}" if group_name else ""
+        bucket = aggregation.get("time_bucket")
+        if bucket in TIME_BUCKETS:
+            # One group per UTC day/month of the reading time (analysis_temp).
+            owner = (target_var if _strip_prefix(target_class) in TIME_CLASSES
+                     else join_vars.get("ObservationCollection") or join_vars.get("Observation"))
+            if owner is None:
+                owner = "?_bucket_oc"
+                lines.append(f"  ?_bucket_oc {_prop('hasObservation')} {target_var} .")
+            lines.append(f"  {owner} sosa:resultTime ?_bucket_time .")
+            lines.append(f"  {bucket_bind('?_bucket_time', bucket)}")
+            if "time" in group_name or "date" in group_name:
+                group_name = ""          # the bucket replaces grouping on the raw timestamp
+            group_name = f"{group_name} ?{bucket}".strip() if group_name else bucket
+        group_var = " ".join(f"?{g.lstrip('?')}" for g in group_name.split()) if group_name else ""
 
         agg_var = f"?{agg_type.lower()}"
 
@@ -569,7 +636,7 @@ def build_sparql(intent: dict) -> str:
     order_clause = ""
     if order_by:
         ovar = "?" + _resolve_group_var(order_by.get("variable", ""), joins)
-        if aggregation and ovar != group_var:
+        if aggregation and ovar not in group_var.split():
             # Grouped rows can only be ranked by the group key or the aggregate;
             # anything else ("avg_hasSimpleResult", "hasSimpleResult") means the aggregate.
             ovar = agg_var
@@ -585,6 +652,136 @@ def build_sparql(intent: dict) -> str:
 
     return (PREFIXES + "\n" + select_clause + "\n" + where_clause
             + group_clause + order_clause + limit_clause)
+
+
+# ── What the parser and the answer generator are told about this layer ───────
+# The intent language is defined here, by the compiler that executes it (time
+# filters and buckets: analysis_temp.py); the parser prompt and the answer
+# prompt import these texts, so what the LLM is told is what this code does.
+
+PARSER_OPERATORS = """\
+  contains  — case-insensitive substring match on string literals
+  equals    — exact case-insensitive match
+  gt / lt   — numeric comparison (for measured values)
+  in        — matches any of a list of values (case-insensitive), e.g. two named nodes or several sites"""
+
+PARSER_GUIDE = """\
+  - For COUNT aggregations: set "target" to the class name in lowercase (e.g. "sensor"), distinct=true. For min/max/avg/sum: set "target" to the property name (e.g. "hasSimpleResult"), distinct=false.
+  - AGGREGATE FIRST — this is a correctness rule, not an optimisation. If the question asks for a statistic ("average", "mean", "total", "sum", "how many", "highest", "lowest", "maximum", "minimum"), you MUST set "aggregation" so the statistic is computed inside the query. Detail rows go through DISTINCT de-duplication, so any average, sum or count derived from them afterwards is WRONG (measured: 15% error on an average). Only omit "aggregation" when the user genuinely wants the individual values listed.
+  - When aggregating on a property, put it in "aggregation.target" only — it does not also need to be in return_properties. Set group_by to null for a single overall figure, or to "ClassName.property" for a per-group breakdown.
+  - group_by and order_by variables MUST use the dotted "ClassName.property" form (e.g. "Site.label", "ObservationCollection.resultTime"). The join for that class MUST be present and include the property in return_properties.
+  - "latest/most recent N readings/values/measurements": one reading = one Observation, so set target_class=Observation (NOT ObservationCollection) and limit=N; join ObservationCollection via hasObservation (incoming) returning resultTime, and order_by ObservationCollection.resultTime DESC. This makes LIMIT count individual readings. (A timestamp lives on the ObservationCollection, so reach it through that join.)
+  - WHICH entity / WHEN / WHERE an extreme occurs ("which node is highest", "when was the maximum temperature recorded"): the answer is the entity or time, so use order_by on that value with limit 1 and return the label / resultTime — NOT an aggregation, which returns only the value. Use aggregation only when the value itself is asked ("what is the maximum temperature").
+  - "range" aggregation: min and max together (and their difference for numbers) — for "what range", "how much spread", "over which dates does the data extend" (target resultTime). Never invent other aggregation types.
+  - Several values of the same property (two named nodes, several sites): ONE filter with op "in" and a list — two "equals" filters on the same property can never both match."""
+
+PARSER_EXAMPLES = """\
+Q: "What are the temperature values recorded at each site?"
+{
+  "target_class": "ObservationCollection",
+  "filters": [],
+  "return_properties": [],
+  "joins": [
+    {"class": "Observation", "via": "hasObservation", "direction": "outgoing",
+     "return_properties": ["hasSimpleResult"], "filters": []},
+    {"class": "ObservedProperty", "via": "observedProperty", "direction": "outgoing",
+     "return_properties": [], "filters": [{"property": "label", "op": "equals", "value": "temperature"}]},
+    {"class": "Site", "via": "hasSite", "direction": "outgoing",
+     "return_properties": ["label"], "filters": []}
+  ],
+  "aggregation": null,
+  "order_by": null, "limit": null,
+  "anomaly_check": false,
+  "as_of": null,
+  "explanation": "Lists the individual values, so no aggregation — contrast with 'average temperature', which must aggregate."
+}
+
+Q: "What is the average temperature at each site?"
+{
+  "target_class": "ObservationCollection",
+  "filters": [],
+  "return_properties": [],
+  "joins": [
+    {"class": "Observation", "via": "hasObservation", "direction": "outgoing",
+     "return_properties": [], "filters": []},
+    {"class": "ObservedProperty", "via": "observedProperty", "direction": "outgoing",
+     "return_properties": [], "filters": [{"property": "label", "op": "equals", "value": "temperature"}]},
+    {"class": "Site", "via": "hasSite", "direction": "outgoing",
+     "return_properties": ["label"], "filters": []}
+  ],
+  "aggregation": {"type": "avg", "group_by": "Site.label",
+                  "target": "hasSimpleResult", "distinct": false},
+  "order_by": null, "limit": null,
+  "anomaly_check": false,
+  "as_of": null,
+  "explanation": "AVG computed in the query over every observation, so de-duplication of detail rows cannot skew it."
+}
+
+Q: "How many sensors are deployed per site?"
+{
+  "target_class": "ObservationCollection",
+  "filters": [],
+  "return_properties": [],
+  "joins": [
+    {"class": "Sensor", "via": "madeBySensor", "direction": "outgoing",
+     "return_properties": [], "filters": []},
+    {"class": "Site", "via": "hasSite", "direction": "outgoing",
+     "return_properties": ["label"], "filters": []}
+  ],
+  "aggregation": {"type": "count", "group_by": "Site.label",
+                  "target": "sensor", "distinct": true},
+  "order_by": null, "limit": null,
+  "anomaly_check": false,
+  "as_of": null,
+  "explanation": "Count distinct sensors per site."
+}
+
+Q: "What are the latest 10 readings?"
+{
+  "target_class": "Observation",
+  "filters": [],
+  "return_properties": ["hasSimpleResult"],
+  "joins": [
+    {"class": "ObservationCollection", "via": "hasObservation", "direction": "incoming",
+     "return_properties": ["resultTime"], "filters": []},
+    {"class": "Site", "via": "hasSite", "direction": "outgoing",
+     "return_properties": ["label"], "filters": []}
+  ],
+  "aggregation": null,
+  "order_by": {"variable": "ObservationCollection.resultTime", "direction": "DESC"},
+  "limit": 10,
+  "anomaly_check": false,
+  "as_of": null,
+  "explanation": "10 most recent individual readings (Observations), ranked by their collection's resultTime so LIMIT counts readings, not collections."
+}
+
+Q: "Which physical quantities are measured at the delos site?"
+{
+  "target_class": "ObservationCollection",
+  "filters": [],
+  "return_properties": [],
+  "joins": [
+    {"class": "Site", "via": "hasSite", "direction": "outgoing",
+     "return_properties": [], "filters": [{"property": "label", "op": "equals", "value": "delos"}]},
+    {"class": "Observation", "via": "hasObservation", "direction": "outgoing",
+     "return_properties": [], "filters": []},
+    {"class": "ObservedProperty", "via": "observedProperty", "direction": "outgoing",
+     "return_properties": ["label"], "filters": []}
+  ],
+  "aggregation": null,
+  "order_by": null,
+  "limit": null,
+  "anomaly_check": false,
+  "as_of": null,
+  "explanation": "Forward-traverse from ObservationCollection to Site (filtered) → Observation → ObservedProperty to list distinct measured quantities."
+}"""
+
+ANSWER_GUIDE = """\
+Statistics:
+- When the query already computed an aggregate (a count/avg/min/max/sum column), report that value — it is the authoritative one.
+- Otherwise the rows are a de-duplicated listing, so do NOT compute an average, total or record count from them; give the values, ranges or examples the rows support and leave it there.
+- With many rows, summarise and name a few representative examples rather than enumerating everything.
+- If the query has a LIMIT, the rows are only the top N it asked for — do not claim they are the only ones that exist."""
 
 
 def execute(backend, sparql: str) -> list[dict[str, Any]]:

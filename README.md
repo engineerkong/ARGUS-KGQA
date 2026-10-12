@@ -5,7 +5,7 @@ the SOSA/ARGUS RDF vocabularies. A question is parsed into a structured intent,
 compiled to SPARQL, executed against a knowledge graph, and turned into a concise
 answer — with the statistics computed *in the query*, not guessed by the LLM.
 
-Default LLM endpoint: `https://ollama.fit.fraunhofer.de/api`, model `llama3.3:70b` (override with `OLLAMA_BASE_URL` / `OLLAMA_MODEL`). The experiments and the baselines (TextRAG, Interactive-KBQA) all use `llama3.3:70b`.
+Default LLM endpoint: `https://chat.kiconnect.nrw/api/v1` (KI:connect NRW), model `openai-gpt-oss-120b` (override with `OLLAMA_BASE_URL` / `OLLAMA_MODEL`; the key goes in `OPENAI_API_KEY`). The experiments and the baselines (TextRAG, Interactive-KBQA) all use `openai-gpt-oss-120b`; the endpoint allows 3 concurrent requests.
 
 ## Requirements
 
@@ -63,7 +63,7 @@ interval) and uses it three ways:
   `relative_time: {amount, unit}`; the pipeline turns it into an absolute
   `resultTime` filter ending at the newest observation. The parser is also
   given that time to resolve calendar phrases ("yesterday") into dates.
-- **Recency** in `geo_analysis` (days ago) is measured from it.
+- **Recency** in `analysis_geo` (days ago) is measured from it.
 - **Every answer ends with the data it rests on**, appended by code, e.g.
   `(Data: readings from 2026-08-11 09:15 UTC to 2026-08-12 09:15 UTC.)`.
 
@@ -86,12 +86,21 @@ How much LLM work a turn may spend is one of three configurations, chosen with
 - **Voted parse**: one greedy and n−1 sampled parses (temperature
   `ARGUS_VOTE_TEMPERATURE`, default 0.7) run in parallel; the most frequent
   intent wins, ties go to the greedy one. Retries always parse once.
-- **Template answer**: no LLM — the AD-RT verdict, or the result rows plus the
+- **Template answer**: no LLM — the AD-RT verdict; or the analysis fact that
+  answers the question (a named pair's distance, the node nearest to a named
+  node, the nodes within a radius, …); or else the result rows plus the
   pre-computed analysis, rendered as text.
-- **Check**: every number in the answer must appear (up to rounding) in the
-  results, the analysis or the AD-RT summary, and an anomaly answer must lead
-  with the computed verdict; on failure the answer is regenerated once with the
-  problems as feedback.
+- **Check**: every number and timestamp in the answer must appear (up to
+  rounding) in the results, the analysis or the AD-RT summary, and an anomaly
+  answer must lead with the computed verdict; on failure the answer is
+  regenerated once with the problems as feedback, and if it still fails, the
+  template answer is returned.
+- **Verdict**: in every configuration with analysis, an anomaly answer that does
+  not lead with the computed verdict is replaced by the template answer.
+- **Declines without a query**: a question the parser marks `unanswerable`
+  (it needs something the KG does not model, e.g. a river), or whose time
+  window lies wholly outside the readings, is answered "Cannot be answered"
+  directly.
 
 ```bash
 python scripts/demo.py --online --config fast
@@ -128,7 +137,7 @@ r["answer"], r["llm_calls"], r["latency_s"]
          NL query + ontology schema → intent JSON (target_class, anomaly_check, as_of)
    │
    ▼
-[Anomaly] AD-RT expert-rule check — only when anomaly_check  ek_analysis.py
+[Anomaly] AD-RT expert-rule check — only when anomaly_check  analysis_ek.py
          intent's site+quantity → applicable Policy rule(s) → each rule's own
          windowed/per-sensor Observation queries → EXCEEDS/within verdict
    │
@@ -138,17 +147,25 @@ r["answer"], r["llm_calls"], r["latency_s"]
    │     ├── OK → continue
    │     └── empty / error → feedback to Step 1 (up to 2 retries)
    ▼
-[Analysis] Pre-computed stats over ALL rows                 geo_analysis.py
-         temporal (recency/span) · spatial (distances) · numeric (per quantity)
+[Analysis] Pre-computed stats over ALL rows                 analysis_geo.py
+         temporal (recency/span; analysis_temp.py) · spatial (distances)
+         · numeric (per quantity)
    │
    ▼
 [Step 3] Answer generator (LLM)                             3_answer_generator.py
          query + rows + analysis + AD-RT verdict → concise answer
 ```
 
+Each deterministic layer also states its own rules for the LLM: the query
+compiler (`2_sparql_retriever.py`), the temporal layer (`analysis_temp.py`:
+time filters, buckets, relative windows), the spatial layer (`analysis_geo.py`)
+and the AD-RT rule evaluation (`analysis_ek.py`) each export `PARSER_*` texts
+and an `ANSWER_GUIDE`, which the parser and answer prompts are assembled from —
+so the prompts describe exactly what the code does.
+
 Design principle throughout: **the LLM reasons over data, it does not compute
 over it.** Counts, averages, ranges, distances and threshold comparisons are
-produced by SPARQL, `geo_analysis.py` or `ek_analysis.py` — never derived by
+produced by SPARQL, `analysis_geo.py` or `analysis_ek.py` — never derived by
 the model from raw rows.
 
 ## Live ingestion
@@ -181,7 +198,7 @@ narrower filter.
 
 ## Spatial & temporal analysis
 
-`geo_analysis.py` runs over the full result set before Step 3 and appends
+`analysis_geo.py` runs over the full result set before Step 3 and appends
 structured facts to the prompt, appearing only when the data supports them:
 temporal recency (newest/oldest/span), spatial stats (centroid, bounding box,
 altitude range, nearest/farthest node pairs) when rows carry coordinates, and
@@ -200,7 +217,7 @@ the old one rather than adding to it. `reset` clears history.
 
 A question asking for a yes/no verdict against a known threshold ("has X
 exceeded threshold", "is there an anomaly") is flagged by Step 1
-(`anomaly_check: true`) and routed to `ek_analysis.py`, which mirrors
+(`anomaly_check: true`) and routed to `analysis_ek.py`, which mirrors
 AD-RT's expert-rule table (`AD-RT/RT/rules.py`) rather than recomputing it
 from scratch: each rule's own column matcher, computation shape (direct
 threshold / windowed sum-mean-range / z-score / rate-of-change / normalized

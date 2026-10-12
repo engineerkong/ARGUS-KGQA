@@ -12,6 +12,12 @@ a turn may spend is set by one of three configurations:
   answer             template   LLM        LLM + check
   LLM calls          1          2 to 4     n+1 to n+4
 
+An anomaly answer must lead with the verdict the AD-RT check computed: when an
+LLM answer does not (BALANCED), or still fails the answer check after its one
+regeneration (THOROUGH), the template answer is returned instead. A question
+the parser marks unanswerable, or whose time window lies wholly outside the
+data, is declined without running a query.
+
 Ablation (w/o analysis, any configuration): the analysis layer still fetches
 each anomaly rule's raw readings but computes nothing, and the answer gets no
 pre-computed temporal/spatial/numeric summary. SPARQL aggregates are unchanged.
@@ -44,15 +50,20 @@ validate_intent = _sr.validate_intent
 execute      = _sr.execute
 unfold_results = _sr.unfold_results
 
+_ta = importlib.import_module("analysis_temp")
+
 _ag = importlib.import_module("3_answer_generator")
 generate = _ag.generate
 prompt_row_stats = _ag.prompt_row_stats
 template_answer = _ag.template_answer
 check_answer = _ag.check_answer
+ad_rt_verdict = _ag.ad_rt_verdict
+leads_with = _ag.leads_with
 
-_ek = importlib.import_module("ek_analysis")
+_ek = importlib.import_module("analysis_ek")
 evaluate_ad_rt = _ek.evaluate
 fetch_ad_rt_raw = _ek.fetch_raw
+rule_vocabulary = _ek.rule_vocabulary
 
 _be = importlib.import_module("backend")
 make_backend = _be.make_backend
@@ -159,63 +170,24 @@ def _is_oversized(results: list[dict]) -> bool:
     return len(results) > MAX_RESULT_ROWS
 
 
-_REL_HOURS = {"hour": 1, "hours": 1, "day": 24, "days": 24, "week": 168, "weeks": 168}
-_TIME_CLASSES = ("ObservationCollection", "Observation")
+# Time windows (relative to the latest reading, against the data's range) are
+# the temporal layer's (analysis_temp.py).
+_apply_relative_time = _ta.apply_relative_time
+_data_note = _ta.data_note
+_outside_data = _ta.outside_data
+_iso, _fmt = _ta.iso, _ta.fmt
 
 
-def _iso(t: datetime) -> str:
-    # Same lexical form as the endpoint's xsd:dateTime values, so the string
-    # comparison the "after"/"before" filters compile to stays correct.
-    return t.astimezone(timezone.utc).isoformat()
-
-
-def _fmt(t: datetime) -> str:
-    return t.astimezone(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
-
-
-def _apply_relative_time(intent: dict, latest: datetime | None):
-    """A relative window ("last 24 hours") ends at the latest reading in the KG,
-    not at the wall clock: turn the parser's relative_time into an absolute
-    resultTime filter. Returns (intent, (start, end) or None, problem or None)."""
-    rt = intent.get("relative_time")
-    if not rt or intent.get("anomaly_check") or latest is None:
-        return intent, None, None
-    try:
-        hours = float(rt.get("amount")) * _REL_HOURS[str(rt.get("unit", "")).lower()]
-    except (AttributeError, KeyError, TypeError, ValueError):
-        return intent, None, (f"Invalid relative_time {rt!r}; use {{\"amount\": <integer>, "
-                              f"\"unit\": \"hours|days|weeks\"}}.")
-    start = latest - timedelta(hours=hours)
-    flt = {"property": "resultTime", "op": "after", "value": _iso(start)}
-    intent = json.loads(json.dumps(intent))
-    if intent.get("target_class") in _TIME_CLASSES:
-        intent.setdefault("filters", []).append(flt)
-    else:
-        j = next((j for j in intent.get("joins") or [] if j.get("class") in _TIME_CLASSES), None)
-        if j is None:
-            return intent, None, ("relative_time needs readings: join ObservationCollection "
-                                  "(it carries resultTime) or target it directly.")
-        j.setdefault("filters", []).append(flt)
-    return intent, (start, latest), None
-
-
-def _data_note(intent: dict | None, latest: datetime | None, window) -> str:
-    """Which data the answer rests on — appended to every answer, so it always
-    states the timestamp of the data used rather than leaving it to the model."""
-    if window:
-        return f"(Data: readings from {_fmt(window[0])} to {_fmt(window[1])}.)"
-    if intent and intent.get("anomaly_check") and intent.get("as_of"):
-        return f"(Data: readings up to {intent['as_of']}, the date the question names.)"
-    bounds = {}
-    for f in [*(intent or {}).get("filters", []), *[f for j in (intent or {}).get("joins", []) or [] for f in j.get("filters", [])]]:
-        if str(f.get("property", "")).lower().endswith("resulttime") and f.get("op") in ("after", "before"):
-            bounds[f["op"]] = f.get("value")
-    if bounds:
-        return f"(Data: readings {'from ' + bounds['after'] if 'after' in bounds else ''}" \
-               f"{' ' if len(bounds) == 2 else ''}{'up to ' + bounds['before'] if 'before' in bounds else ''}.)"
-    if latest is not None:
-        return f"(Data: readings up to {_fmt(latest)}, the latest in the knowledge graph.)"
-    return ""
+def _decline(intent: dict | None, earliest: datetime | None, latest: datetime | None) -> str | None:
+    """A question answered without a query: the parser found it asks for
+    something the KG does not model, or its time window lies outside the data."""
+    # An anomaly question is never declined here: whether a rule applies and can be
+    # evaluated is the AD-RT step's call ("Cannot be determined" with its reason).
+    reason = (intent or {}).get("unanswerable") if not (intent or {}).get("anomaly_check") else None
+    if reason:
+        detail = "" if reason is True else f": {str(reason).strip().rstrip('.')}"
+        return f"Cannot be answered from the knowledge graph{detail}."
+    return _outside_data(intent, earliest, latest)
 
 
 def _with_note(answer: str, note: str) -> str:
@@ -263,24 +235,34 @@ class Pipeline:
             print(f"[Step 0] Latest reading (reference time for relative questions): {latest}")
 
     _LATEST_SPARQL = """PREFIX sosa: <http://www.w3.org/ns/sosa/>
-SELECT (MAX(?t) AS ?latest) WHERE { ?o a sosa:Observation ; sosa:resultTime ?t . }"""
+SELECT (MAX(?t) AS ?latest) (MIN(?t) AS ?earliest) WHERE { ?o a sosa:Observation ; sosa:resultTime ?t . }"""
 
     def latest_reading(self) -> datetime | None:
         """Time of the newest observation (measured value) in the KG — the "now"
         relative times refer to; a reading with no observations does not count.
         Cached for ARGUS_LATEST_TTL seconds (default 3600, the live ingest
         interval: the newest reading only changes once per ingest cycle)."""
+        return self._time_range()[1]
+
+    def earliest_reading(self) -> datetime | None:
+        """Time of the oldest observation in the KG (cached with the latest)."""
+        return self._time_range()[0]
+
+    def _time_range(self) -> tuple[datetime | None, datetime | None]:
         cached = getattr(self, "_latest_cache", None)
         if cached and time.monotonic() - cached[0] < LATEST_TTL:
             return cached[1]
         rows = self.backend.query(self._LATEST_SPARQL)
-        latest = None
-        if rows and "error" not in rows[0] and rows[0].get("latest"):
-            latest = datetime.fromisoformat(rows[0]["latest"].replace("Z", "+00:00"))
-            if latest.tzinfo is None:
-                latest = latest.replace(tzinfo=timezone.utc)
-        self._latest_cache = (time.monotonic(), latest)
-        return latest
+        bounds = []
+        for key in ("earliest", "latest"):
+            t = None
+            if rows and "error" not in rows[0] and rows[0].get(key):
+                t = datetime.fromisoformat(rows[0][key].replace("Z", "+00:00"))
+                if t.tzinfo is None:
+                    t = t.replace(tzinfo=timezone.utc)
+            bounds.append(t)
+        self._latest_cache = (time.monotonic(), tuple(bounds))
+        return tuple(bounds)
 
     _VOCAB_SPARQL = """PREFIX argus: <http://www.argus-project.eu/ontology/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -307,6 +289,10 @@ SELECT DISTINCT ?cls ?label WHERE {
                  "only when the user explicitly asks for a family (\"all voltage channels\"). A name that appears "
                  "under Node.label is a sensor node, not a quantity."]
         lines += [f"{cls}.label: {', '.join(sorted(set(v)))}" for cls, v in sorted(by_cls.items())]
+        # The expert rules per site come from the AD-RT layer that evaluates them.
+        rules = rule_vocabulary(self.backend)
+        if rules:
+            lines.append(rules)
         return "\n".join(lines)
 
     def run(self, query: str) -> dict[str, Any]:
@@ -326,6 +312,8 @@ SELECT DISTINCT ?cls ?label WHERE {
         parse_calls = answer_calls = 0
         vote = None
         check_feedback = None
+        decline = None
+        template_fallback = False
         t_total = time.perf_counter()
 
         for attempt in range(1 + self.max_retries):
@@ -375,6 +363,10 @@ SELECT DISTINCT ?cls ?label WHERE {
             else:
                 intent, window, problem = _apply_relative_time(intent, latest)
                 problem = problem or validate_intent(intent)
+            decline = _decline(intent, self.earliest_reading(), latest)
+            if decline:
+                sparql = f"# not run: {decline}"
+                break
             sparql = f"# not compiled: {problem}" if problem else build_sparql(intent)
             if v:
                 print(f"\n{sep}")
@@ -406,6 +398,20 @@ SELECT DISTINCT ?cls ?label WHERE {
             else:
                 if v:
                     print(f"\n[Pipeline] Query failed after {self.max_retries} retries — {failure}")
+
+        if decline:
+            answer = _with_note(decline, _data_note(intent, latest, window))
+            if v:
+                print(f"\n{sep}\n[Pipeline] Declined without a query — {decline}")
+            if self.keep_history:
+                self.history.append({"query": query, "intent": intent,
+                                     "result_summary": _summarize_results([])})
+                del self.history[:-self.max_history]
+            return {
+                "query": query, "intent": intent, "sparql": sparql, "results": [], "answer": answer,
+                "config": self.config.name, "declined_oversized": False, "declined": True,
+                "llm_calls": parse_calls, "latency_s": round(time.perf_counter() - t_total, 2),
+            }
 
         # Oversized ends the turn on the spot (see _is_oversized) — no retry,
         # no Step 2b or Step 3, just an explanation.
@@ -443,7 +449,7 @@ SELECT DISTINCT ?cls ?label WHERE {
 
         # ── Step 2b: Readings — AD-RT rule check (AD questions only) ────────
         # Runs each Policy rule's own windowed/per-sensor Observation queries
-        # (see ek_analysis.RULE_SPECS) — a single generic query can't express
+        # (see analysis_ek.RULE_SPECS) — a single generic query can't express
         # that, so it's a separate retrieval from Step 2a.
         ad_rt_summary = ""
         ad_rt_policies: list[dict[str, Any]] = []
@@ -500,13 +506,18 @@ SELECT DISTINCT ?cls ?label WHERE {
             print("[Step 3] Generating natural language answer…")
         _t = time.perf_counter()
         anomaly = bool(intent.get("anomaly_check"))
+        # A follow-up's answer needs what it refers to (the current turn is added to
+        # self.history only after this).
+        followup_context = ({"earlier_questions": [t["query"] for t in self.history],
+                             "interpretation": intent.get("explanation")}
+                            if self.keep_history and self.history else {})
         if self.config.answer == "template":
             answer = template_answer(query, unfolded, ad_rt_summary=ad_rt_summary, anomaly_check=anomaly,
                                      with_analysis=self.config.analysis, reference_time=latest)
         else:
             answer = generate(query, sparql, unfolded, ad_rt_summary=ad_rt_summary,
                               anomaly_check=anomaly, verbose=v, with_analysis=self.config.analysis,
-                              reference_time=latest)
+                              reference_time=latest, **followup_context)
             answer_calls += 1
             # THOROUGH: deterministic check against the evidence; one regeneration on failure.
             # Both of its criteria are defined against analysis output (the computed
@@ -519,8 +530,22 @@ SELECT DISTINCT ?cls ?label WHERE {
                         print(f"[Step 3] Answer check failed — regenerating:\n{check_feedback}")
                     answer = generate(query, sparql, unfolded, ad_rt_summary=ad_rt_summary,
                                       anomaly_check=anomaly, verbose=False, feedback=check_feedback,
-                                      reference_time=latest)
+                                      reference_time=latest, **followup_context)
                     answer_calls += 1
+                    # Still wrong after the one regeneration: the template answer,
+                    # whose every number is the computed one.
+                    if check_answer(answer, query, unfolded, ad_rt_summary=ad_rt_summary,
+                                    anomaly_check=anomaly, reference_time=latest):
+                        template_fallback = True
+            # The computed verdict is not the LLM's to overrule (BALANCED has no
+            # check to catch it): an answer leading with another verdict is replaced.
+            elif anomaly and self.config.analysis and not leads_with(answer, ad_rt_verdict(ad_rt_summary)):
+                template_fallback = True
+            if template_fallback:
+                if v:
+                    print("[Step 3] LLM answer contradicts the computed evidence — using the template answer.")
+                answer = template_answer(query, unfolded, ad_rt_summary=ad_rt_summary, anomaly_check=anomaly,
+                                         with_analysis=True, reference_time=latest)
         t_answer = time.perf_counter() - _t
         # Added after the answer check, so it never counts as an unsupported number.
         answer = _with_note(answer, _data_note(intent, latest, window))
@@ -555,6 +580,7 @@ SELECT DISTINCT ?cls ?label WHERE {
             "llm_calls": parse_calls + answer_calls,
             "vote":     vote,
             "check_failed": check_feedback,
+            "template_fallback": template_fallback,
             "ad_rt_raw_rows": ad_rt_raw_rows,
             "declined_oversized": False,
             "latency_s": round(time.perf_counter() - t_total, 2),

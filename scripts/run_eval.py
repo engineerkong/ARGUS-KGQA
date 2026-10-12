@@ -59,6 +59,8 @@ def main():
             "ad_rt_raw_rows": r.get("ad_rt_raw_rows"),
             "vote": r.get("vote"),
             "check_failed": r.get("check_failed"),
+            "template_fallback": r.get("template_fallback"),
+            "declined": r.get("declined"),
         }
         path.write_text(json.dumps(res, indent=1, ensure_ascii=False, default=str))
         print(f"{d['id']} ({res['latency_s']}s, {res['llm_calls']} LLM calls): {res['prediction'][:200]}", flush=True)

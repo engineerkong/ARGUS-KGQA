@@ -18,9 +18,9 @@ import time
 
 from openai import OpenAI
 
-BASE_URL = os.environ.get("OLLAMA_BASE_URL", "https://ollama.fit.fraunhofer.de/api")
-API_KEY  = os.environ.get("OPENAI_API_KEY", "no-key")
-MODEL    = os.environ.get("OLLAMA_MODEL", "llama3.3:70b")
+BASE_URL = os.environ.get("OLLAMA_BASE_URL", "https://chat.kiconnect.nrw/api/v1")
+API_KEY  = os.environ.get("OPENAI_API_KEY", "")
+MODEL    = os.environ.get("OLLAMA_MODEL", "openai-gpt-oss-120b")
 TIMEOUT  = float(os.environ.get("ARGUS_LLM_TIMEOUT", "120"))
 
 PROMPT = "Reply with the single word: pong."

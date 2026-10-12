@@ -10,11 +10,16 @@ import os
 import re
 from openai import OpenAI
 
-from geo_analysis import analyze
+from analysis_geo import analyze
+import analysis_geo as _spatial
+import analysis_ek as _anomaly
+import analysis_temp as _temporal
+import importlib
+_query = importlib.import_module("2_sparql_retriever")
 
-BASE_URL = os.environ.get("OLLAMA_BASE_URL", "https://ollama.fit.fraunhofer.de/api")
+BASE_URL = os.environ.get("OLLAMA_BASE_URL", "https://chat.kiconnect.nrw/api/v1")
 API_KEY  = os.environ.get("OPENAI_API_KEY", "no-key")
-MODEL    = os.environ.get("OLLAMA_MODEL", "llama3.3:70b")
+MODEL    = os.environ.get("OLLAMA_MODEL", "openai-gpt-oss-120b")
 
 # The SDK default is a 600s timeout with silent retries, so a stalled endpoint
 # hangs the pipeline for many minutes with no output.
@@ -41,7 +46,10 @@ def _get_client() -> OpenAI:
         )
     return _client
 
-SYSTEM = """You are a concise sensor data analyst for the ARGUS cultural heritage monitoring system.
+# The layer-specific rules come from the layers that produce what the answer
+# reports: query statistics (2_sparql_retriever), time (analysis_temp),
+# spatial facts (analysis_geo), AD-RT verdicts (analysis_ek).
+SYSTEM = f"""You are a concise sensor data analyst for the ARGUS cultural heritage monitoring system.
 
 You are given a user question, SPARQL results, and a numeric summary.
 
@@ -50,21 +58,18 @@ Rules:
 - Include key numbers from the results (counts, values, site names).
 - If results are tabular, present them as a compact list or table.
 - If results are empty or contain an error, say so in one sentence and suggest a rephrased query.
+- If the question asks about something the results do not contain (something the knowledge graph does not model, e.g. ownership or costs), say it cannot be answered from the knowledge graph — do not answer a different question with the rows you have.
 - Do NOT output URIs or internal identifiers — use human-readable names and labels only.
 - Do NOT explain the SPARQL query, the ontology, or how the system works.
 - Do NOT add follow-up suggestions or next steps.
 
-Statistics:
-- When the query already computed an aggregate (a count/avg/min/max/sum column), report that value — it is the authoritative one.
-- Otherwise the rows are a de-duplicated listing, so do NOT compute an average, total or record count from them; give the values, ranges or examples the rows support and leave it there.
-- With many rows, summarise and name a few representative examples rather than enumerating everything.
-- If the query has a LIMIT, the rows are only the top N it asked for — do not claim they are the only ones that exist.
+{_spatial.ANSWER_GUIDE}
 
-AD-RT rule check (when present in the prompt):
-- If a message includes a section starting "AD-RT rule check", that verdict (EXCEEDS/within a threshold) was computed in Python, not by you — report it as-is, do NOT recompute or second-guess it by comparing raw numbers yourself.
-- If that section says no policy was found for the site/quantity, say plainly that no AD-RT threshold is defined for it — do not guess whether the value is anomalous.
-- If the question asks about anomalies/thresholds/exceedances but no such section is present, say the AD-RT rule check could not be run for this question rather than inventing a judgement from the raw rows.
-- If the prompt says "This is a yes/no anomaly check", START with "Yes."/"No."/"Cannot be determined." (Yes if ANY listed rule fired), then give the supporting numbers and, if multiple rules were checked, which fired.
+{_query.ANSWER_GUIDE}
+
+{_temporal.ANSWER_GUIDE}
+
+{_anomaly.ANSWER_GUIDE}
 """
 
 
@@ -105,22 +110,35 @@ def prompt_row_stats(results: list) -> tuple[int, int]:
 
 def generate(query: str, sparql: str, results: list, ad_rt_summary: str | None = None,
              anomaly_check: bool = False, verbose: bool = False, feedback: str | None = None,
-             with_analysis: bool = True, reference_time=None) -> str:
+             with_analysis: bool = True, reference_time=None,
+             earlier_questions: list[str] | None = None, interpretation: str | None = None) -> str:
     """with_analysis=False is the w/o-analysis ablation: no pre-computed
     summary, and ad_rt_summary holds rule definitions + raw readings
-    (ek_analysis.fetch_raw) instead of verdicts (ek_analysis.evaluate)."""
+    (analysis_ek.fetch_raw) instead of verdicts (analysis_ek.evaluate).
+    For a follow-up, earlier_questions and the parser's interpretation say what
+    the question refers to: without them "and on the following day?" was read
+    against the already-shifted date in the query and shifted a second time."""
     client = _get_client()
 
     deduped = _dedupe(results)
     results_text = json.dumps(deduped, indent=2, ensure_ascii=False)
 
+    context = ""
+    if earlier_questions:
+        context = ("This is a follow-up question. Earlier questions in this conversation:\n"
+                   + "\n".join(f"- {q}" for q in earlier_questions)
+                   + (f"\nHow the follow-up was resolved into the query below: {interpretation}" if interpretation else "")
+                   + "\nThe query's filters (dates, site, quantity) already apply what the follow-up refers to "
+                     "(e.g. \"the following day\" is already the date in the query): answer for the data retrieved, "
+                     "without shifting it again.\n\n")
     user_msg = (
+        context +
         f"User question:\n{query}\n\n"
         f"SPARQL query executed:\n```sparql\n{sparql}\n```\n\n"
         f"Results — all {len(deduped)} distinct rows ({len(results)} total):\n{results_text}"
     )
     if with_analysis:
-        analysis = analyze(results, now=reference_time)
+        analysis = analyze(results, now=reference_time, query=query)
         user_msg += f"\n\nPre-computed spatial & temporal analysis:\n{analysis['summary_text']}"
         if verbose:
             print(f"[Step 3] Pre-computed spatial & temporal analysis:\n{analysis['summary_text']}")
@@ -155,8 +173,13 @@ _FIRED = re.compile(r"→ (EXCEEDS|BELOW|FIRES)")
 _WITHIN = re.compile(r"→ within")
 
 
+def leads_with(answer: str, verdict: str) -> bool:
+    """Whether the answer opens with the verdict, ignoring markdown emphasis."""
+    return re.sub(r"^[\s*_#>\"']+", "", answer or "").lower().startswith(verdict.lower())
+
+
 def ad_rt_verdict(ad_rt_summary: str | None) -> str:
-    """The Yes/No/Cannot-be-determined verdict implied by ek_analysis's summary:
+    """The Yes/No/Cannot-be-determined verdict implied by analysis_ek's summary:
     Yes if any evaluated rule fired, No if rules were evaluated and none fired."""
     if ad_rt_summary and _FIRED.search(ad_rt_summary):
         return "Yes"
@@ -190,6 +213,11 @@ def template_answer(query: str, results: list, ad_rt_summary: str | None = None,
     if not results:
         return "No matching data was found in the knowledge graph for this question."
 
+    # The analysis picked the fact that answers this question: that is the answer.
+    focus = analyze(results, now=reference_time, query=query)["focus"] if with_analysis else []
+    if focus:
+        return "\n".join(f.strip() for f in focus)
+
     rows = _dedupe(results)
     if len(rows) == 1 and len(rows[0]) == 1:
         (k, v), = rows[0].items()
@@ -200,7 +228,7 @@ def template_answer(query: str, results: list, ad_rt_summary: str | None = None,
         lines.append("- " + ", ".join(f"{k.replace('_', ' ')}: {v}" for k, v in row.items()))
     if len(rows) > _TEMPLATE_ROWS:
         lines.append(f"- … and {len(rows) - _TEMPLATE_ROWS} more.")
-    facts = ([l for l in analyze(results, now=reference_time)["summary_text"].splitlines()[1:] if l.strip()]
+    facts = ([l for l in analyze(results, now=reference_time, query=query)["summary_text"].splitlines()[1:] if l.strip()]
              if with_analysis else [])
     if facts:
         lines.append("Analysis:")
@@ -225,25 +253,39 @@ def _supported(num: str, evidence: list[float]) -> bool:
     return any(abs(x - e) <= tol or (e and abs(x - e) / abs(e) <= 0.005) for e in evidence)
 
 
+_DASHES = re.compile(r"[\u2010-\u2015\u2212]")
+_TIMESTAMP = re.compile(r"(\d{4}-\d{2}-\d{2})(?:T|\s+at\s+|\s+)(\d{2}:\d{2})")
+
+
+def _timestamps(text: str) -> set[str]:
+    text = _DASHES.sub("-", re.sub(r"[\u00a0\u202f\u2009]", " ", text or ""))
+    return {f"{d} {t}" for d, t in _TIMESTAMP.findall(text)}
+
+
 def check_answer(answer: str, query: str, results: list, ad_rt_summary: str | None = None,
                  anomaly_check: bool = False, reference_time=None) -> str | None:
     """Deterministic check of an LLM answer against the evidence it was given.
     Returns None when it passes, else feedback for one regeneration:
       - every number in the answer must appear (up to rounding) in the result
         rows, the pre-computed analysis, the AD-RT summary or the question;
+      - every timestamp (date and time) must appear in that evidence too;
       - an anomaly answer must lead with the verdict the AD-RT check computed."""
     problems = []
 
     if anomaly_check:
         expected = ad_rt_verdict(ad_rt_summary)
-        if not answer.strip().lower().startswith(expected.lower()):
+        if not leads_with(answer, expected):
             problems.append(f"The AD-RT rule check computed the verdict '{expected}', "
                             f"but the answer does not start with it.")
 
     evidence_text = "\n".join([
-        json.dumps(results, ensure_ascii=False), analyze(results, now=reference_time)["summary_text"],
+        json.dumps(results, ensure_ascii=False), analyze(results, now=reference_time, query=query)["summary_text"],
         ad_rt_summary or "", query,
     ])
+    wrong_times = sorted(_timestamps(answer) - _timestamps(evidence_text))
+    if wrong_times:
+        problems.append("These timestamps in the answer are not in the results: " + ", ".join(wrong_times)
+                        + ". Copy timestamps from the results.")
     evidence = [float(n) for n in _numbers(evidence_text)]
     unsupported = [n for n in dict.fromkeys(_numbers(answer)) if not _supported(n, evidence)]
     if unsupported:

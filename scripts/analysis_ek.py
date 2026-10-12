@@ -20,16 +20,17 @@ shape, not the loose Policy label text. Four tiers:
              comparison (a threshold for a *daily range* is meaningless
              compared against one raw reading).
 
-Per-sensor grouping: a site can have several physical sensors sharing one
-ObservedProperty label (e.g. each instrument's own diagnostic "temperature").
-Pooling them before computing a range/diff/mean isn't an approximation of
-anything AD-RT computes — it's a different, meaningless number. So every
-windows/zscore/custom evaluator groups by sosa:madeBySensor first, computes
-per sensor, and combines via max()/min() across sensors — mirroring AD-RT's
-own per-column iteration + elementwise-max combination. The "direct" tier and
-the two "two_col_*" rules still pick a single latest reading with no sensor
-grouping (lower risk than range/diff, but can land on an arbitrary sensor
-among ties).
+Per-series grouping: a site can have several physical sensors sharing one
+ObservedProperty label (e.g. each instrument's own diagnostic "temperature"),
+and one sensor can report several quantities a rule matches (pgaComposed and
+rmsComposed). Pooling them before computing a range/diff/mean/z-score isn't an
+approximation of anything AD-RT computes — it's a different, meaningless
+number. So every windows/zscore/custom evaluator groups by (sosa:madeBySensor,
+quantity) — one AD-RT data column — computes per series, and combines via
+max()/min() across series, mirroring AD-RT's own per-column iteration +
+elementwise-max combination. The "direct" tier compares the most extreme of
+the readings at the latest timestamp; the two "two_col_*" rules still pair
+the latest reading of each quantity.
 """
 
 from __future__ import annotations
@@ -260,10 +261,57 @@ def _column_filter_expr(spec: RuleSpec) -> str:
 
 
 def _filter_values(filters: list[dict] | None) -> list[str]:
-    return [str(f.get("value", "")).strip() for f in (filters or []) if f.get("value")]
+    out = []
+    for f in filters or []:
+        v = f.get("value")
+        for x in (v if isinstance(v, list) else [v]):
+            if x:
+                out.append(str(x).strip())
+    return out
+
+
+def extract_rule_ids(intent: dict) -> list[str]:
+    """Exact rule ids the intent names (Policy.ruleId with op equals/in) — the
+    parser picks them from the per-site rule list it is shown, which is more
+    reliable than matching a free-text keyword against rule names."""
+    ids = []
+    for f in intent.get("filters") or []:
+        if str(f.get("property", "")).lower() == "ruleid" and f.get("op") in ("equals", "in"):
+            ids += _filter_values([f])
+    return ids
 
 
 _DATE_LIKE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}")
+
+
+def _query_policies_by_id(backend, site: str, rule_ids: list[str]) -> list[dict[str, Any]]:
+    ids = ", ".join(f'LCASE("{_esc(r)}")' for r in rule_ids)
+    sparql = _PREFIXES + f"""\
+SELECT ?policy ?label ?ruleid ?threshold ?thresholdjson WHERE {{
+  ?policy a panoptes:Policy ; argus:appliesToSite ?site ; rdfs:label ?label ; argus:ruleId ?ruleid .
+  ?site rdfs:label "{_esc(site)}" .
+  OPTIONAL {{ ?policy argus:thresholdValue ?threshold . }}
+  OPTIONAL {{ ?policy argus:thresholdJson ?thresholdjson . }}
+  FILTER(LCASE(STR(?ruleid)) IN ({ids}))
+}}
+"""
+    return [r for r in backend.query(sparql) if "error" not in r]
+
+
+def _policies_for(backend, intent: dict) -> tuple[str | None, str | None, list[dict[str, Any]]]:
+    """(site, description of what was matched, policies). Exact rule ids win;
+    otherwise the quantity keyword is matched against rule names."""
+    site, keyword = extract_context(intent)
+    if not site:
+        return None, None, []
+    rule_ids = extract_rule_ids(intent)
+    if rule_ids:
+        policies = _query_policies_by_id(backend, site, rule_ids)
+        if policies:
+            return site, ", ".join(rule_ids), policies
+    if not keyword:
+        return site, None, []
+    return site, keyword, _query_policies(backend, site, keyword)
 
 
 def extract_context(intent: dict) -> tuple[str | None, str | None]:
@@ -436,7 +484,11 @@ def _thresholds_from_json(thresholdjson: str | None) -> dict[str, float]:
 
 def _query_raw_window(backend, site: str, spec: RuleSpec,
                       start_iso: str | None, end_iso: str | None) -> list[tuple[float, str, str]]:
-    """(value, time, sensor) triples, ascending by time. Either bound may be
+    """(value, time, series) triples, ascending by time, where series is
+    "<sensor IRI>|<quantity label>": AD-RT evaluates each data column — one
+    quantity of one sensor — separately, and a sensor can report several
+    quantities a rule's matcher accepts (Schenkenberg's report both pgaComposed
+    and rmsComposed), which must not be pooled into one series. Either bound may be
     None: end_iso=None with start_iso set means 'from start onward'; both None
     means no time bound at all (z-score's whole-series baseline when no as_of
     is given); start_iso=None with end_iso set means 'everything up to end'
@@ -450,7 +502,7 @@ def _query_raw_window(backend, site: str, spec: RuleSpec,
         bounds.append(f'?time <= "{_esc(end_iso)}"^^xsd:dateTime')
     time_filter = f"FILTER({' && '.join(bounds)})" if bounds else ""
     sparql = _PREFIXES + f"""\
-SELECT ?value ?time ?sensor WHERE {{
+SELECT ?value ?time ?sensor ?proplabel WHERE {{
   ?oc a sosa:ObservationCollection ; argus:hasSite ?site ; argus:hasObservation ?obs ;
       sosa:resultTime ?time ; sosa:madeBySensor ?sensor .
   ?site rdfs:label "{site_e}" .
@@ -466,7 +518,8 @@ ORDER BY ASC(?time)
     for r in rows:
         v = _to_float(r.get("value"))
         if v is not None:
-            out.append((v, r.get("time"), r.get("sensor") or "(unknown sensor)"))
+            out.append((v, r.get("time"),
+                        f"{r.get('sensor') or '(unknown sensor)'}|{r.get('proplabel') or '?'}"))
     _log_reading_query(site, "windowed readings", [v for v, _, _ in out], [t for _, t, _ in out])
     return out
 
@@ -513,7 +566,7 @@ def _combine_min(per_sensor: dict[str, float]) -> tuple[float, str, int] | None:
 
 
 def _sensors_note(n: int) -> str:
-    return f", max of {n} sensor(s)" if n > 1 else ""
+    return f", max of {n} sensor series" if n > 1 else ""
 
 
 def _evaluate_zscore(backend, site: str, rule: str, spec: RuleSpec, threshold: float | None,
@@ -620,7 +673,11 @@ def _evaluate_direct(backend, site: str, rule: str, spec: RuleSpec, threshold: f
         return (f"  - {rule}: threshold={threshold} ({spec.direction}), but no matching "
                 f"recent readings were found to compare against it.{note}")
 
-    latest_value, latest_time = values[0]
+    # Several series can share the latest timestamp: like AD-RT, take the most
+    # anomalous of them rather than whichever the query happened to list first.
+    at_latest = [v for v, t in values if t == values[0][1]]
+    latest_time = values[0][1]
+    latest_value = min(at_latest) if spec.direction == "lt" else max(at_latest)
     if spec.direction == "lt":
         fired = lambda v: v < threshold
         verdict_word = "BELOW"
@@ -877,17 +934,116 @@ CUSTOM_EVALUATORS = {
 }
 
 
+# ---------------------------------------------------------------------------
+# What the parser and the answer generator are told about this layer. Imported
+# into the parser prompt and the answer prompt: the anomaly semantics the LLM is
+# given are the ones evaluate() implements.
+# ---------------------------------------------------------------------------
+
+PARSER_SCHEMA = """\
+Governance graph (expert-rule thresholds and pilot metadata — separate from the
+sensor-reading graph above, joined to it only through Site):
+  Policy   —[appliesToSite]→  Site     (policyDescription, ruleId, threatName, thresholdValue, thresholdJson)
+  Asset    —[atSite]→        Site     (assetDescription, assetCode, pilotNumber, country, sourceUrl)
+  Threat   (threatDescription, threatLevel) — standalone, not yet linked to Policy/Asset by ID.
+  Decision (decisionDescription, urgency) — standalone, not linked to Policy/Asset/Threat by ID.
+  thresholdValue is only set when a rule has exactly one threshold parameter; multi-parameter
+  rules (e.g. "R0_example": {"R0_level": 1, "R0_count": 2}) carry thresholdJson instead —
+  do not attempt to filter/aggregate on thresholdJson's contents, only return it as-is."""
+
+PARSER_GUIDE = """\
+  - Threshold LOOKUPS ("what limit does the soil moisture daily-range rule at baltanas use"): pick the rule(s) the question describes from the Policy.ruleId list for that site and filter ruleId with equals (one rule) or in (several) on those exact ids; return ruleId, thresholdValue and thresholdJson. Do not guess words that might occur in a rule id.
+  - "anomaly_check": true only for a yes/no verdict against a known threshold ("has X exceeded threshold", "is there an anomaly"). False for a plain "what is the threshold for X" lookup, which wants the definition, not a verdict.
+  - When anomaly_check is true: build the intent exactly like a Policy threshold lookup (target_class=Policy, filter by ruleId/label contains the quantity, join Site via appliesToSite) — do NOT join or aggregate Observation data yourself. A separate deterministic step (outside this JSON) takes the rule(s) this query returns and checks each against its threshold; it needs the rule identity first, which is what this query provides. Do not switch off target_class=Policy just because the question mentions a quantity/site.
+  - "as_of": set only when the question names a specific point in time ("on 2025-02-11", "last Tuesday" — resolve relative phrases to an absolute ISO date against the reference time). Null for "currently"/"now"/unstated, which defaults to the latest available reading. Never put a date into "filters" for an anomaly_check question (Policy has no resultTime) — as_of is the only place it belongs."""
+
+PARSER_EXAMPLES = """\
+Q: "What is the rainfall alarm threshold at delos?"
+{
+  "target_class": "Policy",
+  "filters": [{"property": "ruleId", "op": "in", "value": ["R1a_rain_1h", "R1b_rain_3h"]}],
+  "return_properties": ["policyDescription", "ruleId", "thresholdValue", "thresholdJson"],
+  "joins": [
+    {"class": "Site", "via": "appliesToSite", "direction": "outgoing",
+     "return_properties": ["label"], "filters": [{"property": "label", "op": "equals", "value": "delos"}]}
+  ],
+  "aggregation": null,
+  "order_by": null, "limit": null,
+  "anomaly_check": false,
+  "as_of": null,
+  "explanation": "Wants the threshold definition, not a verdict, so Policy is the right target_class and anomaly_check stays false; the rainfall rules are picked from the Policy.ruleId list for delos."
+}
+
+Q: "Is the GNSS displacement at baltanas currently beyond its expert-rule limit?"
+{
+  "target_class": "Policy",
+  "filters": [{"property": "ruleId", "op": "contains", "value": "gnss"}],
+  "return_properties": ["policyDescription", "ruleId", "thresholdValue", "thresholdJson"],
+  "joins": [
+    {"class": "Site", "via": "appliesToSite", "direction": "outgoing",
+     "return_properties": ["label"], "filters": [{"property": "label", "op": "equals", "value": "baltanas"}]}
+  ],
+  "aggregation": null,
+  "order_by": null, "limit": null,
+  "anomaly_check": true,
+  "as_of": null,
+  "explanation": "Retrieve the applicable AD-RT rule(s) and their thresholds first (target_class=Policy) — the same as a pure threshold lookup. anomaly_check=true tells the pipeline to follow up with a separate deterministic step (outside this JSON) that runs each retrieved rule's own windowed/per-sensor Observation queries and compares against these thresholds; do NOT try to also join or aggregate Observation data yourself here."
+}
+
+Q: "Did the airflow at baltanas trigger an expert-rule alarm on 2025-02-11?"
+{
+  "target_class": "Policy",
+  "filters": [{"property": "ruleId", "op": "contains", "value": "airflow"}],
+  "return_properties": ["policyDescription", "ruleId", "thresholdValue", "thresholdJson"],
+  "joins": [
+    {"class": "Site", "via": "appliesToSite", "direction": "outgoing",
+     "return_properties": ["label"], "filters": [{"property": "label", "op": "equals", "value": "baltanas"}]}
+  ],
+  "aggregation": null,
+  "order_by": null, "limit": null,
+  "anomaly_check": true,
+  "as_of": "2025-02-11",
+  "explanation": "Same Policy lookup as any anomaly_check question — the date is NOT a filter here (Policy has no resultTime), it goes in as_of so the deterministic step checks the rule against readings as of that day instead of the latest available."
+}"""
+
+ANSWER_GUIDE = """\
+AD-RT rule check (when present in the prompt):
+- If a message includes a section starting "AD-RT rule check", that verdict (EXCEEDS/within a threshold) was computed in Python, not by you — report it as-is, do NOT recompute or second-guess it by comparing raw numbers yourself.
+- If that section says no policy was found for the site/quantity, say plainly that no AD-RT threshold is defined for it — do not guess whether the value is anomalous.
+- If the question asks about anomalies/thresholds/exceedances but no such section is present, say the AD-RT rule check could not be run for this question rather than inventing a judgement from the raw rows.
+- If the prompt says "This is a yes/no anomaly check", START with "Yes."/"No."/"Cannot be determined." (Yes if ANY listed rule fired), then give the supporting numbers and, if multiple rules were checked, which fired."""
+
+_RULES_SPARQL = _PREFIXES + """\
+SELECT DISTINCT ?site ?rule ?label WHERE {
+  ?p a panoptes:Policy ; argus:ruleId ?rule ; rdfs:label ?label ; argus:appliesToSite ?s .
+  ?s rdfs:label ?site .
+}"""
+
+
+def rule_vocabulary(backend) -> str | None:
+    """The expert rules per site, read from the KG, for the parser prompt — so a
+    threshold lookup names the rule by its id instead of guessing words in it."""
+    rules: dict[str, dict[str, str]] = {}
+    for r in backend.query(_RULES_SPARQL):
+        if "error" not in r:
+            rules.setdefault(r["site"], {})[r["rule"]] = r["label"].split(" - ", 1)[-1]
+    if not rules:
+        return None
+    return "\n".join(["Policy.ruleId per site (expert rules — filter on these ids verbatim):"]
+                     + [f"  {site}: " + "; ".join(f"{rid} ({name})" for rid, name in sorted(rs.items()))
+                        for site, rs in sorted(rules.items())])
+
+
 def evaluate(backend, intent: dict) -> dict[str, Any]:
     """Returns {"summary_text", "policies" (raw Policy rows), "readings" (one
     line per query, for citing separately from the summary text)}. Empty
     summary_text when the intent has no recognisable site+quantity pair."""
-    site, keyword = extract_context(intent)
+    site, keyword, policies = _policies_for(backend, intent)
     if not site or not keyword:
         return {"summary_text": "", "policies": [], "readings": []}
 
     as_of = extract_as_of(intent)
 
-    policies = _query_policies(backend, site, keyword)
     if not policies:
         return {"summary_text": (
             f"AD-RT rule check: no expert-rule policy found for site={site!r} "
@@ -947,8 +1103,11 @@ _ABLATION_PREAMBLE = (
 )
 
 
-def _sensor_name(iri: str) -> str:
-    return iri.rstrip("/").rsplit("/", 1)[-1]
+def _sensor_name(series: str) -> str:
+    """'<sensor IRI>|<quantity>' (see _query_raw_window) → '<sensor id> <quantity>'."""
+    iri, _, quantity = series.partition("|")
+    name = iri.rstrip("/").rsplit("/", 1)[-1]
+    return f"{name} {quantity}" if quantity else name
 
 
 def _rule_definition(rule: str, spec: RuleSpec | None, p: dict) -> str:
@@ -1043,12 +1202,11 @@ def _evaluator_skips(spec: RuleSpec, p: dict) -> bool:
 def fetch_raw(backend, intent: dict) -> dict[str, Any]:
     """The ablation counterpart of evaluate(): same keys, plus "n_rows", the
     number of raw readings in summary_text (they count toward the row cap)."""
-    site, keyword = extract_context(intent)
+    site, keyword, policies = _policies_for(backend, intent)
     if not site or not keyword:
         return {"summary_text": "", "policies": [], "readings": [], "n_rows": 0}
 
     as_of = extract_as_of(intent)
-    policies = _query_policies(backend, site, keyword)
     if not policies:
         return {"summary_text": (
             f"AD-RT rules and raw readings: no expert-rule policy found for site={site!r} "

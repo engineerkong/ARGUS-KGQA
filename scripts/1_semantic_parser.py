@@ -12,9 +12,21 @@ from concurrent.futures import ThreadPoolExecutor
 from openai import OpenAI
 from ontology_schema import get_ontology_schema, extract_class_list
 
-BASE_URL = os.environ.get("OLLAMA_BASE_URL", "https://ollama.fit.fraunhofer.de/api")
+# The rules and examples of each deterministic layer come from that layer, so the
+# parser is told exactly what the code that executes its intent does.
+import importlib
+_query = importlib.import_module("2_sparql_retriever")
+import analysis_geo as _spatial
+import analysis_ek as _anomaly
+import analysis_temp as _temporal
+TIME_OPERATORS, TIME_GUIDE, TIME_EXAMPLES = _temporal.PARSER_OPERATORS, _temporal.PARSER_GUIDE, _temporal.PARSER_EXAMPLES
+QUERY_OPERATORS, QUERY_GUIDE, QUERY_EXAMPLES = _query.PARSER_OPERATORS, _query.PARSER_GUIDE, _query.PARSER_EXAMPLES
+SPATIAL_SCHEMA, SPATIAL_GUIDE, SPATIAL_EXAMPLES = _spatial.PARSER_SCHEMA, _spatial.PARSER_GUIDE, _spatial.PARSER_EXAMPLES
+ANOMALY_SCHEMA, ANOMALY_GUIDE, ANOMALY_EXAMPLES = _anomaly.PARSER_SCHEMA, _anomaly.PARSER_GUIDE, _anomaly.PARSER_EXAMPLES
+
+BASE_URL = os.environ.get("OLLAMA_BASE_URL", "https://chat.kiconnect.nrw/api/v1")
 API_KEY  = os.environ.get("OPENAI_API_KEY", "no-key")
-MODEL    = os.environ.get("OLLAMA_MODEL", "llama3.3:70b")
+MODEL    = os.environ.get("OLLAMA_MODEL", "openai-gpt-oss-120b")
 
 # The SDK default is a 600s timeout with silent retries, so a stalled endpoint
 # hangs the pipeline for many minutes with no output.
@@ -56,224 +68,33 @@ Multi-hop paths (always route through ALL intermediates in order):
   ObservedProperty ↔ Site         : ObservedProperty ←[observedProperty]← Observation ←[hasObservation]← ObservationCollection —[hasSite]→ Site
   ObservedProperty ↔ Sensor       : ObservedProperty ←[observedProperty]← Observation ←[hasObservation]← ObservationCollection —[madeBySensor]→ Sensor
 
-Node geo-location (datatype properties on Node; currently populated for baltanas only):
-  Node.latitude    (decimal degrees, WGS84)
-  Node.longitude   (decimal degrees, WGS84)
-  Node.altitude    (metres)
-  For location/distance/elevation questions, return these Node properties. Distances,
-  nearest/farthest pairs, centroid and spread are computed downstream from the
-  coordinates — you only need to RETURN latitude/longitude/altitude, not compute them.
-
 Variable naming rule: the SPARQL variable for a join's return property is {ClassName}_{property}.
   Site.label → ?site_label        Observation.hasSimpleResult → ?observation_hassimpleresult
-  Use this exact dotted form in group_by and order_by fields.
-
-Governance graph (expert-rule thresholds and pilot metadata — separate from the
-sensor-reading graph above, joined to it only through Site):
-  Policy   —[appliesToSite]→  Site     (policyDescription, ruleId, threatName, thresholdValue, thresholdJson)
-  Asset    —[atSite]→        Site     (assetDescription, assetCode, pilotNumber, country, sourceUrl)
-  Threat   (threatDescription, threatLevel) — standalone, not yet linked to Policy/Asset by ID.
-  Decision (decisionDescription, urgency) — standalone, not linked to Policy/Asset/Threat by ID.
-  thresholdValue is only set when a rule has exactly one threshold parameter; multi-parameter
-  rules (e.g. "R3_hum_cross": {"R3_hum_th": 75, "R3_cross": 9}) carry thresholdJson instead —
-  do not attempt to filter/aggregate on thresholdJson's contents, only return it as-is.\
+  Use this exact dotted form in group_by and order_by fields.\
 """
 
+# Examples that belong to no single layer: follow-up resolution and a plain lookup.
 _FEW_SHOT = """\
---- EXAMPLES ---
-
-Q: "What are the temperature values recorded at each site?"
-{
-  "target_class": "ObservationCollection",
-  "filters": [],
-  "return_properties": [],
-  "joins": [
-    {"class": "Observation", "via": "hasObservation", "direction": "outgoing",
-     "return_properties": ["hasSimpleResult"], "filters": []},
-    {"class": "ObservedProperty", "via": "observedProperty", "direction": "outgoing",
-     "return_properties": [], "filters": [{"property": "label", "op": "equals", "value": "temperature"}]},
-    {"class": "Site", "via": "hasSite", "direction": "outgoing",
-     "return_properties": ["label"], "filters": []}
-  ],
-  "aggregation": null,
-  "order_by": null, "limit": null,
-  "anomaly_check": false,
-  "as_of": null,
-  "explanation": "Lists the individual values, so no aggregation — contrast with 'average temperature', which must aggregate."
-}
-
-Q: "What is the average temperature at each site?"
-{
-  "target_class": "ObservationCollection",
-  "filters": [],
-  "return_properties": [],
-  "joins": [
-    {"class": "Observation", "via": "hasObservation", "direction": "outgoing",
-     "return_properties": [], "filters": []},
-    {"class": "ObservedProperty", "via": "observedProperty", "direction": "outgoing",
-     "return_properties": [], "filters": [{"property": "label", "op": "equals", "value": "temperature"}]},
-    {"class": "Site", "via": "hasSite", "direction": "outgoing",
-     "return_properties": ["label"], "filters": []}
-  ],
-  "aggregation": {"type": "avg", "group_by": "Site.label",
-                  "target": "hasSimpleResult", "distinct": false},
-  "order_by": null, "limit": null,
-  "anomaly_check": false,
-  "as_of": null,
-  "explanation": "AVG computed in the query over every observation, so de-duplication of detail rows cannot skew it."
-}
-
-Q: "How many sensors are deployed per site?"
-{
-  "target_class": "ObservationCollection",
-  "filters": [],
-  "return_properties": [],
-  "joins": [
-    {"class": "Sensor", "via": "madeBySensor", "direction": "outgoing",
-     "return_properties": [], "filters": []},
-    {"class": "Site", "via": "hasSite", "direction": "outgoing",
-     "return_properties": ["label"], "filters": []}
-  ],
-  "aggregation": {"type": "count", "group_by": "Site.label",
-                  "target": "sensor", "distinct": true},
-  "order_by": null, "limit": null,
-  "anomaly_check": false,
-  "as_of": null,
-  "explanation": "Count distinct sensors per site."
-}
-
-Q: "What are the latest 10 readings?"
-{
-  "target_class": "Observation",
-  "filters": [],
-  "return_properties": ["hasSimpleResult"],
-  "joins": [
-    {"class": "ObservationCollection", "via": "hasObservation", "direction": "incoming",
-     "return_properties": ["resultTime"], "filters": []},
-    {"class": "Site", "via": "hasSite", "direction": "outgoing",
-     "return_properties": ["label"], "filters": []}
-  ],
-  "aggregation": null,
-  "order_by": {"variable": "ObservationCollection.resultTime", "direction": "DESC"},
-  "limit": 10,
-  "anomaly_check": false,
-  "as_of": null,
-  "explanation": "10 most recent individual readings (Observations), ranked by their collection's resultTime so LIMIT counts readings, not collections."
-}
-
-Q: "Which physical quantities are measured at the delos site?"
-{
-  "target_class": "ObservationCollection",
-  "filters": [],
-  "return_properties": [],
-  "joins": [
-    {"class": "Site", "via": "hasSite", "direction": "outgoing",
-     "return_properties": [], "filters": [{"property": "label", "op": "equals", "value": "delos"}]},
-    {"class": "Observation", "via": "hasObservation", "direction": "outgoing",
-     "return_properties": [], "filters": []},
-    {"class": "ObservedProperty", "via": "observedProperty", "direction": "outgoing",
-     "return_properties": ["label"], "filters": []}
-  ],
-  "aggregation": null,
-  "order_by": null,
-  "limit": null,
-  "anomaly_check": false,
-  "as_of": null,
-  "explanation": "Forward-traverse from ObservationCollection to Site (filtered) → Observation → ObservedProperty to list distinct measured quantities."
-}
-
-Q: "Where are the sensor nodes at the baltanas site?"
+Q: "of those nodes, how many are above 700 m?"
+   (follow-up; the previous turn asked "which nodes are at lucretili?" and returned 13 nodes)
+   Inherit the set definition — target_class=Node plus the lucretili Site filter — then ADD the
+   altitude constraint and count.
 {
   "target_class": "Node",
-  "filters": [],
-  "return_properties": ["label", "latitude", "longitude", "altitude"],
+  "filters": [{"property": "altitude", "op": "gt", "value": "700"}],
+  "return_properties": [],
   "joins": [
     {"class": "ObservationCollection", "via": "hasNode", "direction": "incoming",
      "return_properties": [], "filters": []},
     {"class": "Site", "via": "hasSite", "direction": "outgoing",
-     "return_properties": [], "filters": [{"property": "label", "op": "equals", "value": "baltanas"}]}
+     "return_properties": [], "filters": [{"property": "label", "op": "equals", "value": "lucretili"}]}
   ],
-  "aggregation": null,
+  "aggregation": {"type": "count", "group_by": null, "target": "node", "distinct": true},
   "order_by": null,
   "limit": null,
   "anomaly_check": false,
   "as_of": null,
-  "explanation": "List baltanas nodes with their coordinates; spatial metrics are derived downstream from lat/long/altitude."
-}
-
-Q: "among these sensors, how many are about temperature?"
-   (follow-up; the previous turn asked "how many sensors are in baltanas?" and returned 28 sensors)
-   Inherit the set definition — target_class=Sensor plus the baltanas Site filter — then ADD the
-   ObservedProperty constraint. The previous rows held no property information, so the new joins
-   are required.
-{
-  "target_class": "Sensor",
-  "filters": [],
-  "return_properties": [],
-  "joins": [
-    {"class": "ObservationCollection", "via": "madeBySensor", "direction": "incoming",
-     "return_properties": [], "filters": []},
-    {"class": "Site", "via": "hasSite", "direction": "outgoing",
-     "return_properties": [], "filters": [{"property": "label", "op": "equals", "value": "baltanas"}]},
-    {"class": "Observation", "via": "hasObservation", "direction": "outgoing",
-     "return_properties": [], "filters": []},
-    {"class": "ObservedProperty", "via": "observedProperty", "direction": "outgoing",
-     "return_properties": [], "filters": [{"property": "label", "op": "contains", "value": "temperature"}]}
-  ],
-  "aggregation": {"type": "count", "group_by": null, "target": "sensor", "distinct": true},
-  "order_by": null,
-  "limit": null,
-  "anomaly_check": false,
-  "as_of": null,
-  "explanation": "Count baltanas sensors (inherited set) that observe temperature (added constraint)."
-}
-
-Q: "What is the rainfall alarm threshold at delos?"
-{
-  "target_class": "Policy",
-  "filters": [{"property": "ruleId", "op": "contains", "value": "rain"}],
-  "return_properties": ["policyDescription", "ruleId", "thresholdValue", "thresholdJson"],
-  "joins": [
-    {"class": "Site", "via": "appliesToSite", "direction": "outgoing",
-     "return_properties": ["label"], "filters": [{"property": "label", "op": "equals", "value": "delos"}]}
-  ],
-  "aggregation": null,
-  "order_by": null, "limit": null,
-  "anomaly_check": false,
-  "as_of": null,
-  "explanation": "Wants the threshold definition, not a verdict, so Policy is the right target_class and anomaly_check stays false."
-}
-
-Q: "Has the temperature range at lucretili exceeded its AD-RT threshold?"
-{
-  "target_class": "Policy",
-  "filters": [{"property": "ruleId", "op": "contains", "value": "temp"}],
-  "return_properties": ["policyDescription", "ruleId", "thresholdValue", "thresholdJson"],
-  "joins": [
-    {"class": "Site", "via": "appliesToSite", "direction": "outgoing",
-     "return_properties": ["label"], "filters": [{"property": "label", "op": "equals", "value": "lucretili"}]}
-  ],
-  "aggregation": null,
-  "order_by": null, "limit": null,
-  "anomaly_check": true,
-  "as_of": null,
-  "explanation": "Retrieve the applicable AD-RT rule(s) and their thresholds first (target_class=Policy) — the same as a pure threshold lookup. anomaly_check=true tells the pipeline to follow up with a separate deterministic step (outside this JSON) that runs each retrieved rule's own windowed/per-sensor Observation queries and compares against these thresholds; do NOT try to also join or aggregate Observation data yourself here."
-}
-
-Q: "Was the temperature range at lucretili anomalous on 2026-05-15?"
-{
-  "target_class": "Policy",
-  "filters": [{"property": "ruleId", "op": "contains", "value": "temp"}],
-  "return_properties": ["policyDescription", "ruleId", "thresholdValue", "thresholdJson"],
-  "joins": [
-    {"class": "Site", "via": "appliesToSite", "direction": "outgoing",
-     "return_properties": ["label"], "filters": [{"property": "label", "op": "equals", "value": "lucretili"}]}
-  ],
-  "aggregation": null,
-  "order_by": null, "limit": null,
-  "anomaly_check": true,
-  "as_of": "2026-05-15",
-  "explanation": "Same Policy lookup as any anomaly_check question — the date is NOT a filter here (Policy has no resultTime), it goes in as_of so the deterministic step checks the rule against readings as of that day instead of the latest available."
+  "explanation": "Count lucretili nodes (inherited set) above 700 m (added constraint)."
 }
 
 Q: "Which country is the Lucretili pilot in, and what threats affect it?"
@@ -287,27 +108,7 @@ Q: "Which country is the Lucretili pilot in, and what threats affect it?"
   "anomaly_check": false,
   "as_of": null,
   "explanation": "Asset carries the pilot's country. Threat has no ID-based link to a specific Asset in this data, so it cannot be joined here — a separate Threat query is needed if the user wants that list."
-}
-
-Q: "How many readings were recorded at ranverso in the last 48 hours?"
-{
-  "target_class": "ObservationCollection",
-  "filters": [],
-  "return_properties": [],
-  "joins": [
-    {"class": "Site", "via": "hasSite", "direction": "outgoing",
-     "return_properties": [], "filters": [{"property": "label", "op": "equals", "value": "ranverso"}]}
-  ],
-  "aggregation": {"type": "count", "group_by": null, "target": "observationcollection", "distinct": true},
-  "order_by": null, "limit": null,
-  "anomaly_check": false,
-  "as_of": null,
-  "relative_time": {"amount": 48, "unit": "hours"},
-  "explanation": "A window ending at the latest reading; it becomes a resultTime filter downstream, so no date is written here."
-}
-
---- END EXAMPLES ---\
-"""
+}"""
 
 PARSE_SYSTEM = f"""You are a semantic parser for an ARGUS knowledge graph.
 
@@ -317,7 +118,7 @@ with this exact schema:
 {{
   "target_class": "<class name, one of: {extract_class_list()}>",
   "filters": [
-    {{"property": "<property>", "op": "contains|equals|in|gt|lt|after|before", "value": "<string, or a list for in>"}}
+    {{"property": "<property>", "op": "contains|equals|in|gt|lt|from|until|after|before", "value": "<string, or a list for in>"}}
   ],
   "return_properties": ["<list of properties to SELECT>"],
   "joins": [
@@ -327,62 +128,74 @@ with this exact schema:
       "direction": "outgoing|incoming",
       "return_properties": ["<properties of the related class>"],
       "filters": [
-        {{"property": "<property>", "op": "contains|equals|in|gt|lt|after|before", "value": "<string, or a list for in>"}}
+        {{"property": "<property>", "op": "contains|equals|in|gt|lt|from|until|after|before", "value": "<string, or a list for in>"}}
       ]
     }}
   ],
-  "aggregation": null or {{"type": "count|min|max|avg|sum|range", "group_by": "ClassName.property", "target": "<class or property>", "distinct": true|false}},
+  "aggregation": null or {{"type": "count|min|max|avg|sum|range", "group_by": "ClassName.property", "time_bucket": null|"day"|"month", "target": "<class or property>", "distinct": true|false}},
   "order_by": null or {{"variable": "ClassName.property", "direction": "ASC|DESC"}},
   "limit": null or <integer>,
   "anomaly_check": true|false,
-  "as_of": null or "<ISO date or datetime, e.g. '2026-05-15'>",
+  "as_of": null or "<ISO date or datetime, e.g. '2025-02-11'>",
   "relative_time": null or {{"amount": <integer>, "unit": "hours|days|weeks"}},
+  "unanswerable": null or "<what the knowledge graph does not model>",
   "explanation": "<one sentence>"
 }}
 
 Operator guide:
-  contains  — case-insensitive substring match on string literals
-  equals    — exact case-insensitive match
-  gt / lt   — numeric comparison (for measured values)
-  after     — datetime is after the given ISO value (for resultTime)
-  before    — datetime is before the given ISO value
-  in        — matches any of a list of values (case-insensitive), e.g. two named nodes or several sites
+{QUERY_OPERATORS}
+{TIME_OPERATORS}
 
 {_GRAPH_PATHS}
+
+{SPATIAL_SCHEMA}
+
+{ANOMALY_SCHEMA}
 
 Rules:
   - Use only class names and property names from the ontology schema.
   - Only include in return_properties the fields that directly answer the question. Do not include internal metadata (deviceGroupId, readingType, sensorId, sensorModel, etc.) unless the user explicitly asked for them.
   - Always include label in return_properties for classes that have it (Site, ObservedProperty, Sensor, Node).
   - Always include hasSimpleResult in return_properties when querying measured values.
-  - For time-based queries use resultTime with after/before operators.
   - direction="outgoing" means the subject (anchor) → via → object (join class).  direction="incoming" means object (join class) → via → subject (anchor).
-  - For COUNT aggregations: set "target" to the class name in lowercase (e.g. "sensor"), distinct=true. For min/max/avg/sum: set "target" to the property name (e.g. "hasSimpleResult"), distinct=false.
-  - AGGREGATE FIRST — this is a correctness rule, not an optimisation. If the question asks for a statistic ("average", "mean", "total", "sum", "how many", "highest", "lowest", "maximum", "minimum"), you MUST set "aggregation" so the statistic is computed inside the query. Detail rows go through DISTINCT de-duplication, so any average, sum or count derived from them afterwards is WRONG (measured: 15% error on an average). Only omit "aggregation" when the user genuinely wants the individual values listed.
-  - When aggregating on a property, put it in "aggregation.target" only — it does not also need to be in return_properties. Set group_by to null for a single overall figure, or to "ClassName.property" for a per-group breakdown.
-  - group_by and order_by variables MUST use the dotted "ClassName.property" form (e.g. "Site.label", "ObservationCollection.resultTime"). The join for that class MUST be present and include the property in return_properties.
-  - When asking to LIST instances of a class (e.g. "which sensors", "what sites"), set target_class to that class directly and join ObservationCollection as needed for filtering — EXCEPT for "what quantities/properties are measured/observed at site X": use target_class=ObservationCollection and forward-join Site (filtered), Observation, ObservedProperty (as shown in example 5).
+  - When asking to LIST instances of a class (e.g. "which sensors", "what sites"), set target_class to that class directly and join ObservationCollection as needed for filtering — EXCEPT for "what quantities/properties are measured/observed at site X": use target_class=ObservationCollection and forward-join Site (filtered), Observation, ObservedProperty (as in the examples).
   - The property "readingType" holds data-format codes ("reading", "eng_units") — NOT physical measurement types. To filter by measurement type (temperature, humidity, etc.), filter on ObservedProperty.label via the hasObservation → observedProperty chain.
-  - "latest/most recent N readings/values/measurements": one reading = one Observation, so set target_class=Observation (NOT ObservationCollection) and limit=N; join ObservationCollection via hasObservation (incoming) returning resultTime, and order_by ObservationCollection.resultTime DESC. This makes LIMIT count individual readings. (A timestamp lives on the ObservationCollection, so reach it through that join.)
-  - WHICH entity / WHEN / WHERE an extreme occurs ("which node is highest", "when was the maximum temperature recorded", "which day was hottest"): the answer is the entity or time, so use order_by on that value with limit 1 and return the label / resultTime — NOT an aggregation, which returns only the value. Use aggregation only when the value itself is asked ("what is the maximum temperature").
-  - "range" aggregation: min and max together (and their difference for numbers) — for "what range", "how much spread", "what time period do the readings cover" (target resultTime). Never invent other aggregation types.
-  - Several values of the same property (two named nodes, several sites): ONE filter with op "in" and a list — two "equals" filters on the same property can never both match.
-  - Distances: between two named nodes, target Node with label "in" [both names]; nearest node / nodes within R m of a node, return all nodes of that site; between sites, target Node joined to Site with label "in" [the sites] and return Site.label. Always return the coordinates — the distances from each node, and per-site centroids, are computed downstream.
-  - Location/where/distance/nearest/elevation questions: set target_class=Node and return_properties=["label","latitude","longitude","altitude"]; link to a Site by joining ObservationCollection via hasNode (incoming) then Site via hasSite (outgoing, filtered). Do NOT try to compute distances/centroids in the query — just return the coordinates; the analysis layer computes spatial metrics.
-  - "anomaly_check": true only for a yes/no verdict against a known threshold ("has X exceeded threshold", "is there an anomaly"). False for a plain "what is the threshold for X" lookup, which wants the definition, not a verdict.
-  - When anomaly_check is true: build the intent exactly like a Policy threshold lookup (target_class=Policy, filter by ruleId/label contains the quantity, join Site via appliesToSite) — do NOT join or aggregate Observation data yourself. A separate deterministic step (outside this JSON) takes the rule(s) this query returns and checks each against its threshold; it needs the rule identity first, which is what this query provides. Do not switch off target_class=Policy just because the question mentions a quantity/site.
-  - "relative_time": set for a window that ends now ("in the last 24 hours", "over the past 7 days", "this past week" = 1 week). "Now" is the latest reading in the knowledge graph (given with the query as the reference time), not today's date; the window is turned into a resultTime filter downstream, so do NOT also add resultTime filters for it. Null otherwise.
-  - "as_of": set only when the question names a specific point in time ("on 2026-05-15", "last Tuesday" — resolve relative phrases to an absolute ISO date against the reference time). Null for "currently"/"now"/unstated, which defaults to the latest available reading. Never put a date into "filters" for an anomaly_check question (Policy has no resultTime) — as_of is the only place it belongs.
+  - "unanswerable": set (to a short reason) ONLY when the question needs something this knowledge graph does not model at all — e.g. ownership, costs, opening hours, construction materials, people — i.e. nothing in the schema or the label lists could hold it. Never for a quantity or period that might merely have no readings (that is decided by running the query), and never for an expert-rule/anomaly question (whether a rule applies is decided by the AD-RT rule evaluation). Leave the rest of the intent minimal when set.
+
+Queries and aggregation (rules of the query compiler):
+{QUERY_GUIDE}
+
+Time (rules of the temporal layer):
+{TIME_GUIDE}
+
+Spatial questions (rules of the spatial analysis layer):
+{SPATIAL_GUIDE}
+
+Expert rules and anomalies (rules of the AD-RT rule evaluation):
+{ANOMALY_GUIDE}
 
 Follow-up handling (earlier turns may appear above as question → intent pairs):
   - Treat the current question as SELF-CONTAINED by default. If it can be understood on its own, IGNORE the earlier turns completely.
-  - Use earlier turns ONLY to resolve what the current question leaves unresolved: pronouns ("there", "those", "it"), ellipsis ("what about delos?", "and the maximum?"), or an omitted subject.
+  - Use earlier turns ONLY to resolve what the current question leaves unresolved: pronouns ("there", "those", "it"), ellipsis ("what about <another site>?", "and the <other statistic>?"), or an omitted subject.
   - When resolving, copy only the specific missing piece. NEVER carry over filters, aggregations, limits, joins or target_class that the current question does not itself imply. A new site/quantity mentioned now REPLACES the old one — it does not add to it.
   - The output intent must always be complete and standalone, exactly as if the question had been asked with no history.
+  - Relative periods in a follow-up ("the following day", "the next month", "the day before") are relative to the period of the previous turn — read its date from the previous intent and shift it: previous "on 2025-03-04" + "the following day" → from 2025-03-05, until 2025-03-05.
   - "among these / of those / from that set" narrows the PREVIOUS result set. That set is defined by the previous intent's target_class and filters, so inherit those and ADD the new constraint as an extra join/filter. Never try to filter the previously returned rows — build a complete new query instead.
   - A "[The previous query returned …]" note tells you how big that set was and which columns it had. Those columns are only what was displayed; they do NOT limit what you may query now. If the new question needs a property that was not returned, add whatever joins are required to reach it.
 
+--- EXAMPLES ---
+
+{QUERY_EXAMPLES}
+
+{TIME_EXAMPLES}
+
+{SPATIAL_EXAMPLES}
+
+{ANOMALY_EXAMPLES}
+
 {_FEW_SHOT}
+
+--- END EXAMPLES ---
 """
 
 
