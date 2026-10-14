@@ -1,12 +1,11 @@
+import os
 from openai import OpenAI
 
 client = OpenAI(
     base_url="https://chat.kiconnect.nrw/api/v1",
-    api_key="",
+    api_key=os.environ.get("KICONNECT_API_KEY", ""),
 )
 
-resp = client.chat.completions.create(
-    model="openai-gpt-oss-120b",
-    messages=[{"role": "user", "content": "Hello"}],
-)
-print(resp.choices[0].message.content)
+models = client.models.list()
+for m in models.data:
+    print(m.id)

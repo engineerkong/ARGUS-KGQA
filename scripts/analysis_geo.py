@@ -276,6 +276,7 @@ Node geo-location (datatype properties on Node; populated for the nodes of all f
   coordinates — you only need to RETURN latitude/longitude/altitude, not compute them."""
 
 PARSER_GUIDE = """\
+  - Counting or picking nodes BY DISTANCE ("how many nodes are within R m of X", "which node is closest to X") is a spatial question, not an aggregation: set aggregation to null and return the coordinates of all nodes of that site — the count or the nearest node is computed downstream from the distances. An aggregation here would count the site's nodes without any distance.
   - Distances: between two named nodes, target Node with label "in" [both names]; nearest node / nodes within R m of a node, return all nodes of that site; between sites, target Node joined to Site with label "in" [the sites] and return Site.label. Always return the coordinates — the distances from each node, and per-site centroids, are computed downstream.
   - Location/where/distance/nearest/elevation questions: set target_class=Node and return_properties=["label","latitude","longitude","altitude"]; link to a Site by joining ObservationCollection via hasNode (incoming) then Site via hasSite (outgoing, filtered). Do NOT try to compute distances/centroids in the query — just return the coordinates; the analysis layer computes spatial metrics."""
 

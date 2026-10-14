@@ -26,10 +26,13 @@ def main():
     ap.add_argument("--config", choices=list(CONFIGS), default="balanced")
     ap.add_argument("--n", type=int, default=3)
     ap.add_argument("--no-analysis", action="store_true")
+    ap.add_argument("--no-robustness", action="store_true",
+                    help="ablation: 1 parse candidate, no retries, LLM answer without the answer check")
     ap.add_argument("--verbose", action="store_true")
     args = ap.parse_args()
 
-    cfg = get_config(args.config, n=args.n, analysis=not args.no_analysis)
+    cfg = get_config(args.config, n=args.n, analysis=not args.no_analysis,
+                     robustness=not args.no_robustness)
     pipeline = Pipeline(verbose=args.verbose, config=cfg, keep_history=True)
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)

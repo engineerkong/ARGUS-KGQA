@@ -27,6 +27,11 @@ The row cap counts those raw readings too. Per configuration:
   BALANCED  the LLM computes and judges from rows and raw readings
   THOROUGH  as BALANCED with voted parsing; the answer check is skipped, since
             it checks against analysis output (n+1 to n+3 LLM calls)
+
+Ablation (w/o robustness, run on THOROUGH): one parse candidate, retry budget 0,
+and an LLM answer without the answer check, i.e. answered as in BALANCED (an
+anomaly answer not leading with the computed verdict still falls back to the
+template). Analysis and history are unchanged.
 """
 
 from __future__ import annotations
@@ -101,12 +106,18 @@ CONFIGS = {
 }
 
 
-def get_config(name: str = "balanced", n: int | None = None, analysis: bool = True) -> Config:
+def get_config(name: str = "balanced", n: int | None = None, analysis: bool = True,
+               robustness: bool = True) -> Config:
     """A named configuration; n overrides THOROUGH's number of parse candidates,
-    analysis=False gives its w/o-analysis ablation."""
+    analysis=False gives its w/o-analysis ablation, robustness=False its w/o-robustness
+    ablation: one parse candidate, no retries, and an LLM answer without the answer
+    check (as BALANCED, so an anomaly answer still has to lead with the computed verdict)."""
     cfg = CONFIGS[name.lower()]
     if n is not None and cfg.parse_candidates > 1:
         cfg = replace(cfg, parse_candidates=n)
+    if not robustness:
+        cfg = replace(cfg, name=cfg.name + "-norobustness", parse_candidates=1, max_retries=0,
+                      answer="llm" if cfg.answer == "llm+check" else cfg.answer)
     if not analysis:
         cfg = replace(cfg, name=cfg.name + "-noanalysis", analysis=False)
     return cfg
