@@ -1,0 +1,5 @@
+# Filled in by start.sh: Ontop -> the local, read-only snapshot database.
+jdbc.url=jdbc:postgresql://localhost:${PGPORT}/${HERIKG_DB}
+jdbc.driver=org.postgresql.Driver
+jdbc.user=${HERIKG_DB_USER}
+jdbc.password=${HERIKG_DB_USER}

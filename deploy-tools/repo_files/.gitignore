@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+logs/
+evaluation/results/
+evaluation/scores.csv
+evaluation/verdicts.json
+.herikgqa-export

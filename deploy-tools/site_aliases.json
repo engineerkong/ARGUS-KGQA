@@ -1,0 +1,40 @@
+{
+ "_comment": "PRIVATE — never push. Real names -> anonymised names for the public Hugging Face Space. Used by anonymize_db.py (database) and build_space.py (code). Site letters follow the paper (Table 5).",
+ "sites": {
+  "baltanas":     {"id": "site_a", "asset": "Heritage site A", "centroid": [46.0, 2.0]},
+  "delos":        {"id": "site_b", "asset": "Heritage site B", "centroid": [46.0, 4.0]},
+  "lucretili":    {"id": "site_c", "asset": "Heritage site C", "centroid": [47.0, 2.0]},
+  "ranverso":     {"id": "site_d", "asset": "Heritage site D", "centroid": [47.0, 4.0]},
+  "schenkenberg": {"id": "site_e", "asset": "Heritage site E", "centroid": [48.0, 3.0]},
+  "eurecat":      {"id": "test_site_1"},
+  "lorawan":      {"id": "test_site_2"}
+ },
+ "_text_comment": "Ordered, case-insensitive regex replacements applied to every free-text field (and, by build_space.py, to the code). Phrases come before the words they contain; site names are appended by the scripts from 'sites'.",
+ "text": [
+  ["Dyonisios &panter mosaic", "Mosaic B"],
+  ["Dyonisios mosaic", "Mosaic A"],
+  ["Dolphins mosaic", "Mosaic C"],
+  ["Masks mosaic", "Mosaic D"],
+  ["Mask mosaic", "Mosaic E"],
+  ["_Mask_", "_Mosaic E_"],
+  ["H\\. Fournoi", "House 1"],
+  ["H\\. Masks", "House 2"],
+  ["\\bfournoi\\b", "house1"],
+  ["\\bmasks\\b", "house2"],
+  ["Villa[ _-]Orazio", "Location 1"],
+  ["\\bConventillo\\b", "Location 2"],
+  ["\\bMontefalco\\b", "Location 3"],
+  ["katestrefh ta panta", "total destruction"],
+  ["\\bKatastrofh\\b", "Destruction"],
+  ["Sant[’']Antonio di", ""],
+  ["\\bPreceptory\\b", ""],
+  ["Cellar Town of", ""],
+  ["Monti Lucretili", "site_c"],
+  ["Delos Island", "site_b"],
+  ["Schenkenberg Castle", "site_e"],
+  ["Baltan[aá]s", "site_a"]
+ ],
+ "forbidden": ["baltan", "delos", "lucretili", "ranverso", "schenkenberg", "eurecat", "fournoi", "masks", "dyonisios",
+               "dolphins", "orazio", "conventillo", "montefalco", "katast", "katestref", "antonio", "preceptory",
+               "cellar town", "argus-project", "pilot_site_", "greece", "italy", "spain", "switzerland"]
+}

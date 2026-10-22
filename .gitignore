@@ -1,0 +1,15 @@
+.pgdata/
+*.dump
+data/
+
+.local/
+
+*.log
+*.jsonl
+__pycache__/
+*.pyc
+
+*.jar
+
+.env
+myenv/

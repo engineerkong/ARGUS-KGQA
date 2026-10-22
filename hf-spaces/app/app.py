@@ -1,0 +1,238 @@
+"""
+HeriKGQA demo: a chat interface to the question-answering pipeline over a
+frozen, anonymised snapshot of the heritage sensor knowledge graph.
+
+Started by start.sh once PostgreSQL and the Ontop SPARQL endpoint are up
+(HERIKG_SPARQL_ENDPOINT). Each browser session keeps its own conversation; one
+question is answered at a time, as there is one pipeline (configured per question)
+and the LLM endpoint allows few concurrent requests.
+
+The system's configuration options (parse candidates n, retry budget k, history
+turns h, answer check) are shown beside the conversation, set to THOROUGH's.
+
+Every answered question is logged (question, answer, configuration, latency) and
+can be rated good / fine / bad, with a comment for "bad". Logs go to
+HERIKG_LOG_DIR and, when HF_TOKEN and FEEDBACK_REPO are set, are pushed to that
+(private) Hugging Face dataset every few minutes.
+"""
+
+import json
+import os
+import sys
+import threading
+import uuid
+from datetime import datetime, timezone
+from pathlib import Path
+
+import gradio as gr
+
+sys.path.insert(0, str(Path(__file__).resolve().parent / "scripts"))
+from pipeline import Config, Pipeline, get_config  # noqa: E402
+
+# Configuration options, defaulting to THOROUGH's (n=3, k=2, h=2, answer check on).
+DEFAULT = dict(n=3, k=2, h=2, check=True)
+N_MAX, K_MAX, H_MAX = 5, 3, 4
+# Side by side (wide screens), the side column is exactly as tall as the
+# conversation column: "contain: size" keeps its content from adding height. The
+# parsed intent and SPARQL share the height left over, each with one scrollbar
+# (CodeMirror's; Gradio's wrapper around it would add a second). Only should even
+# their minimum not fit (configuration and feedback both open) does the column scroll.
+# Stacked (narrow screens), each has a fixed height.
+CSS = """
+#side > * { flex: 0 0 auto; }
+#rating-row { align-items: center; flex-wrap: nowrap; }
+#rating-row .wrap { gap: 6px; }
+#rating-row label { padding: 6px 10px; }
+#rating-row button { white-space: nowrap; }
+.rating-label { color: var(--block-label-text-color); font-size: var(--block-label-text-size); }
+#intent, #sparql { display: flex !important; flex-direction: column; overflow: hidden !important; }
+#intent > .wrap:not(.full), #sparql > .wrap:not(.full) { flex: 1 1 0; min-height: 0; overflow: hidden; }
+#intent .codemirror-wrapper, #sparql .codemirror-wrapper { height: 100%; overflow: hidden !important; }
+#intent .cm-editor, #sparql .cm-editor { height: 100%; }
+#intent .cm-scroller, #sparql .cm-scroller { overflow: auto; }
+@media (min-width: 768px) {
+  #layout { flex-wrap: nowrap; }
+  #side { contain: size; overflow-y: auto; flex-wrap: nowrap; }
+  #side > #details:has(> .label-wrap.open) { flex: 1 1 0; display: flex; flex-direction: column; overflow: visible !important; }
+  #details > .label-wrap.open + div { display: flex !important; flex-direction: column; flex: 1 1 0; }
+  #details > .label-wrap.open + div > .column { flex: 1 1 0; }
+  #details > .label-wrap.open + div > .column > * { flex: 0 0 auto; }
+  #details #intent, #details #sparql { flex: 1 1 0; min-height: 6em; }
+}
+@media (max-width: 767px) {
+  #details #intent, #details #sparql { height: 18em; }
+}
+"""
+EXAMPLES = [
+    "How many sensor nodes are installed at site A?",
+    "What is the average temperature at site C?",
+    "Which two sensor nodes at site B are farthest apart, and how far?",
+    "What time period do the readings at site E cover?",
+    "Was the temperature at site C anomalous on 2026-07-15 according to its AD-RT rules?",
+    "What was the average temperature at site A over the last 24 hours?",
+]
+NOTE = """**HeriKGQA** answers questions about sensor readings from five cultural heritage sites,
+anonymised as **site A – site E**. The data is a frozen snapshot from
+13 May to 12 August 2026; place names are replaced and each site is moved to a fictitious location, keeping
+the distances within a site. Every number in an answer is computed by SPARQL or deterministic code, not by the
+language model. Questions, answers and ratings are logged anonymously for research."""
+
+# ── pipeline: one backend and vocabulary, configured per question ───────────
+PIPELINE = Pipeline(verbose=False, config=get_config("thorough", n=3), keep_history=True)
+LOCK = threading.Lock()
+
+
+def make_config(n: int, k: int, h: int, check: bool) -> Config:
+    """The Config for these options: "thorough" for the defaults, else named by them."""
+    name = ("thorough" if dict(n=n, k=k, h=h, check=check) == DEFAULT
+            else f"custom-n{n}-k{k}-h{h}-{'check' if check else 'nocheck'}")
+    return Config(name, parse_candidates=n, max_retries=k, max_history=max(h, 1),
+                  answer="llm+check" if check else "llm")
+
+# ── logging ─────────────────────────────────────────────────────────────────
+LOG_DIR = Path(os.environ.get("HERIKG_LOG_DIR", Path(__file__).resolve().parent.parent / "logs"))
+LOG_DIR.mkdir(parents=True, exist_ok=True)
+QUERY_LOG, FEEDBACK_LOG = LOG_DIR / "queries.jsonl", LOG_DIR / "feedback.jsonl"
+_log_lock = threading.Lock()
+if os.environ.get("HF_TOKEN") and os.environ.get("FEEDBACK_REPO"):
+    from huggingface_hub import CommitScheduler
+    SCHEDULER = CommitScheduler(repo_id=os.environ["FEEDBACK_REPO"], repo_type="dataset", private=True,
+                                folder_path=LOG_DIR, path_in_repo="logs", every=5,
+                                token=os.environ["HF_TOKEN"])
+    _log_lock = SCHEDULER.lock
+
+
+def _log(path: Path, record: dict) -> None:
+    with _log_lock:
+        with path.open("a") as f:
+            f.write(json.dumps(record, ensure_ascii=False, default=str) + "\n")
+
+
+def _now() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
+
+# ── handlers ────────────────────────────────────────────────────────────────
+def new_session():
+    return {"session": uuid.uuid4().hex[:12], "history": [], "last": None}
+
+
+def ask(question, n, k, h, check, chat, state):
+    state = state or new_session()
+    question = (question or "").strip()
+    if not question:
+        return ("", chat, state) + (gr.update(),) * 6
+    n, k, h = (min(max(int(x), lo), hi) for x, lo, hi in ((n, 1, N_MAX), (k, 0, K_MAX), (h, 0, H_MAX)))
+    check = bool(check)
+    cfg = make_config(n, k, h, check)
+    # The session keeps up to H_MAX turns; the parser gets the last h of them.
+    earlier = state["history"][-h:] if h else []
+    with LOCK:
+        p = PIPELINE
+        p.config, p.max_retries, p.max_history = cfg, cfg.max_retries, cfg.max_history
+        p.history = list(earlier)
+        try:
+            r = p.run(question)
+            answer = r["answer"]
+        except Exception as e:  # e.g. the LLM endpoint is unavailable
+            r, answer = {}, f"Sorry, the question could not be answered ({type(e).__name__}). Please try again."
+        if p.history and p.history[-1]["query"] == question:
+            state["history"] = (state["history"] + [p.history[-1]])[-H_MAX:]
+    settings = {"n": n, "k": k, "h": h, "answer_check": check}
+    turn = {"id": uuid.uuid4().hex[:12], "session": state["session"], "time": _now(),
+            "config": cfg.name, "settings": settings,
+            "question": question, "answer": answer, "latency_s": r.get("latency_s"),
+            "llm_calls": r.get("llm_calls"), "earlier_questions": [t["query"] for t in earlier]}
+    _log(QUERY_LOG, {**turn, "intent": r.get("intent"), "sparql": r.get("sparql")})
+    state["last"] = turn
+    chat = chat + [{"role": "user", "content": question}, {"role": "assistant", "content": answer}]
+    # a fresh rating form for the new answer
+    return ("", chat, state, *_details(r, settings), gr.update(value=None), gr.update(value=""), "")
+
+
+def _summary(n="–", k="–", h="–", check="–", calls="–", latency="–") -> str:
+    """The configuration and cost line; "–" where there is no answer yet."""
+    items = [f"**n** = {n}", f"**k** = {k}", f"**h** = {h}", f"**answer check:** {check}",
+             f"**LLM calls:** {calls}", f"**Latency:** {latency}"]
+    # a line wraps only between items
+    return "&ensp;·&ensp; ".join(i.replace(" ", "&nbsp;") for i in items)
+
+
+def _details(r: dict, s: dict) -> tuple[str, str, str]:
+    """Summary line, parsed intent (JSON) and SPARQL of an answer."""
+    if not r:
+        return _summary(), "", ""
+    summary = _summary(s["n"], s["k"], s["h"], "on" if s["answer_check"] else "off",
+                       r.get("llm_calls", "–"), f"{r['latency_s']} s" if r.get("latency_s") is not None else "–")
+    intent = json.dumps(r["intent"], indent=1, ensure_ascii=False) if r.get("intent") else ""
+    sparql = str(r.get("sparql") or "")
+    return summary, intent, sparql
+
+
+def rate(rating, comment, state):
+    """Rate the latest answer, once."""
+    last = (state or {}).get("last")
+    if not last:
+        return gr.update(), "Ask a question first, then rate its answer.", state
+    if last.get("rated"):
+        return gr.update(), "This answer has already been rated.", state
+    if not rating:
+        return gr.update(), "Please choose a rating.", state
+    if rating == "bad" and not (comment or "").strip():
+        return gr.update(), "Please tell us briefly what went wrong.", state
+    _log(FEEDBACK_LOG, {**last, "rating": rating, "comment": (comment or "").strip(), "rated_at": _now()})
+    last["rated"] = True
+    return gr.update(value=""), "Thank you for your feedback.", state
+
+
+def reset(state):
+    state = new_session()
+    return [], state, _summary(), "", "", gr.update(value=None), gr.update(value=""), ""
+
+
+# ── interface ───────────────────────────────────────────────────────────────
+with gr.Blocks(title="HeriKGQA", css=CSS) as demo:
+    gr.Markdown("# HeriKGQA\n" + NOTE)
+    state = gr.State(None)  # created on the first question (new_session)
+    with gr.Row(elem_id="layout", equal_height=True):
+        with gr.Column(scale=3):
+            chat = gr.Chatbot(type="messages", height=460, label="Conversation")
+            with gr.Row():
+                box = gr.Textbox(placeholder="Ask about the sensor data, e.g. a statistic, a place, a time or an anomaly…",
+                                 show_label=False, scale=5)
+                send = gr.Button("Ask", variant="primary", scale=1)
+            gr.Examples(EXAMPLES, inputs=box, label="Examples")
+        with gr.Column(scale=2, elem_id="side"):
+            with gr.Accordion("Configuration", open=False):
+                with gr.Row():
+                    n_opt = gr.Dropdown(list(range(1, N_MAX + 1)), value=DEFAULT["n"], label="Parse candidates n",
+                                        info="parses voted on", min_width=100)
+                    k_opt = gr.Dropdown(list(range(0, K_MAX + 1)), value=DEFAULT["k"], label="Retry budget k",
+                                        info="re-parses on failure", min_width=100)
+                    h_opt = gr.Dropdown(list(range(0, H_MAX + 1)), value=DEFAULT["h"], label="History turns h",
+                                        info="earlier turns used", min_width=100)
+                check_opt = gr.Checkbox(value=DEFAULT["check"], label="Answer check",
+                                        info="numbers, timestamps and verdict checked against the evidence")
+            with gr.Accordion("Feedback", open=False):  # rates the latest answer
+                gr.Markdown("How good was this answer?", elem_classes="rating-label")
+                with gr.Row(elem_id="rating-row"):
+                    rating = gr.Radio(["good", "fine", "bad"], show_label=False, container=False, scale=1)
+                    submit = gr.Button("Send rating", size="md", scale=0, min_width=100)
+                comment = gr.Textbox(label="What went wrong? (required for 'bad')", lines=2)
+                thanks = gr.Markdown()
+            with gr.Accordion("How this answer was computed", open=True, elem_id="details"):
+                summary = gr.Markdown(_summary())
+                intent_box = gr.Code(label="Parsed intent", language="json", interactive=False, elem_id="intent")
+                sparql_box = gr.Code(label="SPARQL", language="sql", interactive=False, elem_id="sparql")
+            clear = gr.Button("New conversation")
+
+    for trigger in (send.click, box.submit):
+        trigger(ask, [box, n_opt, k_opt, h_opt, check_opt, chat, state],
+                [box, chat, state, summary, intent_box, sparql_box, rating, comment, thanks])
+    submit.click(rate, [rating, comment, state], [comment, thanks, state])
+    clear.click(reset, [state], [chat, state, summary, intent_box, sparql_box, rating, comment, thanks])
+
+demo.queue(default_concurrency_limit=1, max_size=32)
+
+if __name__ == "__main__":
+    demo.launch(server_name="0.0.0.0", server_port=int(os.environ.get("PORT", "7860")))

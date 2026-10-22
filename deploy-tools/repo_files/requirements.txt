@@ -1,0 +1,8 @@
+# versions used in the experiments; gradio and huggingface_hub only for the web demo (app/app.py)
+openai==3.26.1
+httpx==0.28.1
+rdflib==7.6.0
+requests==2.34.2
+psycopg[binary]==3.3.6
+gradio==5.49.1
+huggingface_hub>=0.25,<1.0

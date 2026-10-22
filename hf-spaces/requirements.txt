@@ -1,0 +1,7 @@
+# versions used in the experiments (pipeline) and for the web interface
+openai==3.26.1
+httpx==0.28.1
+rdflib==7.6.0
+requests==2.34.2
+gradio==5.49.1
+huggingface_hub>=0.25,<1.0
