@@ -73,11 +73,11 @@ Rules:
 """
 
 
-# Ablation (w/o analysis): same prompt, except that nothing is pre-computed
+# Ablation (w/o grounding): same prompt, except that nothing is pre-computed
 # any more — no spatial/temporal/numeric summary and no AD-RT verdict, only the
 # rule definitions and raw readings. SPARQL aggregates are still computed in
 # the query, so the instruction to report them stays.
-SYSTEM_NO_ANALYSIS = SYSTEM.replace(
+SYSTEM_NO_GROUNDING = SYSTEM.replace(
     "You are given a user question, SPARQL results, and a numeric summary.",
     "You are given a user question and SPARQL results. No numeric summary or analysis is provided.",
 ).replace(
@@ -88,7 +88,16 @@ SYSTEM_NO_ANALYSIS = SYSTEM.replace(
     """- If a message includes a section starting "AD-RT rule check", that verdict (EXCEEDS/within a threshold) was computed in Python, not by you — report it as-is, do NOT recompute or second-guess it by comparing raw numbers yourself.""",
     """- If a message includes a section starting "AD-RT rules and raw readings", it lists each applicable rule (definition and threshold) and the raw readings retrieved for it. No verdict has been computed: evaluate each rule yourself from those readings and decide whether it fires.""",
 )
-assert SYSTEM_NO_ANALYSIS.count("compute it yourself") == 1 and "No verdict has been computed" in SYSTEM_NO_ANALYSIS
+import domain as _domain
+if _domain.IS_ARGUS:
+    assert SYSTEM_NO_GROUNDING.count("compute it yourself") == 1 and "No verdict has been computed" in SYSTEM_NO_GROUNDING
+else:
+    # Another domain (scripts/domain.py): its own role and answer rules, with the query and
+    # time guides of the layers that computed the results; w/o grounding as above.
+    SYSTEM = _domain.load("prompt").answer_system(query_guide=_query.ANSWER_GUIDE, time_guide=_temporal.ANSWER_GUIDE)
+    SYSTEM_NO_GROUNDING = SYSTEM.replace(
+        "You are given a user question, SPARQL results, and a numeric summary.",
+        "You are given a user question and SPARQL results. No numeric summary or analysis is provided.")
 
 
 def _dedupe(results: list) -> list:
@@ -110,9 +119,9 @@ def prompt_row_stats(results: list) -> tuple[int, int]:
 
 def generate(query: str, sparql: str, results: list, ad_rt_summary: str | None = None,
              anomaly_check: bool = False, verbose: bool = False, feedback: str | None = None,
-             with_analysis: bool = True, reference_time=None,
+             with_grounding: bool = True, reference_time=None,
              earlier_questions: list[str] | None = None, interpretation: str | None = None) -> str:
-    """with_analysis=False is the w/o-analysis ablation: no pre-computed
+    """with_grounding=False is the w/o grounding ablation: no pre-computed
     summary, and ad_rt_summary holds rule definitions + raw readings
     (analysis_ek.fetch_raw) instead of verdicts (analysis_ek.evaluate).
     For a follow-up, earlier_questions and the parser's interpretation say what
@@ -137,7 +146,7 @@ def generate(query: str, sparql: str, results: list, ad_rt_summary: str | None =
         f"SPARQL query executed:\n```sparql\n{sparql}\n```\n\n"
         f"Results — all {len(deduped)} distinct rows ({len(results)} total):\n{results_text}"
     )
-    if with_analysis:
+    if with_grounding:
         analysis = analyze(results, now=reference_time, query=query)
         user_msg += f"\n\nPre-computed spatial & temporal analysis:\n{analysis['summary_text']}"
         if verbose:
@@ -158,7 +167,7 @@ def generate(query: str, sparql: str, results: list, ad_rt_summary: str | None =
     response = client.chat.completions.create(
         model=MODEL,
         messages=[
-            {"role": "system", "content": SYSTEM if with_analysis else SYSTEM_NO_ANALYSIS},
+            {"role": "system", "content": SYSTEM if with_grounding else SYSTEM_NO_GROUNDING},
             {"role": "user",   "content": user_msg},
         ],
         temperature=0.3,
@@ -167,7 +176,7 @@ def generate(query: str, sparql: str, results: list, ad_rt_summary: str | None =
     return response.choices[0].message.content.strip()
 
 
-# ── Verdict, template answer (FAST) and answer check (THOROUGH) ─────────────
+# ── Verdict, template answer (fallback) and answer check ───────────────────
 
 _FIRED = re.compile(r"→ (EXCEEDS|BELOW|FIRES)")
 _WITHIN = re.compile(r"→ within")
@@ -192,12 +201,12 @@ _TEMPLATE_ROWS = 10
 
 
 def template_answer(query: str, results: list, ad_rt_summary: str | None = None,
-                    anomaly_check: bool = False, with_analysis: bool = True, reference_time=None) -> str:
+                    anomaly_check: bool = False, with_grounding: bool = True, reference_time=None) -> str:
     """Deterministic answer with no LLM call: the AD-RT verdict, or the result
-    rows plus the pre-computed analysis, rendered as text. Without the analysis
-    layer nothing computes a verdict, so an anomaly question cannot be decided
+    rows plus the pre-computed analysis, rendered as text. Without grounding (no
+    analysis layer) nothing computes a verdict, so an anomaly question cannot be decided
     and only the applicable rules are listed."""
-    if anomaly_check and not with_analysis:
+    if anomaly_check and not with_grounding:
         rules = [l.strip()[2:] for l in (ad_rt_summary or "").splitlines() if l.startswith("  - ")]
         n_readings = sum(1 for l in (ad_rt_summary or "").splitlines() if l.startswith("    ") and "|" in l)
         detail = (f" Applicable rules: {' '.join(rules)} ({n_readings} raw readings retrieved, "
@@ -214,7 +223,7 @@ def template_answer(query: str, results: list, ad_rt_summary: str | None = None,
         return "No matching data was found in the knowledge graph for this question."
 
     # The analysis picked the fact that answers this question: that is the answer.
-    focus = analyze(results, now=reference_time, query=query)["focus"] if with_analysis else []
+    focus = analyze(results, now=reference_time, query=query)["focus"] if with_grounding else []
     if focus:
         return "\n".join(f.strip() for f in focus)
 
@@ -229,7 +238,7 @@ def template_answer(query: str, results: list, ad_rt_summary: str | None = None,
     if len(rows) > _TEMPLATE_ROWS:
         lines.append(f"- … and {len(rows) - _TEMPLATE_ROWS} more.")
     facts = ([l for l in analyze(results, now=reference_time, query=query)["summary_text"].splitlines()[1:] if l.strip()]
-             if with_analysis else [])
+             if with_grounding else [])
     if facts:
         lines.append("Analysis:")
         lines += facts[:15]

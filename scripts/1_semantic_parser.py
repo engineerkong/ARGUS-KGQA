@@ -198,6 +198,13 @@ Follow-up handling (earlier turns may appear above as question → intent pairs)
 --- END EXAMPLES ---
 """
 
+# Another domain (scripts/domain.py) brings its own instructions and examples; the query and
+# time operators stay those of the compiler and the temporal layer, which execute the intent.
+import domain as _domain
+if not _domain.IS_ARGUS:
+    PARSE_SYSTEM = _domain.load("prompt").parse_system(
+        class_list=extract_class_list(), query_operators=QUERY_OPERATORS, time_operators=TIME_OPERATORS)
+
 
 def _format_result_summary(summary: dict | None) -> str | None:
     if not summary or not summary.get("row_count"):

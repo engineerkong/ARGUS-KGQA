@@ -1,7 +1,8 @@
 """
 Query backend behind one interface, so the pipeline does not care whether the
-RDF lives in a local rdflib graph or behind a remote SPARQL endpoint (Ontop
-over Postgres). Selected by make_backend(): ARGUS_SPARQL_ENDPOINT picks remote.
+RDF lives in a local rdflib graph, behind a remote SPARQL endpoint (Ontop
+over Postgres) or in a local Oxigraph store. Selected by make_backend():
+HERIKGQA_OXIGRAPH_STORE picks Oxigraph, ARGUS_SPARQL_ENDPOINT picks remote.
 
 URI unfolding needs each result URI's predicate/object pairs. Locally that is a
 cheap in-memory lookup; remotely it must be batched (one VALUES query) or it
@@ -111,7 +112,38 @@ class RemoteSparqlBackend(Backend):
         return f"remote SPARQL endpoint — {self.endpoint}"
 
 
+class OxigraphBackend(Backend):
+    """A local Oxigraph store (pyoxigraph), opened read-only: for a graph too large for an
+    in-memory rdflib graph and with no endpoint behind it (e.g. domains/multitq)."""
+
+    def __init__(self, path: str | Path):
+        import pyoxigraph
+        self.path = str(path)
+        self.store = pyoxigraph.Store.read_only(self.path)
+
+    def query(self, sparql: str) -> list[dict[str, Any]]:
+        try:
+            res = self.store.query(sparql)
+            if isinstance(res, bool):  # ASK
+                return [{"ask": str(res).lower()}]
+            names = [v.value for v in res.variables]
+            return [{n: (sol[n].value if sol[n] is not None else None) for n in names} for sol in res]
+        except Exception as e:
+            return [{"error": str(e)}]
+
+    def predicate_objects(self, uri: str) -> list[tuple[str, str]]:
+        import pyoxigraph
+        return [(q.predicate.value, q.object.value)
+                for q in self.store.quads_for_pattern(pyoxigraph.NamedNode(uri), None, None)]
+
+    def describe(self) -> str:
+        return f"local Oxigraph store — {self.path} — {len(self.store):,} triples"
+
+
 def make_backend(ttl_path: str | Path | None = None, endpoint: str | None = None) -> Backend:
+    store = os.environ.get("HERIKGQA_OXIGRAPH_STORE")
+    if store:
+        return OxigraphBackend(store)
     endpoint = endpoint or os.environ.get("ARGUS_SPARQL_ENDPOINT")
     if endpoint:
         return RemoteSparqlBackend(endpoint)

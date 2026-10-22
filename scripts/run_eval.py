@@ -1,9 +1,10 @@
 """
 Batch runner for experiments: one result JSON per question.
 
-    python scripts/run_eval.py --questions trial20.json --out results/balanced
+    python scripts/run_eval.py --questions trial20.json --out results/thorough
     python scripts/run_eval.py --questions q.json --out results/thorough --config thorough --n 3
-    python scripts/run_eval.py --questions q.json --out results/balanced-noanalysis --no-analysis
+    python scripts/run_eval.py --questions q.json --out results/thorough-nogrounding --no-grounding
+    python scripts/run_eval.py --questions q.json --out results/thorough-noerrorcorrection --no-error-correction
 
 Question file: [{"id", "question", "history"?: [{"question", ...}], ...}].
 For a follow-up, the earlier questions in "history" are first run through the
@@ -23,16 +24,17 @@ def main():
     ap = argparse.ArgumentParser(description="ARGUS KGQA batch evaluation")
     ap.add_argument("--questions", required=True)
     ap.add_argument("--out", required=True)
-    ap.add_argument("--config", choices=list(CONFIGS), default="balanced")
+    ap.add_argument("--config", choices=list(CONFIGS), default="thorough")
     ap.add_argument("--n", type=int, default=3)
-    ap.add_argument("--no-analysis", action="store_true")
-    ap.add_argument("--no-robustness", action="store_true",
-                    help="ablation: 1 parse candidate, no retries, LLM answer without the answer check")
+    ap.add_argument("--no-grounding", dest="no_grounding", action="store_true",
+                    help="ablation w/o grounding: no deterministic analysis layer")
+    ap.add_argument("--no-error-correction", dest="no_error_correction", action="store_true",
+                    help="ablation w/o error correction: 1 parse candidate, no retries, no answer check")
     ap.add_argument("--verbose", action="store_true")
     args = ap.parse_args()
 
-    cfg = get_config(args.config, n=args.n, analysis=not args.no_analysis,
-                     robustness=not args.no_robustness)
+    cfg = get_config(args.config, n=args.n, grounding=not args.no_grounding,
+                     error_correction=not args.no_error_correction)
     pipeline = Pipeline(verbose=args.verbose, config=cfg, keep_history=True)
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)

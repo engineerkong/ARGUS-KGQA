@@ -3625,7 +3625,7 @@
   "type": "anomaly",
   "template": "verdict_no_rule",
   "question": "Has the temperature at Ranverso exceeded its AD-RT threshold?",
-  "reference": "Cannot be determined: no AD-RT rule is defined for temperature at Ranverso.",
+  "reference": "Cannot be determined: no AD-RT rule sets a threshold on the temperature at Ranverso. Its only temperature-related rule, R3_temp_nodiff (threshold 2), checks whether the soil temperature tracks the outdoor air temperature, not the temperature itself, and the snapshot has no soil-temperature readings at Ranverso to evaluate it.",
   "reference_value": "Cannot be determined",
   "answerable": true
  },

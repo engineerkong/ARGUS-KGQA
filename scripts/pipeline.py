@@ -2,36 +2,26 @@
 ARGUS KGQA pipeline: parse → SPARQL → answer, over a KG loaded once at init.
 
 A Step 2 error or empty result is fed back to Step 1 for up to k re-parses.
-Conversation history is opt-in (see Pipeline.keep_history). How much LLM work
-a turn may spend is set by one of three configurations:
+Conversation history is opt-in (see Pipeline.keep_history). The system runs in
+one configuration, THOROUGH: n parse candidates voted, retry budget k = 2,
+history h = 2, and an LLM answer checked against the computed evidence
+(n+1 to n+4 LLM calls). An answer that still fails the check after its one
+regeneration, or an anomaly answer that does not lead with the verdict the AD-RT
+check computed, is replaced by the template answer. A question the parser marks
+unanswerable, or whose time window lies wholly outside the data, is declined
+without running a query.
 
-                     FAST       BALANCED   THOROUGH
-  parse candidates   1          1          n (voted)
-  retry budget k     0          2          2
-  history turns h    1          2          2
-  answer             template   LLM        LLM + check
-  LLM calls          1          2 to 4     n+1 to n+4
-
-An anomaly answer must lead with the verdict the AD-RT check computed: when an
-LLM answer does not (BALANCED), or still fails the answer check after its one
-regeneration (THOROUGH), the template answer is returned instead. A question
-the parser marks unanswerable, or whose time window lies wholly outside the
-data, is declined without running a query.
-
-Ablation (w/o analysis, any configuration): the analysis layer still fetches
-each anomaly rule's raw readings but computes nothing, and the answer gets no
-pre-computed temporal/spatial/numeric summary. SPARQL aggregates are unchanged.
-The row cap counts those raw readings too. Per configuration:
-  FAST      template answer lists rows only; anomaly questions are
-            "Cannot be determined" (no LLM and no computed verdict)
-  BALANCED  the LLM computes and judges from rows and raw readings
-  THOROUGH  as BALANCED with voted parsing; the answer check is skipped, since
-            it checks against analysis output (n+1 to n+3 LLM calls)
-
-Ablation (w/o robustness, run on THOROUGH): one parse candidate, retry budget 0,
-and an LLM answer without the answer check, i.e. answered as in BALANCED (an
-anomaly answer not leading with the computed verdict still falls back to the
-template). Analysis and history are unchanged.
+Two ablations (get_config, or --no-grounding / --no-error-correction):
+  w/o grounding (grounding=False): the deterministic analysis layer still fetches
+      each anomaly rule's raw readings but computes nothing, and the answer gets
+      no pre-computed temporal/spatial/numeric facts; the LLM computes and judges
+      from the rows and raw readings. SPARQL aggregates are unchanged; the raw
+      readings count toward the row cap; the answer check, defined against the
+      analysis output, is skipped (n+1 to n+3 LLM calls).
+  w/o error correction (error_correction=False): one parse candidate, retry budget 0,
+      and an LLM answer without the answer check (an anomaly answer not leading
+      with the computed verdict still falls back to the template). Analysis and
+      history are unchanged.
 """
 
 from __future__ import annotations
@@ -56,6 +46,7 @@ execute      = _sr.execute
 unfold_results = _sr.unfold_results
 
 _ta = importlib.import_module("analysis_temp")
+_domain = importlib.import_module("domain")
 
 _ag = importlib.import_module("3_answer_generator")
 generate = _ag.generate
@@ -96,30 +87,32 @@ class Config:
     max_retries: int        # k
     max_history: int        # h
     answer: str             # "template" | "llm" | "llm+check"
-    analysis: bool = True   # False = w/o-analysis ablation
+    grounding: bool = True  # False = w/o grounding ablation
 
 
 CONFIGS = {
-    "fast":     Config("fast",     parse_candidates=1, max_retries=0, max_history=1, answer="template"),
-    "balanced": Config("balanced", parse_candidates=1, max_retries=2, max_history=2, answer="llm"),
+    # [disabled-config] begin — only THOROUGH is used; FAST and BALANCED kept for reference
+    # "fast":     Config("fast",     parse_candidates=1, max_retries=0, max_history=1, answer="template"),
+    # "balanced": Config("balanced", parse_candidates=1, max_retries=2, max_history=2, answer="llm"),
+    # [disabled-config] end
     "thorough": Config("thorough", parse_candidates=3, max_retries=2, max_history=2, answer="llm+check"),
 }
 
 
-def get_config(name: str = "balanced", n: int | None = None, analysis: bool = True,
-               robustness: bool = True) -> Config:
-    """A named configuration; n overrides THOROUGH's number of parse candidates,
-    analysis=False gives its w/o-analysis ablation, robustness=False its w/o-robustness
-    ablation: one parse candidate, no retries, and an LLM answer without the answer
-    check (as BALANCED, so an anomaly answer still has to lead with the computed verdict)."""
+def get_config(name: str = "thorough", n: int | None = None, grounding: bool = True,
+               error_correction: bool = True) -> Config:
+    """THOROUGH; n overrides its number of parse candidates. grounding=False gives the
+    w/o grounding ablation, error_correction=False the w/o error correction ablation: one
+    parse candidate, no retries, and an LLM answer without the answer check (an
+    anomaly answer still has to lead with the computed verdict)."""
     cfg = CONFIGS[name.lower()]
     if n is not None and cfg.parse_candidates > 1:
         cfg = replace(cfg, parse_candidates=n)
-    if not robustness:
-        cfg = replace(cfg, name=cfg.name + "-norobustness", parse_candidates=1, max_retries=0,
+    if not error_correction:
+        cfg = replace(cfg, name=cfg.name + "-noerrorcorrection", parse_candidates=1, max_retries=0,
                       answer="llm" if cfg.answer == "llm+check" else cfg.answer)
-    if not analysis:
-        cfg = replace(cfg, name=cfg.name + "-noanalysis", analysis=False)
+    if not grounding:
+        cfg = replace(cfg, name=cfg.name + "-nogrounding", grounding=False)
     return cfg
 
 
@@ -187,6 +180,7 @@ _apply_relative_time = _ta.apply_relative_time
 _data_note = _ta.data_note
 _outside_data = _ta.outside_data
 _iso, _fmt = _ta.iso, _ta.fmt
+_anchor_intent, _apply_anchor = _ta.anchor_intent, _ta.apply_anchor
 
 
 def _decline(intent: dict | None, earliest: datetime | None, latest: datetime | None) -> str | None:
@@ -218,7 +212,7 @@ class Pipeline:
         self,
         verbose: bool = True,
         ttl_path: str | Path | None = None,
-        config: str | Config = "balanced",
+        config: str | Config = "thorough",
         keep_history: bool = False,
         sparql_endpoint: str | None = None,
     ):
@@ -234,7 +228,7 @@ class Pipeline:
 
         # ── Step 0: Connect the query backend (local TTL or remote SPARQL) ──
         endpoint = sparql_endpoint or os.environ.get("ARGUS_SPARQL_ENDPOINT")
-        if not endpoint and not ttl.exists():
+        if not endpoint and not ttl.exists() and not os.environ.get("HERIKGQA_OXIGRAPH_STORE"):
             print(f"[Step 0] WARNING: TTL file not found: {ttl}")
             print("[Step 0] Run `python scripts/0a_offline_readings.py --max-records 500` to fetch data first.")
         self.backend = make_backend(ttl_path=ttl, endpoint=endpoint)
@@ -286,7 +280,10 @@ SELECT DISTINCT ?cls ?label WHERE {
     def _vocabulary(self) -> str | None:
         """The KG's own quantity and site labels for the parser, so a filter
         uses "soil_temperature", not "soil temperature" (which matches nothing)
-        or "voltage" with contains (which also matches voltage_polynomial_4)."""
+        or "voltage" with contains (which also matches voltage_polynomial_4).
+        Another domain (scripts/domain.py) supplies its own."""
+        if not _domain.IS_ARGUS:
+            return _domain.load("prompt").vocabulary(self.backend)
         rows = [r for r in self.backend.query(self._VOCAB_SPARQL) if "error" not in r]
         if not rows:
             return None
@@ -306,12 +303,35 @@ SELECT DISTINCT ?cls ?label WHERE {
             lines.append(rules)
         return "\n".join(lines)
 
+    def _question_vocabulary(self, query: str) -> str | None:
+        """The vocabulary for one question: for a domain too large to list its entities
+        (scripts/domain.py), the KG labels that the question may mean are added."""
+        if _domain.IS_ARGUS:
+            return self.vocabulary
+        earlier = [t["query"] for t in self.history] if self.keep_history else []
+        candidates = _domain.load("linker").candidates(query, earlier)
+        return "\n\n".join(x for x in (self.vocabulary, candidates) if x) or None
+
+    def _resolve_anchor(self, intent: dict) -> tuple[dict, str | None]:
+        """Anchored time (analysis_temp): find the anchor event's time with its own
+        query, then turn the "anchor" filters into bounds. No anchor: unchanged."""
+        sub = _anchor_intent(intent)
+        if sub is None:
+            return intent, None
+        problem = validate_intent(sub)
+        if problem:
+            return intent, f"Anchor: {problem}"
+        rows = [r for r in execute(self.backend, build_sparql(sub)) if "error" not in r]
+        t = next((v for r in rows for k, v in r.items() if k.endswith("resulttime") and v), None)
+        return _apply_anchor(intent, t)
+
     def run(self, query: str) -> dict[str, Any]:
         v = self.verbose
         sep = "─" * 60
         latest = self.latest_reading()
         ref = _fmt(latest)[:-4] if latest else None
         window = None
+        vocabulary = self._question_vocabulary(query)
 
         feedback = None
         intent = None
@@ -343,14 +363,14 @@ SELECT DISTINCT ?cls ?label WHERE {
             n = self.config.parse_candidates
             if attempt == 0 and n > 1:
                 intent, vote = parse_voted(query, n, history=history, reference_time=ref,
-                                           vocabulary=self.vocabulary)
+                                           vocabulary=vocabulary)
                 parse_calls += n
                 if v:
                     print(f"[Step 1] Voted over {n} candidates: {vote['distinct']} distinct intent(s), "
                           f"winner has {vote['winner_votes']} vote(s).")
             else:
                 intent = parse(query, feedback=feedback, history=history, reference_time=ref,
-                                vocabulary=self.vocabulary)
+                                vocabulary=vocabulary)
                 parse_calls += 1
             t_parse += time.perf_counter() - _t
             # AD questions: this fetches the applicable Policy rule(s), labelled
@@ -372,8 +392,9 @@ SELECT DISTINCT ?cls ?label WHERE {
             if intent.get("parse_error"):
                 window, problem = None, intent["parse_error"]
             else:
+                intent, anchor_problem = self._resolve_anchor(intent)
                 intent, window, problem = _apply_relative_time(intent, latest)
-                problem = problem or validate_intent(intent)
+                problem = anchor_problem or problem or validate_intent(intent)
             decline = _decline(intent, self.earliest_reading(), latest)
             if decline:
                 sparql = f"# not run: {decline}"
@@ -468,7 +489,7 @@ SELECT DISTINCT ?cls ?label WHERE {
         ad_rt_raw_rows = 0
         if is_ad:
             _t = time.perf_counter()
-            if self.config.analysis:
+            if self.config.grounding:
                 ad_rt_result = evaluate_ad_rt(self.backend, intent)
             else:
                 ad_rt_result = fetch_ad_rt_raw(self.backend, intent)
@@ -479,7 +500,7 @@ SELECT DISTINCT ?cls ?label WHERE {
             t_query += time.perf_counter() - _t
             if v and ad_rt_summary:
                 print(f"\n{sep}")
-                if self.config.analysis:
+                if self.config.grounding:
                     print("[Step 2b] SPARQL query on Readings (per matched rule, windowed/sensor-grouped):")
                     print(ad_rt_summary)
                 else:
@@ -524,16 +545,16 @@ SELECT DISTINCT ?cls ?label WHERE {
                             if self.keep_history and self.history else {})
         if self.config.answer == "template":
             answer = template_answer(query, unfolded, ad_rt_summary=ad_rt_summary, anomaly_check=anomaly,
-                                     with_analysis=self.config.analysis, reference_time=latest)
+                                     with_grounding=self.config.grounding, reference_time=latest)
         else:
             answer = generate(query, sparql, unfolded, ad_rt_summary=ad_rt_summary,
-                              anomaly_check=anomaly, verbose=v, with_analysis=self.config.analysis,
+                              anomaly_check=anomaly, verbose=v, with_grounding=self.config.grounding,
                               reference_time=latest, **followup_context)
             answer_calls += 1
             # THOROUGH: deterministic check against the evidence; one regeneration on failure.
             # Both of its criteria are defined against analysis output (the computed
             # verdict and analysis numbers), so the ablation skips it.
-            if self.config.answer == "llm+check" and self.config.analysis:
+            if self.config.answer == "llm+check" and self.config.grounding:
                 check_feedback = check_answer(answer, query, unfolded, ad_rt_summary=ad_rt_summary,
                                               anomaly_check=anomaly, reference_time=latest)
                 if check_feedback:
@@ -548,15 +569,16 @@ SELECT DISTINCT ?cls ?label WHERE {
                     if check_answer(answer, query, unfolded, ad_rt_summary=ad_rt_summary,
                                     anomaly_check=anomaly, reference_time=latest):
                         template_fallback = True
-            # The computed verdict is not the LLM's to overrule (BALANCED has no
-            # check to catch it): an answer leading with another verdict is replaced.
-            elif anomaly and self.config.analysis and not leads_with(answer, ad_rt_verdict(ad_rt_summary)):
+            # The computed verdict is not the LLM's to overrule (without the answer
+            # check nothing else catches it): an answer leading with another verdict
+            # is replaced.
+            elif anomaly and self.config.grounding and not leads_with(answer, ad_rt_verdict(ad_rt_summary)):
                 template_fallback = True
             if template_fallback:
                 if v:
                     print("[Step 3] LLM answer contradicts the computed evidence — using the template answer.")
                 answer = template_answer(query, unfolded, ad_rt_summary=ad_rt_summary, anomaly_check=anomaly,
-                                         with_analysis=True, reference_time=latest)
+                                         with_grounding=True, reference_time=latest)
         t_answer = time.perf_counter() - _t
         # Added after the answer check, so it never counts as an unsupported number.
         answer = _with_note(answer, _data_note(intent, latest, window))

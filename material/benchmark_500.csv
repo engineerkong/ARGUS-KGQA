@@ -367,7 +367,7 @@ A065,anomaly,verdict_no_data,True,,Was the humidity at Ranverso anomalous on 202
 A066,anomaly,verdict_no_rule,True,,Has the soil temperature at Baltanas exceeded its AD-RT threshold?,Cannot be determined: no AD-RT rule is defined for soil temperature at Baltanas.,
 A067,anomaly,verdict_no_rule,True,,Has the temperature at Baltanas exceeded its AD-RT threshold?,Cannot be determined: no AD-RT rule is defined for temperature at Baltanas.,
 A068,anomaly,verdict_no_rule,True,,Has the temperature at Delos exceeded its AD-RT threshold?,Cannot be determined: no AD-RT rule is defined for temperature at Delos.,
-A069,anomaly,verdict_no_rule,True,,Has the temperature at Ranverso exceeded its AD-RT threshold?,Cannot be determined: no AD-RT rule is defined for temperature at Ranverso.,
+A069,anomaly,verdict_no_rule,True,,Has the temperature at Ranverso exceeded its AD-RT threshold?,"Cannot be determined: no AD-RT rule sets a threshold on the temperature at Ranverso. Its only temperature-related rule, R3_temp_nodiff (threshold 2), checks whether the soil temperature tracks the outdoor air temperature, not the temperature itself, and the snapshot has no soil-temperature readings at Ranverso to evaluate it.",
 A070,anomaly,verdict_no_rule,True,,Has the voltage at Delos exceeded its AD-RT threshold?,Cannot be determined: no AD-RT rule is defined for voltage at Delos.,
 A071,anomaly,threshold_lookup,True,,What threshold does the AD-RT 1-hour and 24-hour rainfall rule at Lucretili use?,"Rule R6a_rain: R6a_rain_1h = 5, R6a_rain_24h = 20.",
 A072,anomaly,threshold_lookup,True,,What threshold does the AD-RT 6-hour barometric pressure range rule at Lucretili use?,Rule R8_baro: R8_baro_range = 300.,

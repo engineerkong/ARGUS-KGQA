@@ -372,6 +372,14 @@ NO_DATA_GROUPS = [
 ]
 NO_RULE_GROUPS = [("delos", "temperature"), ("baltanas", "temperature"), ("ranverso", "temperature"),
                   ("baltanas", "soil temperature"), ("delos", "voltage")]
+# A rule that concerns the quantity without being a threshold on its value (partner review, 2026-10-20)
+NO_RULE_REFERENCE = {
+    ("ranverso", "temperature"): (
+        "Cannot be determined: no AD-RT rule sets a threshold on the temperature at Ranverso. Its only "
+        "temperature-related rule, R3_temp_nodiff (threshold 2), checks whether the soil temperature tracks "
+        "the outdoor air temperature, not the temperature itself, and the snapshot has no soil-temperature "
+        "readings at Ranverso to evaluate it."),
+}
 RULE_PHRASE = {
     "R1_ppv": "peak particle velocity (PPV)", "R2_hum_daily_range": "daily humidity range",
     "R3_gnss_change": "day-over-day GNSS position change", "R4a_soil_high": "high soil moisture",
@@ -518,7 +526,9 @@ def gen_anomaly(b: Bench, d, eng: RuleEngine):
               "Cannot be determined")
     for site, phrase in NO_RULE_GROUPS:
         b.add("anomaly", "verdict_no_rule", f"Has the {phrase} at {SITE[site]} exceeded its AD-RT threshold?",
-              f"Cannot be determined: no AD-RT rule is defined for {phrase} at {SITE[site]}.", "Cannot be determined")
+              NO_RULE_REFERENCE.get((site, phrase),
+                                    f"Cannot be determined: no AD-RT rule is defined for {phrase} at {SITE[site]}."),
+              "Cannot be determined")
     for (site, rule), (tv, tj) in sorted(eng.policies.items()):
         if ("threshold", site, rule) in EXCLUDED:
             continue

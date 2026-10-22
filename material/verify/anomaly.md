@@ -3838,7 +3838,7 @@ WHERE site_id = 'delos' AND left(label, 5) = 'AD-RT' ORDER BY rule_id;
 ## A069 · verdict_no_rule
 
 **Question:** Has the temperature at Ranverso exceeded its AD-RT threshold?  
-**Reference:** Cannot be determined: no AD-RT rule is defined for temperature at Ranverso.  
+**Reference:** Cannot be determined: no AD-RT rule sets a threshold on the temperature at Ranverso. Its only temperature-related rule, R3_temp_nodiff (threshold 2), checks whether the soil temperature tracks the outdoor air temperature, not the temperature itself, and the snapshot has no soil-temperature readings at Ranverso to evaluate it.  
 **Recomputed:** `Cannot be determined` → **MANUAL**
 
 ```sql
@@ -3854,6 +3854,13 @@ WHERE site_id = 'ranverso' AND left(label, 5) = 'AD-RT' ORDER BY rule_id;
 | R4b_soil_low | AD-RT Ranverso policy - soil moisture low | 5 | {"R4b_soil_low": 5} |
 
 - Check that none of these rules is about temperature.
+
+**Partner review (2026-10-20):** R3_temp_nodiff concerns temperature (soil vs. outdoor air temperature,
+threshold 2, confirmed in the partner database and NB5.3 Table 1 of ARGUS D5.3), so the explanation was
+revised to tell it apart from a threshold on the temperature itself. The verdict stays *Cannot be
+determined*: no rule thresholds the temperature value, and R3_temp_nodiff cannot be evaluated, as the
+snapshot's only temperature quantity at Ranverso is `temperature` (18,924 observations) and it has no
+soil-temperature series (`soilmoisture_temp`) to pair it with. `reference_value` is unchanged, so no score changes.
 
 ---
 

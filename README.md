@@ -70,60 +70,27 @@ interval) and uses it three ways:
 AD-RT rule windows were already anchored to the newest matching reading (or
 to the date the question names).
 
-## Configurations
+## Configuration and ablations
 
-How much LLM work a turn may spend is one of three configurations, chosen with
-`--config` (default `balanced`, the original behaviour):
+The system runs in one configuration, **THOROUGH**: three parse candidates voted
+(ties go to the greedy parse), retry budget k = 2, history h = 2, and an LLM answer
+checked deterministically against the computed evidence (every number must appear in
+the results, analysis or verdicts; an anomaly answer must lead with the computed
+verdict), regenerated once on failure and replaced by the template answer if it still
+fails. The earlier FAST and BALANCED configurations are kept, commented out, in
+`pipeline.CONFIGS`.
 
-|                    | `fast`   | `balanced` | `thorough`    |
-|--------------------|----------|------------|---------------|
-| Parse candidates   | 1        | 1          | n (voted)     |
-| Retry budget k     | 0        | 2          | 2             |
-| History turns h    | 1        | 2          | 2             |
-| Answer             | template | LLM        | LLM + check   |
-| LLM calls          | 1        | 2 to 4     | n+1 to n+4    |
+Two ablations:
 
-- **Voted parse**: one greedy and n−1 sampled parses (temperature
-  `ARGUS_VOTE_TEMPERATURE`, default 0.7) run in parallel; the most frequent
-  intent wins, ties go to the greedy one. Retries always parse once.
-- **Template answer**: no LLM — the AD-RT verdict; or the analysis fact that
-  answers the question (a named pair's distance, the node nearest to a named
-  node, the nodes within a radius, …); or else the result rows plus the
-  pre-computed analysis, rendered as text.
-- **Check**: every number and timestamp in the answer must appear (up to
-  rounding) in the results, the analysis or the AD-RT summary, and an anomaly
-  answer must lead with the computed verdict; on failure the answer is
-  regenerated once with the problems as feedback, and if it still fails, the
-  template answer is returned.
-- **Verdict**: in every configuration with analysis, an anomaly answer that does
-  not lead with the computed verdict is replaced by the template answer.
-- **Declines without a query**: a question the parser marks `unanswerable`
-  (it needs something the KG does not model, e.g. a river), or whose time
-  window lies wholly outside the readings, is answered "Cannot be answered"
-  directly.
+| | flag | what changes |
+|---|---|---|
+| **w/o grounding** | `--no-grounding` | no deterministic analysis layer: no temporal/spatial/numeric facts, and anomaly rules' raw readings go to the LLM, which computes the verdict itself; SPARQL aggregates unchanged; raw readings count toward the 1,000-row cap; no answer check |
+| **w/o error correction** | `--no-error-correction` | one parse candidate, no retries, no answer check |
 
 ```bash
-python scripts/demo.py --online --config fast
-python scripts/demo.py --online --config thorough --n 3
-```
-
-**Ablation `--no-analysis`** (any configuration; analysis is on by default)
-removes the deterministic analysis layer: no temporal/spatial/numeric summary,
-and for anomaly questions the rule windows' raw readings are fetched as usual
-but nothing is computed — no per-sensor grouping, window statistics or
-threshold comparison. Statistics are still SPARQL aggregates. Raw readings
-count toward the 1,000-row cap (declined, not truncated, like any oversized
-result).
-
-| | `fast` | `balanced` | `thorough` |
-|---|---|---|---|
-| w/o analysis | rows only; anomaly → "Cannot be determined" | LLM computes and judges from rows and raw readings | as `balanced`, voted parse; answer check skipped (it checks against analysis output), n+1 to n+3 calls |
-
-```python
-from pipeline import Pipeline, get_config
-p = Pipeline(config=get_config("thorough", n=3))
-r = p.run("What is the maximum temperature recorded at Schenkenberg?")
-r["answer"], r["llm_calls"], r["latency_s"]
+python scripts/demo.py --online
+python scripts/demo.py --online --no-grounding
+python scripts/run_eval.py --questions material/benchmark_500.json --out results/thorough
 ```
 
 ## Pipeline

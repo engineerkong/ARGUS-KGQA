@@ -1090,7 +1090,7 @@ def evaluate(backend, intent: dict) -> dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
-# Ablation (w/o analysis): fetch exactly the readings each rule's evaluator
+# Ablation (w/o grounding): fetch exactly the readings each rule's evaluator
 # would fetch — same anchor time, same window(s), same column matcher — but
 # compute nothing: no per-sensor grouping, no window statistic, no threshold
 # comparison. The rule's definition and the raw rows go to the LLM instead.
@@ -1200,7 +1200,7 @@ def _evaluator_skips(spec: RuleSpec, p: dict) -> bool:
 
 
 def fetch_raw(backend, intent: dict) -> dict[str, Any]:
-    """The ablation counterpart of evaluate(): same keys, plus "n_rows", the
+    """The w/o grounding counterpart of evaluate(): same keys, plus "n_rows", the
     number of raw readings in summary_text (they count toward the row cap)."""
     site, keyword, policies = _policies_for(backend, intent)
     if not site or not keyword:

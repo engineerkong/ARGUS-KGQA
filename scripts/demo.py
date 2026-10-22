@@ -7,8 +7,7 @@ OLLAMA_BASE_URL, OLLAMA_MODEL).
 
     python scripts/demo.py           # preset queries, no conversation history
     python scripts/demo.py --online  # interactive, follow-up questions supported
-    python scripts/demo.py --online --config fast
-    python scripts/demo.py --online --config thorough --n 3
+    python scripts/demo.py --online --no-grounding        # ablation
 """
 
 import argparse
@@ -84,21 +83,21 @@ def main():
                         help="Interactive mode: type queries in terminal")
     parser.add_argument("--quiet", action="store_true",
                         help="Hide intermediate pipeline steps")
-    parser.add_argument("--config", choices=list(CONFIGS), default="balanced",
-                        help="fast: 1 LLM call, template answer; balanced: 2-4 calls; "
-                             "thorough: n voted parses + checked answer, n+1 to n+4 calls")
+    parser.add_argument("--config", choices=list(CONFIGS), default="thorough",
+                        help="THOROUGH: n voted parses, retries, checked answer (the only configuration in use)")
     parser.add_argument("--n", type=int, default=3,
-                        help="Parse candidates voted on in the thorough configuration (default 3)")
-    parser.add_argument("--no-analysis", action="store_true",
-                        help="Ablation, with any --config: no analysis layer (no temporal/spatial "
-                             "summary, no AD-RT computation — raw rule readings go to the answer); "
-                             "SPARQL aggregates unchanged. Default: analysis on")
+                        help="Parse candidates voted on (default 3)")
+    parser.add_argument("--no-grounding", dest="no_grounding", action="store_true",
+                        help="Ablation w/o grounding: no deterministic analysis layer; SPARQL aggregates unchanged")
+    parser.add_argument("--no-error-correction", dest="no_error_correction", action="store_true",
+                        help="Ablation w/o error correction: 1 parse candidate, no retries, no answer check")
     args = parser.parse_args()
 
     # History only in interactive mode — batch queries stay independent so the
     # preset run is reproducible and one query cannot contaminate the next.
     pipeline = Pipeline(verbose=not args.quiet, keep_history=args.online,
-                        config=get_config(args.config, n=args.n, analysis=not args.no_analysis))
+                        config=get_config(args.config, n=args.n, grounding=not args.no_grounding,
+                                          error_correction=not args.no_error_correction))
 
     if args.online:
         run_online(pipeline)
