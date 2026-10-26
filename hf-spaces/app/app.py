@@ -14,10 +14,17 @@ Every answered question is logged (question, answer, configuration, latency) and
 can be rated good / fine / bad, with a comment for "bad". Logs go to
 HERIKG_LOG_DIR and, when HF_TOKEN and FEEDBACK_REPO are set, are pushed to that
 (private) Hugging Face dataset every few minutes.
+
+The parsed intent is shown without its unset fields and the SPARQL without unused
+prefixes, so both fit beside the conversation. With "?figure" in the URL the page
+is a landscape layout at most 1600 px wide, in larger type, with the conversation,
+parsed intent and SPARQL shown in full, for screenshots that stay legible when
+scaled to a page.
 """
 
 import json
 import os
+import re
 import sys
 import threading
 import uuid
@@ -62,7 +69,43 @@ CSS = """
 @media (max-width: 767px) {
   #details #intent, #details #sparql { height: 18em; }
 }
+/* figure view (?figure): the whole interface in a landscape layout (about twice as wide as high), legible
+   when scaled down to a page: conversation on the left; on the right configuration and feedback side by side,
+   and the parsed intent beside the SPARQL */
+body.figure .gradio-container { width: 100% !important; max-width: 1600px !important; margin: 0 auto !important;
+  --text-sm: 16px; --text-md: 18px; --text-lg: 20px; --block-label-text-size: 16px; --block-title-text-size: 16px;
+  --layout-gap: 12px; }
+body.figure main.fillable { max-width: none !important; }
+body.figure footer { display: none !important; }
+body.figure #layout > .column { flex: 1 1 0 !important; }
+body.figure #layout > #side { display: grid !important; grid-template-columns: 1fr 1fr;
+  align-content: start; }
+body.figure #side > #details, body.figure #side > button { grid-column: 1 / -1; }
+body.figure #details > .label-wrap.open + div > .column { display: grid !important; grid-template-columns: 2fr 3fr;
+  align-items: start; }
+body.figure #details > .label-wrap.open + div > .column > :first-child { grid-column: 1 / -1; }
+body.figure #chat, body.figure #chat .bubble-wrap { height: auto !important; max-height: none !important; }
+body.figure #chat .message-row { margin: 8px 16px 4px !important; }
+body.figure #chat .message-wrap { margin-bottom: 4px !important; }
+body.figure #side { contain: none !important; overflow: visible !important; }
+body.figure #side > #details, body.figure #details > .label-wrap.open + div,
+body.figure #details > .label-wrap.open + div > .column { flex: none !important; }
+body.figure #details #intent, body.figure #details #sparql { flex: none !important; height: auto !important; }
+body.figure #intent > .wrap:not(.full), body.figure #sparql > .wrap:not(.full),
+body.figure #intent .codemirror-wrapper, body.figure #sparql .codemirror-wrapper,
+body.figure #intent .cm-editor, body.figure #sparql .cm-editor { flex: none !important; height: auto !important;
+  overflow: visible !important; }
+body.figure .cm-editor { font-size: 15px; }
+body.figure .cm-editor .cm-line { line-height: 1.3; }
+body.figure #chat .md { font-size: 18px; }
+body.figure .label-wrap span { font-size: 16px; }
+body.figure #layout .gallery { display: grid !important; grid-template-columns: 1fr 1fr; }
+body.figure #layout .gallery > button, body.figure #layout .gallery > button > div { max-width: none !important;
+  display: block !important; font-size: 16px; text-align: left; white-space: nowrap; overflow: hidden;
+  text-overflow: ellipsis; }
 """
+# Adds the class behind the figure view above when the URL has "?figure".
+FIGURE_JS = "() => { if (new URLSearchParams(location.search).has('figure')) document.body.classList.add('figure'); }"
 EXAMPLES = [
     "How many sensor nodes are installed at site A?",
     "What is the average temperature at site C?",
@@ -71,11 +114,9 @@ EXAMPLES = [
     "Was the temperature at site C anomalous on 2026-07-15 according to its AD-RT rules?",
     "What was the average temperature at site A over the last 24 hours?",
 ]
-NOTE = """**HeriKGQA** answers questions about sensor readings from five cultural heritage sites,
-anonymised as **site A – site E**. The data is a frozen snapshot from
-13 May to 12 August 2026; place names are replaced and each site is moved to a fictitious location, keeping
-the distances within a site. Every number in an answer is computed by SPARQL or deterministic code, not by the
-language model. Questions, answers and ratings are logged anonymously for research."""
+NOTE = """**HeriKGQA** answers questions about sensor readings (13 May – 12 August 2026) from five cultural heritage
+sites, anonymised as **site A – site E** and moved to fictitious locations. Every number in an answer is computed
+by SPARQL or deterministic code, not by the language model. Questions, answers and ratings are logged anonymously."""
 
 # ── pipeline: one backend and vocabulary, configured per question ───────────
 PIPELINE = Pipeline(verbose=False, config=get_config("thorough", n=3), keep_history=True)
@@ -158,14 +199,47 @@ def _summary(n="–", k="–", h="–", check="–", calls="–", latency="–")
     return "&ensp;·&ensp; ".join(i.replace(" ", "&nbsp;") for i in items)
 
 
+def _unset_dropped(v):
+    """v without its unset (null, false, empty) fields, at every level."""
+    if isinstance(v, dict):
+        v = {k: _unset_dropped(x) for k, x in v.items()}
+        return {k: x for k, x in v.items() if x not in (None, "", [], {}, False)}
+    if isinstance(v, list):
+        return [_unset_dropped(x) for x in v]
+    return v
+
+
+def _compact_intent(intent: dict) -> str:
+    """The intent as JSON without its unset fields, one field per line and one join per line."""
+    shown = _unset_dropped(intent)
+    dump = lambda v: json.dumps(v, ensure_ascii=False)
+    lines = [f' "{k}": ' + ("[\n" + ",\n".join(f"  {dump(j)}" for j in v) + "\n ]"
+                            if k == "joins" and v else dump(v)) for k, v in shown.items()]
+    return "{\n" + ",\n".join(lines) + "\n}"
+
+
+def _used_prefixes(sparql: str) -> str:
+    """The query with only the PREFIX declarations its body uses, without their alignment padding."""
+    lines = sparql.splitlines()
+    body = "\n".join(l for l in lines if not l.lstrip().upper().startswith("PREFIX"))
+    keep = []
+    for l in lines:
+        m = re.match(r"\s*PREFIX\s+([\w-]*):\s*", l, re.I)
+        if m is None:
+            keep.append(l)
+        elif re.search(rf"(?<![\w-]){re.escape(m.group(1))}:", body):
+            keep.append(f"PREFIX {m.group(1)}: {l[m.end():]}")
+    return "\n".join(keep).strip()
+
+
 def _details(r: dict, s: dict) -> tuple[str, str, str]:
     """Summary line, parsed intent (JSON) and SPARQL of an answer."""
     if not r:
         return _summary(), "", ""
     summary = _summary(s["n"], s["k"], s["h"], "on" if s["answer_check"] else "off",
                        r.get("llm_calls", "–"), f"{r['latency_s']} s" if r.get("latency_s") is not None else "–")
-    intent = json.dumps(r["intent"], indent=1, ensure_ascii=False) if r.get("intent") else ""
-    sparql = str(r.get("sparql") or "")
+    intent = _compact_intent(r["intent"]) if r.get("intent") else ""
+    sparql = _used_prefixes(str(r.get("sparql") or ""))
     return summary, intent, sparql
 
 
@@ -191,16 +265,16 @@ def reset(state):
 
 
 # ── interface ───────────────────────────────────────────────────────────────
-with gr.Blocks(title="HeriKGQA", css=CSS) as demo:
+with gr.Blocks(title="HeriKGQA", css=CSS, js=FIGURE_JS) as demo:
     gr.Markdown("# HeriKGQA\n" + NOTE)
     state = gr.State(None)  # created on the first question (new_session)
     with gr.Row(elem_id="layout", equal_height=True):
         with gr.Column(scale=3):
-            chat = gr.Chatbot(type="messages", height=460, label="Conversation")
+            chat = gr.Chatbot(type="messages", height=460, label="Conversation", elem_id="chat")
             with gr.Row():
-                box = gr.Textbox(placeholder="Ask about the sensor data, e.g. a statistic, a place, a time or an anomaly…",
+                box = gr.Textbox(placeholder="Ask about a statistic, a place, a time or an anomaly…",
                                  show_label=False, scale=5)
-                send = gr.Button("Ask", variant="primary", scale=1)
+                send = gr.Button("Ask", variant="primary", scale=1, min_width=80)
             gr.Examples(EXAMPLES, inputs=box, label="Examples")
         with gr.Column(scale=2, elem_id="side"):
             with gr.Accordion("Configuration", open=False):
@@ -222,8 +296,10 @@ with gr.Blocks(title="HeriKGQA", css=CSS) as demo:
                 thanks = gr.Markdown()
             with gr.Accordion("How this answer was computed", open=True, elem_id="details"):
                 summary = gr.Markdown(_summary())
-                intent_box = gr.Code(label="Parsed intent", language="json", interactive=False, elem_id="intent")
-                sparql_box = gr.Code(label="SPARQL", language="sql", interactive=False, elem_id="sparql")
+                intent_box = gr.Code(label="Parsed intent", language="json", interactive=False, elem_id="intent",
+                                     wrap_lines=True, show_line_numbers=False)
+                sparql_box = gr.Code(label="SPARQL", language="sql", interactive=False, elem_id="sparql",
+                                     wrap_lines=True, show_line_numbers=False)
             clear = gr.Button("New conversation")
 
     for trigger in (send.click, box.submit):

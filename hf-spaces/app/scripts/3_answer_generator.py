@@ -88,7 +88,16 @@ SYSTEM_NO_GROUNDING = SYSTEM.replace(
     """- If a message includes a section starting "AD-RT rule check", that verdict (EXCEEDS/within a threshold) was computed in Python, not by you — report it as-is, do NOT recompute or second-guess it by comparing raw numbers yourself.""",
     """- If a message includes a section starting "AD-RT rules and raw readings", it lists each applicable rule (definition and threshold) and the raw readings retrieved for it. No verdict has been computed: evaluate each rule yourself from those readings and decide whether it fires.""",
 )
-assert SYSTEM_NO_GROUNDING.count("compute it yourself") == 1 and "No verdict has been computed" in SYSTEM_NO_GROUNDING
+import domain as _domain
+if _domain.IS_HERIKG:
+    assert SYSTEM_NO_GROUNDING.count("compute it yourself") == 1 and "No verdict has been computed" in SYSTEM_NO_GROUNDING
+else:
+    # Another domain (scripts/domain.py): its own role and answer rules, with the query and
+    # time guides of the layers that computed the results; w/o grounding as above.
+    SYSTEM = _domain.load("prompt").answer_system(query_guide=_query.ANSWER_GUIDE, time_guide=_temporal.ANSWER_GUIDE)
+    SYSTEM_NO_GROUNDING = SYSTEM.replace(
+        "You are given a user question, SPARQL results, and a numeric summary.",
+        "You are given a user question and SPARQL results. No numeric summary or analysis is provided.")
 
 
 def _dedupe(results: list) -> list:

@@ -46,6 +46,7 @@ execute      = _sr.execute
 unfold_results = _sr.unfold_results
 
 _ta = importlib.import_module("analysis_temp")
+_domain = importlib.import_module("domain")
 
 _ag = importlib.import_module("3_answer_generator")
 generate = _ag.generate
@@ -175,6 +176,7 @@ _apply_relative_time = _ta.apply_relative_time
 _data_note = _ta.data_note
 _outside_data = _ta.outside_data
 _iso, _fmt = _ta.iso, _ta.fmt
+_anchor_intent, _apply_anchor = _ta.anchor_intent, _ta.apply_anchor
 
 
 def _decline(intent: dict | None, earliest: datetime | None, latest: datetime | None) -> str | None:
@@ -222,7 +224,7 @@ class Pipeline:
 
         # ── Step 0: Connect the query backend (local TTL or remote SPARQL) ──
         endpoint = sparql_endpoint or os.environ.get("HERIKG_SPARQL_ENDPOINT")
-        if not endpoint and not ttl.exists():
+        if not endpoint and not ttl.exists() and not os.environ.get("HERIKGQA_OXIGRAPH_STORE"):
             print(f"[Step 0] WARNING: TTL file not found: {ttl}")
             print("[Step 0] Run `python scripts/0a_offline_readings.py --max-records 500` to fetch data first.")
         self.backend = make_backend(ttl_path=ttl, endpoint=endpoint)
@@ -274,7 +276,10 @@ SELECT DISTINCT ?cls ?label WHERE {
     def _vocabulary(self) -> str | None:
         """The KG's own quantity and site labels for the parser, so a filter
         uses "soil_temperature", not "soil temperature" (which matches nothing)
-        or "voltage" with contains (which also matches voltage_polynomial_4)."""
+        or "voltage" with contains (which also matches voltage_polynomial_4).
+        Another domain (scripts/domain.py) supplies its own."""
+        if not _domain.IS_HERIKG:
+            return _domain.load("prompt").vocabulary(self.backend)
         rows = [r for r in self.backend.query(self._VOCAB_SPARQL) if "error" not in r]
         if not rows:
             return None
@@ -294,12 +299,35 @@ SELECT DISTINCT ?cls ?label WHERE {
             lines.append(rules)
         return "\n".join(lines)
 
+    def _question_vocabulary(self, query: str) -> str | None:
+        """The vocabulary for one question: for a domain too large to list its entities
+        (scripts/domain.py), the KG labels that the question may mean are added."""
+        if _domain.IS_HERIKG:
+            return self.vocabulary
+        earlier = [t["query"] for t in self.history] if self.keep_history else []
+        candidates = _domain.load("linker").candidates(query, earlier)
+        return "\n\n".join(x for x in (self.vocabulary, candidates) if x) or None
+
+    def _resolve_anchor(self, intent: dict) -> tuple[dict, str | None]:
+        """Anchored time (analysis_temp): find the anchor event's time with its own
+        query, then turn the "anchor" filters into bounds. No anchor: unchanged."""
+        sub = _anchor_intent(intent)
+        if sub is None:
+            return intent, None
+        problem = validate_intent(sub)
+        if problem:
+            return intent, f"Anchor: {problem}"
+        rows = [r for r in execute(self.backend, build_sparql(sub)) if "error" not in r]
+        t = next((v for r in rows for k, v in r.items() if k.endswith("resulttime") and v), None)
+        return _apply_anchor(intent, t)
+
     def run(self, query: str) -> dict[str, Any]:
         v = self.verbose
         sep = "─" * 60
         latest = self.latest_reading()
         ref = _fmt(latest)[:-4] if latest else None
         window = None
+        vocabulary = self._question_vocabulary(query)
 
         feedback = None
         intent = None
@@ -331,14 +359,14 @@ SELECT DISTINCT ?cls ?label WHERE {
             n = self.config.parse_candidates
             if attempt == 0 and n > 1:
                 intent, vote = parse_voted(query, n, history=history, reference_time=ref,
-                                           vocabulary=self.vocabulary)
+                                           vocabulary=vocabulary)
                 parse_calls += n
                 if v:
                     print(f"[Step 1] Voted over {n} candidates: {vote['distinct']} distinct intent(s), "
                           f"winner has {vote['winner_votes']} vote(s).")
             else:
                 intent = parse(query, feedback=feedback, history=history, reference_time=ref,
-                                vocabulary=self.vocabulary)
+                                vocabulary=vocabulary)
                 parse_calls += 1
             t_parse += time.perf_counter() - _t
             # AD questions: this fetches the applicable Policy rule(s), labelled
@@ -360,8 +388,9 @@ SELECT DISTINCT ?cls ?label WHERE {
             if intent.get("parse_error"):
                 window, problem = None, intent["parse_error"]
             else:
+                intent, anchor_problem = self._resolve_anchor(intent)
                 intent, window, problem = _apply_relative_time(intent, latest)
-                problem = problem or validate_intent(intent)
+                problem = anchor_problem or problem or validate_intent(intent)
             decline = _decline(intent, self.earliest_reading(), latest)
             if decline:
                 sparql = f"# not run: {decline}"

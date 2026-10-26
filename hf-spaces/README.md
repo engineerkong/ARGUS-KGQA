@@ -29,13 +29,15 @@ shown beside the conversation and can be changed:
 
 The interface shows the parsed intent and SPARQL behind each answer, and lets users rate each
 answer (good / fine / bad, with a comment for bad); each logged question records the options
-it was answered with.
+it was answered with. Adding `?figure` to the URL shows the interface in a landscape layout (at most
+1600 px wide, about twice as wide as high), in larger type, with the conversation, parsed intent and SPARQL
+in full, for screenshots.
 
 ## Data
 
-A frozen snapshot of the sensor database, 13 May – 12 August 2026: 3,737,747
-observations at five heritage sites, plus the expert anomaly
-rules. It is anonymised: sites are named `site_a` … `site_e`, place names in node, rule
+A frozen snapshot of the sensor database, 13 May – 12 August 2026: 1,677,556 readings
+with 5,227,617 observations from 71 sensor nodes at five heritage sites (including the
+LoRaWAN stations), plus the expert anomaly rules. It is anonymised: sites are named `site_a` … `site_e`, place names in node, rule
 and threat descriptions are replaced, and each
 site is moved to a fictitious location while keeping the distances between its nodes.
 The ontology namespaces are replaced by `heritage-kg.example.org`. The snapshot is

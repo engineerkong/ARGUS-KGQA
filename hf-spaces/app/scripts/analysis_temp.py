@@ -7,6 +7,9 @@ Temporal layer: what time means in this system, in one place.
   - Relative windows ("last 24 hours") end at the latest reading in the
     knowledge graph, not at the wall clock; a window wholly outside the
     readings is declined instead of answered with a confident 0.
+  - Anchored time ("after X did it", "in the same month as X"): the time of
+    another event, found by its own query, bounds this one (anchor_intent,
+    apply_anchor).
   - Temporal facts of a result set (newest/oldest timestamp, span, recency),
     part of the pre-computed analysis the answer is written from.
   - What the parser and the answer generator are told about all of this
@@ -102,7 +105,9 @@ def apply_relative_time(intent: dict, latest: datetime | None):
 def time_filters(intent: dict | None) -> list[dict]:
     fs = [*((intent or {}).get("filters") or []),
           *[f for j in (intent or {}).get("joins") or [] for f in j.get("filters") or []]]
-    return [f for f in fs if str(f.get("property", "")).lower().endswith("resulttime") and f.get("op") in TIME_OPS]
+    # an unresolved anchored filter ("anchor", see apply_anchor) names no date yet
+    return [f for f in fs if str(f.get("property", "")).lower().endswith("resulttime") and f.get("op") in TIME_OPS
+            and str(f.get("value", "")).strip().lower() != ANCHOR]
 
 
 def requested_window(intent: dict | None):
@@ -147,6 +152,74 @@ def data_note(intent: dict | None, latest: datetime | None, window) -> str:
     if latest is not None:
         return f"(Data: readings up to {fmt(latest)}, the latest in the knowledge graph.)"
     return ""
+
+
+# ── Anchored time (a filter relative to another event's time) ────────────────
+# An intent may carry "anchor": a sub-intent (filters/joins of the same target class,
+# "pick": "first"|"last") naming another event, and resultTime filters whose value is
+# "anchor". The anchor's own query finds that event's time; the filters then become
+# ordinary from/until/before bounds at day granularity:
+#   after      → from the day after the anchor        before    → before the anchor's day
+#   same_day / same_month / same_year → from/until the anchor's day, month or year
+
+ANCHOR = "anchor"
+ANCHOR_OPS = ("after", "before", "same_day", "same_month", "same_year")
+
+
+def anchor_intent(intent: dict) -> dict | None:
+    """The query that finds the anchor event's time, or None if the intent has no anchor."""
+    a = intent.get("anchor")
+    if not a:
+        return None
+    cls = a.get("target_class") or intent.get("target_class")
+    return {"target_class": cls, "filters": a.get("filters") or [], "joins": a.get("joins") or [],
+            "return_properties": ["resultTime"], "aggregation": None,
+            "order_by": {"variable": f"{cls}.resultTime",
+                         "direction": "DESC" if a.get("pick") == "last" else "ASC"},
+            "limit": 1}
+
+
+def apply_anchor(intent: dict, anchor_time: str | None) -> tuple[dict, str | None]:
+    """Replace the "anchor" time filters by bounds around the anchor's day.
+    Returns (intent, problem); problem when the anchor event was not found."""
+    if not intent.get("anchor"):
+        return intent, None
+    t = _parse_dt(anchor_time) if anchor_time else None
+    if t is None:
+        return intent, ("The anchor event (the other event the time refers to) was not found: "
+                        "check its entities and event type.")
+    day = t.date()
+
+    def bounds(op: str) -> list[dict]:
+        if op == "after":
+            return [{"property": "resultTime", "op": "from", "value": (day + timedelta(days=1)).isoformat()}]
+        if op == "before":
+            return [{"property": "resultTime", "op": "before", "value": day.isoformat()}]
+        if op == "same_day":
+            lo = hi = day
+        elif op == "same_month":
+            lo = day.replace(day=1)
+            hi = (lo.replace(year=lo.year + 1, month=1) if lo.month == 12 else lo.replace(month=lo.month + 1)) - timedelta(days=1)
+        else:
+            lo, hi = date(day.year, 1, 1), date(day.year, 12, 31)
+        return [{"property": "resultTime", "op": "from", "value": lo.isoformat()},
+                {"property": "resultTime", "op": "until", "value": hi.isoformat()}]
+
+    def rewrite(filters: list[dict]) -> list[dict]:
+        out = []
+        for f in filters or []:
+            if str(f.get("value")).strip().lower() == ANCHOR and f.get("op") in ANCHOR_OPS:
+                out += bounds(f["op"])
+            else:
+                out.append(f)
+        return out
+
+    new = dict(intent)
+    new["filters"] = rewrite(intent.get("filters"))
+    new["joins"] = [{**j, "filters": rewrite(j.get("filters"))} for j in intent.get("joins") or []]
+    new["anchor_time"] = day.isoformat()
+    new.pop("anchor")
+    return new, None
 
 
 # ── Temporal facts of a result set (part of the pre-computed analysis) ───────

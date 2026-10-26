@@ -9,11 +9,13 @@ from pathlib import Path
 from rdflib import Graph, Namespace, URIRef
 from rdflib.namespace import OWL, RDF, RDFS
 
+from domain import DOMAIN_DIR, IS_HERIKG, load as _load_domain
+
 # ── Shared namespaces ────────────────────────────────────────────────────────
 
 SOSA = Namespace("http://www.w3.org/ns/sosa/")
 HERIKG = Namespace("http://www.heritage-kg.example.org/ontology/")
-EX = Namespace("http://www.heritage-kg.example.org/resource/")
+EX = Namespace("http://www.heritage-kg.example.org/resource/" if IS_HERIKG else _load_domain("config").RESOURCE_NS)
 PANOPTES = Namespace("http://www.heritage-kg.example.org/panoptes#")
 
 OWL_DIR = Path(__file__).resolve().parent.parent / "material"
@@ -27,6 +29,8 @@ OWL_FILES = [
 # Measurement, …) that have no instances — offering them as target_class choices
 # costs tokens and invites queries that can only return nothing.
 SCHEMA_OWL_FILES = [OWL_DIR / "panoptes3_extension.owl"]
+if not IS_HERIKG:  # another domain (scripts/domain.py): its own ontology, all of it in the prompt
+    OWL_FILES = SCHEMA_OWL_FILES = [DOMAIN_DIR / f"{DOMAIN_DIR.name}.owl"]
 
 _PREFIX_MAP = {
     "http://www.w3.org/ns/sosa/": "sosa:",
@@ -41,6 +45,7 @@ _PREFIX_MAP = {
     "http://www.cidoc-crm.org/cidoc-crm/": "crm:",
     "http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#": "dul:",
     "http://purl.org/dc/elements/1.1/": "dc:",
+    "http://herikgqa.org/multitq/ontology#": "mtq:",
 }
 
 
@@ -213,7 +218,8 @@ def extract_schema_text(g: Graph | None = None) -> str:
                      if isinstance(t, URIRef) and ":" in _short(t)}
 
     lines: list[str] = []
-    lines.append("HERIKG ontology (auto-generated from panoptes3_extension.owl)")
+    lines.append("HERIKG ontology (auto-generated from panoptes3_extension.owl)" if IS_HERIKG else
+                 f"{_load_domain('config').NAME} ontology (auto-generated from {SCHEMA_OWL_FILES[0].name})")
     lines.append("")
 
     lines.append("Namespaces:")
