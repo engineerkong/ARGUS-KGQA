@@ -5,6 +5,6 @@ evaluation/results/
 evaluation/scores.csv
 evaluation/verdicts.json
 .herikgqa-export
-# downloaded from the Hugging Face dataset (see README.md)
+# reassembled from data/snapshot.dump.part* (see README.md)
 data/snapshot.dump
-material/benchmark_500.*
+material/verify/data/

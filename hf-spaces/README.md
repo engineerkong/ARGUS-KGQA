@@ -29,9 +29,9 @@ shown beside the conversation and can be changed:
 
 The interface shows the parsed intent and SPARQL behind each answer, and lets users rate each
 answer (good / fine / bad, with a comment for bad); each logged question records the options
-it was answered with. Adding `?figure` to the URL shows the interface in a landscape layout (at most
-1600 px wide, about twice as wide as high), in larger type, with the conversation, parsed intent and SPARQL
-in full, for screenshots.
+it was answered with. On screens at least 1024 px wide the interface
+uses a landscape layout (at most 1600 px wide, about twice as wide as high at 1600 × 800), in larger type,
+with the conversation, parsed intent and SPARQL in full; `?figure` in the URL forces it on any screen.
 
 ## Data
 

@@ -4,7 +4,8 @@ Grounded question answering over a cultural-heritage sensor knowledge graph: the
 the evaluation scripts used in the paper.
 
 - **Demo:** [huggingface.co/spaces/{{SPACE_REPO}}](https://huggingface.co/spaces/{{SPACE_REPO}})
-- **Benchmark and database:** the 500-question benchmark and the anonymised database snapshot,
+- **Benchmark and database:** the 500-question benchmark (`material/`) and the anonymised
+  database snapshot (`data/`) are in this repository; the same files are also at
   [huggingface.co/datasets/{{DATASET_REPO}}](https://huggingface.co/datasets/{{DATASET_REPO}})
 
 **How it works.**
@@ -19,10 +20,11 @@ Follow-ups see the last *h* = 2 turns.
 
 | Path | Contents |
 |---|---|
-| `scripts/` | the pipeline, `run_eval.py` (batch evaluation), `demo.py` / `demo_ad.py`, `build_benchmark.py` |
+| `scripts/` | the pipeline, `run_eval.py` (batch evaluation), `demo.py` / `demo_ad.py`, `build_benchmark.py` (references), `build_verification.py` (second, SQL implementation of the references) |
 | `evaluation/` | `score.py` (rule-based scorer), `extract_verdicts.py` (lenient verdict scoring), `node_labels.csv` |
-| `material/`, `ontop/` | ontology; Ontop mapping and JDBC driver |
-| `data/SHA256SUMS` | checksums of the dataset files |
+| `material/` | the benchmark (`benchmark_500.json`, `.csv`, `.meta.json`); its SQL verification per question (`verify/`); ontology |
+| `ontop/` | Ontop mapping and JDBC driver |
+| `data/` | the database snapshot (PostgreSQL 16 custom-format dump, split into `snapshot.dump.part*`) and `SHA256SUMS` |
 | `app/`, `Dockerfile`, `start.sh` | web demo; one container with PostgreSQL, Ontop and the pipeline |
 
 ## Quick start
@@ -30,7 +32,7 @@ Follow-ups see the last *h* = 2 turns.
 You need Docker and an OpenAI-compatible LLM endpoint (the paper used `gpt-oss-120b`).
 
 ```bash
-docker build -t herikgqa .     # downloads and verifies the dataset, restores the snapshot
+docker build -t herikgqa .     # reassembles and verifies the snapshot, restores it
 
 export OPENAI_API_KEY=... OLLAMA_BASE_URL=https://.../v1 OLLAMA_MODEL=openai-gpt-oss-120b
 docker run --rm -p 7860:7860 -e OPENAI_API_KEY -e OLLAMA_BASE_URL -e OLLAMA_MODEL herikgqa   # demo: http://localhost:7860
@@ -67,13 +69,13 @@ $RUN python evaluation/score.py --verdicts evaluation/verdicts.json evaluation/r
 
 ## Without Docker
 
-1. Download the dataset:
+1. Reassemble and check the snapshot:
    ```bash
-   hf download {{DATASET_REPO}} --repo-type dataset --local-dir hf-data
-   mv hf-data/benchmark_500.* material/
-   mv hf-data/snapshot.dump data/
+   cat data/snapshot.dump.part* > data/snapshot.dump && sha256sum -c data/SHA256SUMS
    ```
 2. Restore it: `pg_restore -d <db> --no-owner data/snapshot.dump` (PostgreSQL 16).
+   `HERIKG_SNAPSHOT_DSN=postgresql://… python scripts/build_verification.py` then recomputes
+   every reference in SQL into `material/verify/`.
 3. Start Ontop 5.5 with `ontop/`.
 4. `pip install -r requirements.txt`.
 5. Set `HERIKG_SPARQL_ENDPOINT` plus the LLM variables above. Optional:

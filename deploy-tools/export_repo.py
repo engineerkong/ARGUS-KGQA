@@ -12,8 +12,12 @@ they used, are removed. Then:
   - the benchmark is generated again, by the rewritten build_benchmark.py, from the
     anonymised database (argus_anon), and aligned to the paper's 500 questions;
   - evaluation/node_labels.csv (used by the scorer) is written from argus_anon;
-  - benchmark and dump go to the dataset directory; the repository has their
-    checksums (data/SHA256SUMS) and downloads them when the container is built;
+  - the second, SQL implementation (build_verification.py) recomputes every reference on
+    the anonymised database into material/verify/ (summary and per-type queries);
+  - benchmark and dump go to the dataset directory and into the repository: the
+    benchmark under material/, the dump split into parts under data/ (GitHub takes
+    no file above 100 MB), reassembled and checked against data/SHA256SUMS when the
+    container is built;
   - checks: forbidden words (also in the dump's content), secrets, configuration
     names, Python compiles, file sizes.
 
@@ -47,11 +51,12 @@ PG_BIN = Path.home() / "miniconda3/envs/pgtools/bin"
 # method (the Space's runtime modules), entry points and benchmark builder
 SCRIPTS = ["pipeline.py", "1_semantic_parser.py", "2_sparql_retriever.py", "3_answer_generator.py",
            "analysis_ek.py", "analysis_geo.py", "analysis_temp.py", "backend.py", "ontology_schema.py",
-           "domain.py", "run_eval.py", "demo.py", "demo_ad.py", "build_benchmark.py"]
+           "domain.py", "run_eval.py", "demo.py", "demo_ad.py", "build_benchmark.py", "build_verification.py"]
 EVALUATION = ["score.py", "extract_verdicts.py"]           # from ~/workspace/experiments
 ONTOLOGY = ["panoptes3.owl", "panoptes3_extension.owl"]
 BENCHMARK = ["benchmark_500.json", "benchmark_500.csv", "benchmark_500.meta.json"]
 REPO_FILES = ["Dockerfile", "start.sh", "requirements.txt", "README.md", ".gitignore"]
+DUMP_PART = 45 * 2**20                                      # below the size check (50 MB) and GitHub's 100 MB
 
 # Patches after the rewrite: (file, old, new); each old must occur exactly once.
 PATCHES = [
@@ -59,6 +64,10 @@ PATCHES = [
     ("scripts/build_benchmark.py", "SITE = {s: s.capitalize() for s in SITES}", "SITE = {s: s for s in SITES}"),
     # the database of the container
     ("scripts/build_benchmark.py",
+     'DSN = os.environ.get("HERIKG_SNAPSHOT_DSN", "postgresql://herikg:herikg@localhost:5432/herikg_snapshot")',
+     'DSN = os.environ.get("HERIKG_SNAPSHOT_DSN", "postgresql://herikg@localhost:5432/herikg_snapshot")'),
+    ("scripts/build_verification.py", "SITE_OF = {s.capitalize(): s for s in SITES}", "SITE_OF = {s: s for s in SITES}"),
+    ("scripts/build_verification.py",
      'DSN = os.environ.get("HERIKG_SNAPSHOT_DSN", "postgresql://herikg:herikg@localhost:5432/herikg_snapshot")',
      'DSN = os.environ.get("HERIKG_SNAPSHOT_DSN", "postgresql://herikg@localhost:5432/herikg_snapshot")'),
     # credentials from the environment only
@@ -336,7 +345,8 @@ def scan(root: Path, cfg) -> list[str]:
     forbidden = re.compile(forbidden_pattern(cfg), re.I)
     problems = []
     for f in sorted(root.rglob("*")):
-        if not f.is_file() or ".git" in f.parts or "__pycache__" in f.parts or f.suffix in (".dump", ".jar"):
+        if (not f.is_file() or ".git" in f.parts or "__pycache__" in f.parts or f.suffix == ".jar"
+                or ".dump" in f.name):
             continue
         try:
             text = f.read_text()
@@ -442,15 +452,28 @@ def main():
                                                                                          args.dataset_repo))
     os.chmod(out / "start.sh", 0o755)
     patch(out, PATCHES)
+    # the verifier's site_compare answers as the site label (site_b), not capitalised (Site_b)
+    p = out / "scripts/build_verification.py"
+    s = p.read_text()
+    if s.count("value=rows[0][0].capitalize())") != 3:
+        raise SystemExit("patch for scripts/build_verification.py (site_compare) does not apply")
+    p.write_text(s.replace("value=rows[0][0].capitalize())", "value=rows[0][0])"))
     patch(out, SINGLE_CONFIG)
     drop_template_mode(out)
     print(f"copied {len(SCRIPTS)} scripts, {len(EVALUATION)} evaluation scripts, {len(ONTOLOGY)} ontology files; "
           f"one configuration")
 
-    # benchmark and node labels from the anonymised database
+    # benchmark and node labels from the anonymised database: the paper's questions (rewritten),
+    # their references recomputed by the rewritten build_benchmark.py (--update-references; a
+    # fresh draw on snapshot v2 would sample other questions, as the paper's were drawn on v1)
     env = {**os.environ, "HERIKG_SNAPSHOT_DSN": args.dsn}
-    subprocess.run([sys.executable, str(out / "scripts/build_benchmark.py")], check=True, env=env,
-                   stdout=subprocess.DEVNULL)
+    put(out, "material/benchmark_500.json", rewrite((src / "material/benchmark_500.json").read_text(), rs))
+    subprocess.run([sys.executable, str(out / "scripts/build_benchmark.py"), "--update-references"], check=True,
+                   env=env, stdout=subprocess.DEVNULL)
+    changes = json.loads((out / "material/benchmark_500.changes.json").read_text())
+    (out / "material/benchmark_500.changes.json").unlink()
+    print(f"references recomputed on the anonymised data: {len(changes)} differ from the paper's "
+          f"({', '.join(c['id'] for c in changes[:12])}{' …' if len(changes) > 12 else ''})")
     print(f"node labels: {node_labels(args.dsn, out)} nodes")
     rep = compare_benchmark(src / "material/benchmark_500.json", out / "material/benchmark_500.json", rs)
     print(f"regenerated benchmark: {len(rep['question'])} questions drawn differently")
@@ -468,16 +491,34 @@ def main():
     for t, ids in sorted(by_template.items()):
         print(f"    {t:28s} {len(ids):3d}  {', '.join(ids[:8])}{' …' if len(ids) > 8 else ''}")
 
-    # benchmark and dump to the dataset; their checksums to the repository
+    # the second implementation over the published benchmark; the raw rule-window readings
+    # it also writes (verify/data/) are left out, as the script regenerates them
+    subprocess.run([sys.executable, str(out / "scripts/build_verification.py")], check=True, env=env,
+                   stdout=subprocess.DEVNULL)
+    shutil.rmtree(out / "scripts/__pycache__", ignore_errors=True)
+    shutil.rmtree(out / "material/verify/data", ignore_errors=True)
+    total = (out / "material/verify/summary.md").read_text().split("| **total** |")[1].splitlines()[0]
+    match, mismatch, manual = re.findall(r"\*\*(\d+)\*\*", total)
+    print(f"verification (SQL, anonymised data): {match} match, {mismatch} mismatch, {manual} manual")
+    if int(mismatch):
+        raise SystemExit("the SQL verification disagrees with the benchmark: see material/verify/summary.md")
+
+    # benchmark and dump to the dataset and the repository (the dump in parts); checksums
     sums = []
     for f in BENCHMARK:
-        shutil.move(out / "material" / f, dout / f)
+        shutil.copy(out / "material" / f, dout / f)
         sums.append(f"{hashlib.sha256((dout / f).read_bytes()).hexdigest()}  material/{f}")
     neutral_dump(args.dsn, dout / "snapshot.dump")
     sums.append(f"{hashlib.sha256((dout / 'snapshot.dump').read_bytes()).hexdigest()}  data/snapshot.dump")
     put(out, "data/SHA256SUMS", "\n".join(sums) + "\n")
+    with open(dout / "snapshot.dump", "rb") as f:
+        parts = 0
+        while chunk := f.read(DUMP_PART):
+            (out / f"data/snapshot.dump.part{parts:02d}").write_bytes(chunk)
+            parts += 1
     print(f"dataset: {', '.join(BENCHMARK)}, snapshot.dump ({(dout / 'snapshot.dump').stat().st_size / 1e6:.0f} MB) "
-          f"-> {dout} (for huggingface.co/datasets/{args.dataset_repo})")
+          f"-> {dout} (for huggingface.co/datasets/{args.dataset_repo}) and the repository "
+          f"(material/, data/snapshot.dump.part00-{parts - 1:02d})")
 
     # checks
     problems = scan(out, cfg) + scan(dout, cfg) + scan_dump(dout / "snapshot.dump", cfg)
@@ -491,8 +532,8 @@ def main():
     if problems:
         print("\n".join(problems))
         raise SystemExit(f"{len(problems)} problem(s)")
-    print("checks: no forbidden word (code, benchmark, dump content), no secret, one unnamed configuration, "
-          "all Python compiles, no data in the code repository")
+    print("checks: no forbidden word (code, benchmark, verification, dump content), no secret, "
+          "one unnamed configuration, all Python compiles, no file above 50 MB")
 
 
 if __name__ == "__main__":

@@ -26,14 +26,16 @@ RUN python3 -m venv /home/user/venv && pip install --no-cache-dir -r requirement
 
 COPY --chown=user . .
 
-# Benchmark and database snapshot from the Hugging Face dataset, verified against
-# data/SHA256SUMS; the snapshot is restored read-only at build time.
+# Benchmark and database snapshot from this repository (the dump in parts), or from the
+# Hugging Face dataset when they are missing, verified against data/SHA256SUMS; the
+# snapshot is restored read-only at build time.
 ARG HF_DATASET={{DATASET_REPO}}
 ARG HF_REVISION=main
 RUN base="https://huggingface.co/datasets/${HF_DATASET}/resolve/${HF_REVISION}" \
  && for f in benchmark_500.json benchmark_500.csv benchmark_500.meta.json; do \
-        curl -fsSL -o "material/$f" "$base/$f"; done \
- && curl -fsSL -o data/snapshot.dump "$base/snapshot.dump" \
+        [ -s "material/$f" ] || curl -fsSL -o "material/$f" "$base/$f"; done \
+ && if ls data/snapshot.dump.part* >/dev/null 2>&1; then cat data/snapshot.dump.part* > data/snapshot.dump; \
+    else curl -fsSL -o data/snapshot.dump "$base/snapshot.dump"; fi \
  && sha256sum -c data/SHA256SUMS \
  && initdb -D "$PGDATA" -U herikg --auth=trust -E UTF8 --locale=C >/dev/null \
  && pg_ctl -D "$PGDATA" -o "-k /tmp -c listen_addresses=''" -w start \
@@ -45,7 +47,7 @@ RUN base="https://huggingface.co/datasets/${HF_DATASET}/resolve/${HF_REVISION}" 
       -c "ALTER DATABASE herikg_snapshot SET statement_timeout = '120s'" \
       -c "ALTER DATABASE herikg_snapshot SET timezone = 'UTC'" \
  && pg_ctl -D "$PGDATA" -w stop \
- && rm data/snapshot.dump
+ && rm -f data/snapshot.dump data/snapshot.dump.part*
 
 ENV HERIKG_LOG_DIR=/tmp/herikg/logs
 EXPOSE 7860

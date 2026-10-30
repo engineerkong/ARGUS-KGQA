@@ -188,11 +188,16 @@ def leads_with(answer: str, verdict: str) -> bool:
 
 
 def ad_rt_verdict(ad_rt_summary: str | None) -> str:
-    """The Yes/No/Cannot-be-determined verdict implied by analysis_ek's summary:
-    Yes if any evaluated rule fired, No if rules were evaluated and none fired."""
-    if ad_rt_summary and _FIRED.search(ad_rt_summary):
+    """The Yes/No/Cannot-be-determined verdict implied by analysis_ek's summary (one "  - <rule>: …"
+    line per applicable rule): Yes if any rule fired, No if every rule was evaluated and none fired,
+    Cannot be determined otherwise (a rule that could not be evaluated might have fired). Policies
+    that are not AD-RT rules (analysis_ek's "unrecognised rule id", e.g. threat policies whose
+    names match the quantity) are not applicable rules and do not count."""
+    rules = [ln for ln in (ad_rt_summary or "").splitlines()
+             if ln.startswith("  - ") and "unrecognised rule id" not in ln]
+    if any(_FIRED.search(ln) for ln in rules):
         return "Yes"
-    if ad_rt_summary and _WITHIN.search(ad_rt_summary):
+    if rules and all(_WITHIN.search(ln) for ln in rules):
         return "No"
     return "Cannot be determined"
 

@@ -16,10 +16,10 @@ HERIKG_LOG_DIR and, when HF_TOKEN and FEEDBACK_REPO are set, are pushed to that
 (private) Hugging Face dataset every few minutes.
 
 The parsed intent is shown without its unset fields and the SPARQL without unused
-prefixes, so both fit beside the conversation. With "?figure" in the URL the page
-is a landscape layout at most 1600 px wide, in larger type, with the conversation,
-parsed intent and SPARQL shown in full, for screenshots that stay legible when
-scaled to a page.
+prefixes, so both fit beside the conversation. On screens at least 1024 px wide
+(or any screen with "?figure" in the URL) the page is a landscape layout at most
+1600 px wide, in larger type, with the conversation, parsed intent and SPARQL shown
+in full, so that a screenshot stays legible when scaled to a page.
 """
 
 import json
@@ -69,43 +69,51 @@ CSS = """
 @media (max-width: 767px) {
   #details #intent, #details #sparql { height: 18em; }
 }
-/* figure view (?figure): the whole interface in a landscape layout (about twice as wide as high), legible
-   when scaled down to a page: conversation on the left; on the right configuration and feedback side by side,
-   and the parsed intent beside the SPARQL */
-body.figure .gradio-container { width: 100% !important; max-width: 1600px !important; margin: 0 auto !important;
+/* landscape layout (screens >= 1024 px, or ?figure): about twice as wide as high and legible when a
+   screenshot is scaled down to a page: conversation on the left; on the right configuration, feedback and
+   "New conversation" in one row, and below them the parsed intent beside the SPARQL, both shown in full and
+   reaching down to the bottom of the examples */
+body.landscape .gradio-container { width: 100% !important; max-width: 1600px !important; margin: 0 auto !important;
   --text-sm: 16px; --text-md: 18px; --text-lg: 20px; --block-label-text-size: 16px; --block-title-text-size: 16px;
   --layout-gap: 12px; }
-body.figure main.fillable { max-width: none !important; }
-body.figure footer { display: none !important; }
-body.figure #layout > .column { flex: 1 1 0 !important; }
-body.figure #layout > #side { display: grid !important; grid-template-columns: 1fr 1fr;
-  align-content: start; }
-body.figure #side > #details, body.figure #side > button { grid-column: 1 / -1; }
-body.figure #details > .label-wrap.open + div > .column { display: grid !important; grid-template-columns: 2fr 3fr;
-  align-items: start; }
-body.figure #details > .label-wrap.open + div > .column > :first-child { grid-column: 1 / -1; }
-body.figure #chat, body.figure #chat .bubble-wrap { height: auto !important; max-height: none !important; }
-body.figure #chat .message-row { margin: 8px 16px 4px !important; }
-body.figure #chat .message-wrap { margin-bottom: 4px !important; }
-body.figure #side { contain: none !important; overflow: visible !important; }
-body.figure #side > #details, body.figure #details > .label-wrap.open + div,
-body.figure #details > .label-wrap.open + div > .column { flex: none !important; }
-body.figure #details #intent, body.figure #details #sparql { flex: none !important; height: auto !important; }
-body.figure #intent > .wrap:not(.full), body.figure #sparql > .wrap:not(.full),
-body.figure #intent .codemirror-wrapper, body.figure #sparql .codemirror-wrapper,
-body.figure #intent .cm-editor, body.figure #sparql .cm-editor { flex: none !important; height: auto !important;
+body.landscape main.fillable { max-width: none !important; }
+body.landscape footer { display: none !important; }
+body.landscape #layout > .column { flex: 1 1 0 !important; }
+body.landscape #layout > #side { display: grid !important; grid-template-columns: 1fr 1fr auto;
+  grid-template-rows: auto 1fr; }
+body.landscape #side > #details { grid-column: 1 / -1; grid-row: 2; }
+body.landscape #side > button { grid-column: 3; grid-row: 1; align-self: stretch; height: auto; }
+body.landscape #details > .label-wrap.open + div > .column { display: grid !important; grid-template-columns: 2fr 3fr;
+  grid-template-rows: auto 1fr; align-items: stretch; }
+body.landscape #details > .label-wrap.open + div > .column > :first-child { grid-column: 1 / -1; }
+body.landscape #chat, body.landscape #chat .bubble-wrap { height: auto !important; max-height: none !important; }
+body.landscape #chat { min-height: 380px; }
+body.landscape #chat .message-row { margin: 8px 16px 4px !important; }
+body.landscape #chat .message-wrap { margin-bottom: 4px !important; }
+body.landscape #side { contain: none !important; overflow: visible !important; }
+body.landscape #side > #details { display: flex !important; flex-direction: column; border: none !important;
+  padding: 0 !important; background: none !important; box-shadow: none !important; }
+body.landscape #details > .label-wrap.open + div, body.landscape #details > .label-wrap.open + div > .column {
+  flex: 1 1 auto !important; }
+body.landscape #details > .label-wrap.open + div { display: flex !important; flex-direction: column; }
+body.landscape #details #intent, body.landscape #details #sparql { flex: none !important; height: auto !important; }
+body.landscape #intent > .wrap:not(.full), body.landscape #sparql > .wrap:not(.full),
+body.landscape #intent .codemirror-wrapper, body.landscape #sparql .codemirror-wrapper,
+body.landscape #intent .cm-editor, body.landscape #sparql .cm-editor { flex: none !important; height: auto !important;
   overflow: visible !important; }
-body.figure .cm-editor { font-size: 15px; }
-body.figure .cm-editor .cm-line { line-height: 1.3; }
-body.figure #chat .md { font-size: 18px; }
-body.figure .label-wrap span { font-size: 16px; }
-body.figure #layout .gallery { display: grid !important; grid-template-columns: 1fr 1fr; }
-body.figure #layout .gallery > button, body.figure #layout .gallery > button > div { max-width: none !important;
+body.landscape .cm-editor { font-size: 15px; }
+body.landscape .cm-editor .cm-line { line-height: 1.3; }
+body.landscape #chat .md { font-size: 18px; }
+body.landscape .label-wrap span { font-size: 16px; }
+body.landscape #layout .gallery { display: grid !important; grid-template-columns: 1fr 1fr; }
+body.landscape #layout .gallery > button, body.landscape #layout .gallery > button > div { max-width: none !important;
   display: block !important; font-size: 16px; text-align: left; white-space: nowrap; overflow: hidden;
   text-overflow: ellipsis; }
 """
-# Adds the class behind the figure view above when the URL has "?figure".
-FIGURE_JS = "() => { if (new URLSearchParams(location.search).has('figure')) document.body.classList.add('figure'); }"
+# Adds the class behind the landscape layout above on screens at least 1024 px wide, or on any screen
+# when the URL has "?figure".
+LANDSCAPE_JS = ("() => { if (window.innerWidth >= 1024 || new URLSearchParams(location.search).has('figure')) "
+                "document.body.classList.add('landscape'); }")
 EXAMPLES = [
     "How many sensor nodes are installed at site A?",
     "What is the average temperature at site C?",
@@ -176,7 +184,10 @@ def ask(question, n, k, h, check, chat, state):
             r = p.run(question)
             answer = r["answer"]
         except Exception as e:  # e.g. the LLM endpoint is unavailable
-            r, answer = {}, f"Sorry, the question could not be answered ({type(e).__name__}). Please try again."
+            r = {}
+            answer = ("Sorry, the language model service is busy right now. Please try again in a minute."
+                      if type(e).__name__ == "RateLimitError" else
+                      f"Sorry, the question could not be answered ({type(e).__name__}). Please try again.")
         if p.history and p.history[-1]["query"] == question:
             state["history"] = (state["history"] + [p.history[-1]])[-H_MAX:]
     settings = {"n": n, "k": k, "h": h, "answer_check": check}
@@ -265,7 +276,7 @@ def reset(state):
 
 
 # ── interface ───────────────────────────────────────────────────────────────
-with gr.Blocks(title="HeriKGQA", css=CSS, js=FIGURE_JS) as demo:
+with gr.Blocks(title="HeriKGQA", css=CSS, js=LANDSCAPE_JS) as demo:
     gr.Markdown("# HeriKGQA\n" + NOTE)
     state = gr.State(None)  # created on the first question (new_session)
     with gr.Row(elem_id="layout", equal_height=True):

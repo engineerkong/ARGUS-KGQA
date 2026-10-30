@@ -39,6 +39,9 @@ RUN initdb -D "$PGDATA" -U herikg --auth=trust -E UTF8 --locale=C >/dev/null \
  && rm data/snapshot.dump
 
 ENV HERIKG_LOG_DIR=/tmp/herikg/logs
+# The LLM endpoint allows few concurrent requests and a question sends n parses at once:
+# rate-limited (429) requests are retried with backoff, as in the experiments.
+ENV HERIKG_LLM_MAX_RETRIES=8
 EXPOSE 7860
 ENTRYPOINT []
 CMD ["bash", "start.sh"]

@@ -40,8 +40,8 @@ from the paper.
 | anomaly | whether a quantity at a site exceeds its expert (AD-RT) rule thresholds on a day or at the latest reading, and the thresholds themselves |
 | follow-up | a question that depends on one or two earlier turns (another site, the next day or month, the minimum instead of the maximum, …) |
 
-Every type includes a few unanswerable questions: the answer must say that the data
-cannot answer them.
+Seven questions (basic, spatial and temporal) are unanswerable: the answer must say that
+the data cannot answer them.
 
 Each item of `benchmark_500.json` has:
 
@@ -73,15 +73,16 @@ The conventions:
 - all times are UTC, and "on a date" means that UTC day;
 - relative times ("the last 24 hours") end at the snapshot's last reading;
 - distances are haversine on a 6,371,000 m sphere;
-- an anomaly verdict is Yes if any applicable rule fires, No if at least one rule was
-  evaluated and none fired, and Cannot be determined if none could be evaluated.
+- an anomaly verdict is Yes if any applicable rule fires, No if every applicable rule was
+  evaluated and none fired, and Cannot be determined otherwise.
 
 They are given in full in `benchmark_500.meta.json`.
 
 ## Database snapshot
 
-A frozen copy of the sensor database, 13 May – 12 August 2026: 3,737,747 observations at
-five heritage sites, plus the expert anomaly rules (thresholds, windows, quantities).
+A frozen copy of the sensor database, 13 May – 12 August 2026: 1,677,556 readings with
+5,227,617 observations from 71 sensor nodes at five heritage sites, plus the 37 expert
+anomaly rules (thresholds, windows, quantities).
 
 It is anonymised:
 - sites are named `site_a` … `site_e`;
@@ -97,5 +98,5 @@ createdb herikg_snapshot
 pg_restore -d herikg_snapshot --no-owner --no-privileges snapshot.dump
 ```
 
-The code repository's `Dockerfile` downloads this dataset and serves the snapshot as a
-virtual knowledge graph through Ontop.
+The code repository holds the same files (the snapshot split into parts); its `Dockerfile`
+restores the snapshot and serves it as a virtual knowledge graph through Ontop.
