@@ -21,10 +21,11 @@ Follow-ups see the last *h* = 2 turns.
 | Path | Contents |
 |---|---|
 | `scripts/` | the pipeline, `run_eval.py` (batch evaluation), `demo.py` / `demo_ad.py`, `build_benchmark.py` (references), `build_verification.py` (second, SQL implementation of the references) |
-| `evaluation/` | `score.py` (rule-based scorer), `extract_verdicts.py` (lenient verdict scoring), `node_labels.csv` |
+| `evaluation/` | `score.py` (rule-based scorer), `extract_verdicts.py` (the verdict an anomaly answer states, which `score.py` uses), `node_labels.csv` |
 | `material/` | the benchmark (`benchmark_500.json`, `.csv`, `.meta.json`); its SQL verification per question (`verify/`); ontology |
 | `ontop/` | Ontop mapping and JDBC driver |
 | `data/` | the database snapshot (PostgreSQL 16 custom-format dump, split into `snapshot.dump.part*`) and `SHA256SUMS` |
+| `results/` | the paper's results, anonymised: every system's answers and scores on the benchmark (accuracy, answer quality, latency), the user questions, MultiTQ and the smaller backbone (see `results/README.md`) |
 | `app/`, `Dockerfile`, `start.sh` | web demo; one container with PostgreSQL, Ontop and the pipeline |
 
 ## Quick start
@@ -50,9 +51,8 @@ $RUN python scripts/run_eval.py --questions $Q --out evaluation/results/herikgqa
 $RUN python scripts/run_eval.py --questions $Q --out evaluation/results/herikgqa-nogrounding --no-grounding
 $RUN python scripts/run_eval.py --questions $Q --out evaluation/results/herikgqa-noerrorcorrection --no-error-correction
 
-$RUN python evaluation/score.py evaluation/results/*                    # accuracy per question type
-$RUN python evaluation/extract_verdicts.py evaluation/results/*         # optional: lenient verdict scoring
-$RUN python evaluation/score.py --verdicts evaluation/verdicts.json evaluation/results/*
+$RUN python evaluation/extract_verdicts.py evaluation/results/*         # the verdict each anomaly answer states (LLM)
+$RUN python evaluation/score.py --verdicts evaluation/verdicts.json evaluation/results/*   # accuracy per question type
 ```
 
 | System | Flag | *n* | *k* | *h* | Answer check |

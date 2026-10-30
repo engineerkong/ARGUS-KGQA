@@ -18,8 +18,9 @@ they used, are removed. Then:
     benchmark under material/, the dump split into parts under data/ (GitHub takes
     no file above 100 MB), reassembled and checked against data/SHA256SUMS when the
     container is built;
+  - the paper's results, anonymised, into results/ (export_results.py);
   - checks: forbidden words (also in the dump's content), secrets, configuration
-    names, Python compiles, file sizes.
+    names, Python compiles, file sizes, real coordinates and site distances in the results.
 
     python export_repo.py [--src ~/workspace/ARGUS-KGQA] [--out ~/workspace/HeriKGQA]
                           [--dataset-out ~/workspace/HeriKGQA-dataset]
@@ -112,6 +113,37 @@ def site_of(rec: dict) -> str | None:'''),
      '''        first = min(((text.lower().find(s), s) for s in SITES if s in text.lower()), default=None)''',
      '''        low = _sites_normalised(text).lower()
         first = min(((low.find(s), s) for s in SITES if s in low), default=None)'''),
+] + [
+    # one scoring, the paper's: a verdict as the answer states it (score.py --verdicts); no strict mode
+    ("evaluation/score.py", "    python score.py [results/<system> ...]      (default: every dir in results/)",
+     "    python score.py --verdicts verdicts.json [results/<system> ...]   (default: every dir in results/)"),
+    ("evaluation/score.py",
+     '''  "Yes"/"No"/"Cannot…"  the answer starts with that verdict ("Yes"/"No" followed by
+                        punctuation, so "No data was found" is no verdict)''',
+     '''  "Yes"/"No"/"Cannot…"  the answer states that verdict, anywhere in it, as extract_verdicts.py
+                        classified it into verdicts.json; an answer the classification has no
+                        verdict for must start with it ("Yes"/"No" followed by punctuation, so
+                        "No data was found" is no verdict)'''),
+    ("evaluation/score.py",
+     '''
+
+    python score.py --verdicts verdicts.json [dirs ...]
+
+judges a verdict by the one the answer states anywhere (as classified by
+extract_verdicts.py) instead of requiring it as the answer's first words.
+"""''',
+     '''
+Run extract_verdicts.py on the result dirs first: it writes verdicts.json.
+"""'''),
+    ("evaluation/score.py",
+     '''    if args[:1] == ["--verdicts"]:
+        VERDICT_CACHE = json.load(open(args[1]))
+        args = args[2:]''',
+     '''    if args[:1] != ["--verdicts"] or len(args) < 2:
+        sys.exit("usage: python score.py --verdicts verdicts.json [dirs ...] (run extract_verdicts.py first)")
+    VERDICT_CACHE = json.load(open(args[1]))
+    args = args[2:]'''),
+] + [
     # the ontology's creator
     ("material/panoptes3.owl", "<dc:creator>HERIKG Project Consortium</dc:creator>", "<dc:creator>anonymous</dc:creator>"),
     ("material/panoptes3_extension.owl", "<dc:creator>HERIKG Project Consortium</dc:creator>",
@@ -197,7 +229,7 @@ def get_config(n: int | None = None, grounding: bool = True, error_correction: b
 ]
 
 # words that must not appear, besides site_aliases.json's and build_space.py's
-REPO_FORBIDDEN = [r"\bkong\b", r"dayue", r"gmail", r"nfdi4ds", r"193\.175\.", r"test_llm",
+REPO_FORBIDDEN = [r"\bkong\b", r"lingxiao", r"dayue", r"gmail", r"nfdi4ds", r"193\.175\.", r"test_llm",
                   r"argus_snapshot", r"argus_anon", r"consortium"]
 SECRETS = re.compile(r"sk-[A-Za-z0-9]{16,}|(api_key|password|token)\s*[=:]\s*['\"][^'\"$<{]{6,}['\"]", re.I)
 CONFIG_NAMES = re.compile(r"(?i:thorough|disabled-config)|\bFAST\b|\bBALANCED\b")   # "fast" as a word is fine
@@ -343,6 +375,8 @@ def forbidden_pattern(cfg) -> str:
 
 def scan(root: Path, cfg) -> list[str]:
     forbidden = re.compile(forbidden_pattern(cfg), re.I)
+    # MultiTQ results are public data (ICEWS: countries, "Hong Kong"): only names that identify us
+    identity = re.compile("|".join(EXTRA_FORBIDDEN + [w for w in REPO_FORBIDDEN if w != r"\bkong\b"]), re.I)
     problems = []
     for f in sorted(root.rglob("*")):
         if (not f.is_file() or ".git" in f.parts or "__pycache__" in f.parts or f.suffix == ".jar"
@@ -353,8 +387,9 @@ def scan(root: Path, cfg) -> list[str]:
         except UnicodeDecodeError:
             continue
         where = f"{root.name}/{f.relative_to(root)}"
+        words = identity if "multitq" in f.relative_to(root).parts else forbidden
         for i, line in enumerate(text.splitlines(), 1):
-            for kind, pat in (("forbidden", forbidden), ("secret", SECRETS)):
+            for kind, pat in (("forbidden", words), ("secret", SECRETS)):
                 if pat.search(line):
                     problems.append(f"{kind}: {where}:{i}: {line.strip()[:110]}")
             if CONFIG_NAMES.search(line) or (f.suffix == ".py" and CONFIG_NAMES_PY.search(line)):
@@ -520,8 +555,12 @@ def main():
           f"-> {dout} (for huggingface.co/datasets/{args.dataset_repo}) and the repository "
           f"(material/, data/snapshot.dump.part00-{parts - 1:02d})")
 
+    # the paper's results, anonymised (export_results.py), with their own leak check
+    from export_results import export_results
+    leaks = export_results(out, cfg, args.dsn)
+
     # checks
-    problems = scan(out, cfg) + scan(dout, cfg) + scan_dump(dout / "snapshot.dump", cfg)
+    problems = leaks + scan(out, cfg) + scan(dout, cfg) + scan_dump(dout / "snapshot.dump", cfg)
     for f in sorted(out.rglob("*.py")):
         try:
             compile(f.read_text(), str(f), "exec")
