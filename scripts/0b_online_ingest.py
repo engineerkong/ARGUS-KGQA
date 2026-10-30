@@ -51,7 +51,7 @@ def build_rows(readings: list[dict]) -> dict[str, list[tuple]]:
 
     for reading in readings:
         rid = _rd.reading_stable_id(reading)
-        site = _rd._safe_text(reading.get("site"), "unknown_site")
+        site = _rd._safe_text(_rd.reading_site(reading), "unknown_site")   # partner channels → pilot site
         sid = _rd._make_uri_part(site)
         sensor_id = _rd._safe_text(reading.get("sensor_id"), "unknown_sensor")
         node_id = _rd._safe_text(reading.get("node_id"), "unknown_node")

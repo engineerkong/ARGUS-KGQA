@@ -19,7 +19,7 @@ WHERE r.site_id = 'schenkenberg' AND o.property_id = 'temperature' AND o.value I
 
 **Question:** What about Baltanas?  
 **Reference:** 21.722 °C.  
-**Recomputed:** `21.72190526521375` → **MATCH**
+**Recomputed:** `21.721905265213763` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -37,7 +37,7 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Turn 1:** What is the average temperature at Delos?  
 **Answer given in history:** The average temperature at Delos is 26.087.  
-**Recomputed:** `26.087030199753862`
+**Recomputed:** `26.08703019975384`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -50,7 +50,7 @@ WHERE r.site_id = 'delos' AND o.property_id = 'temperature' AND o.value IS NOT N
 
 **Question:** What about Baltanas?  
 **Reference:** 21.722 °C.  
-**Recomputed:** `21.721905265213735` → **MATCH**
+**Recomputed:** `21.721905265213746` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -68,7 +68,7 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Turn 1:** What is the average voltage at Ranverso?  
 **Answer given in history:** The average voltage at Ranverso is 1.543.  
-**Recomputed:** `1.5432252862908113`
+**Recomputed:** `1.543225286290812`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -80,8 +80,8 @@ WHERE r.site_id = 'ranverso' AND o.property_id = 'voltage' AND o.value IS NOT NU
 | 1.54323 | 4.42806 | 0.0010206 | 14793 | None |
 
 **Question:** What about Baltanas?  
-**Reference:** 0.935.  
-**Recomputed:** `0.9349161758575442` → **MATCH**
+**Reference:** 0.903 V.  
+**Recomputed:** `0.9029327876239537` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -90,7 +90,7 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'voltage' AND o.value IS NOT NU
 ```
 | avg | max | min | n | unit |
 |---|---|---|---|---|
-| 0.934916 | 3.72243 | -0.0011721 | 167572 | None |
+| 0.902933 | 3.72243 | -0.0011721 | 182636 | V |
 
 
 ---
@@ -99,7 +99,7 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'voltage' AND o.value IS NOT NU
 
 **Turn 1:** What is the average temperature at Schenkenberg?  
 **Answer given in history:** The average temperature at Schenkenberg is 23.672 °C.  
-**Recomputed:** `23.672202985963775`
+**Recomputed:** `23.672202985963782`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -112,7 +112,7 @@ WHERE r.site_id = 'schenkenberg' AND o.property_id = 'temperature' AND o.value I
 
 **Question:** What about Delos?  
 **Reference:** 26.087.  
-**Recomputed:** `26.087030199753862` → **MATCH**
+**Recomputed:** `26.087030199753844` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -130,7 +130,7 @@ WHERE r.site_id = 'delos' AND o.property_id = 'temperature' AND o.value IS NOT N
 
 **Turn 1:** What is the average temperature at Ranverso?  
 **Answer given in history:** The average temperature at Ranverso is 24.209 °C.  
-**Recomputed:** `24.208592263792024`
+**Recomputed:** `24.20859226379202`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -143,7 +143,7 @@ WHERE r.site_id = 'ranverso' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Question:** What about Delos?  
 **Reference:** 26.087.  
-**Recomputed:** `26.08703019975386` → **MATCH**
+**Recomputed:** `26.08703019975387` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -161,7 +161,7 @@ WHERE r.site_id = 'delos' AND o.property_id = 'temperature' AND o.value IS NOT N
 
 **Turn 1:** What is the average temperature at Baltanas?  
 **Answer given in history:** The average temperature at Baltanas is 21.722 °C.  
-**Recomputed:** `21.721905265213756`
+**Recomputed:** `21.721905265213746`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -174,7 +174,7 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Question:** What about Delos?  
 **Reference:** 26.087.  
-**Recomputed:** `26.087030199753862` → **MATCH**
+**Recomputed:** `26.08703019975385` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -192,7 +192,7 @@ WHERE r.site_id = 'delos' AND o.property_id = 'temperature' AND o.value IS NOT N
 
 **Turn 1:** What is the average voltage at Lucretili?  
 **Answer given in history:** The average voltage at Lucretili is 0.142.  
-**Recomputed:** `0.14163626460849335`
+**Recomputed:** `0.14163626460849388`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -204,8 +204,8 @@ WHERE r.site_id = 'lucretili' AND o.property_id = 'voltage' AND o.value IS NOT N
 | 0.141636 | 4.61947 | 0.0036663 | 179933 | None |
 
 **Question:** What about Delos?  
-**Reference:** 1.656.  
-**Recomputed:** `1.6559220909441186` → **MATCH**
+**Reference:** 2.387 V.  
+**Recomputed:** `2.387406240001122` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -214,7 +214,7 @@ WHERE r.site_id = 'delos' AND o.property_id = 'voltage' AND o.value IS NOT NULL;
 ```
 | avg | max | min | n | unit |
 |---|---|---|---|---|
-| 1.65592 | 4.94471 | -0.0016764 | 35822 | None |
+| 2.38741 | 13104 | -0.0016764 | 35824 | V |
 
 
 ---
@@ -222,8 +222,8 @@ WHERE r.site_id = 'delos' AND o.property_id = 'voltage' AND o.value IS NOT NULL;
 ## F008 · what_about_site
 
 **Turn 1:** What is the average voltage at Baltanas?  
-**Answer given in history:** The average voltage at Baltanas is 0.935.  
-**Recomputed:** `0.9349161758575434`
+**Answer given in history:** The average voltage at Baltanas is 0.903 V.  
+**Recomputed:** `0.902932787623949`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -232,11 +232,11 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'voltage' AND o.value IS NOT NU
 ```
 | avg | max | min | n | unit |
 |---|---|---|---|---|
-| 0.934916 | 3.72243 | -0.0011721 | 167572 | None |
+| 0.902933 | 3.72243 | -0.0011721 | 182636 | V |
 
 **Question:** What about Lucretili?  
 **Reference:** 0.142.  
-**Recomputed:** `0.14163626460849377` → **MATCH**
+**Recomputed:** `0.14163626460849418` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -253,8 +253,8 @@ WHERE r.site_id = 'lucretili' AND o.property_id = 'voltage' AND o.value IS NOT N
 ## F009 · what_about_site
 
 **Turn 1:** What is the average voltage at Baltanas?  
-**Answer given in history:** The average voltage at Baltanas is 0.935.  
-**Recomputed:** `0.9349161758575459`
+**Answer given in history:** The average voltage at Baltanas is 0.903 V.  
+**Recomputed:** `0.9029327876239537`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -263,7 +263,7 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'voltage' AND o.value IS NOT NU
 ```
 | avg | max | min | n | unit |
 |---|---|---|---|---|
-| 0.934916 | 3.72243 | -0.0011721 | 167572 | None |
+| 0.902933 | 3.72243 | -0.0011721 | 182636 | V |
 
 **Question:** What about Ranverso?  
 **Reference:** 1.543.  
@@ -298,7 +298,7 @@ WHERE r.site_id = 'delos' AND o.property_id = 'temperature' AND o.value IS NOT N
 
 **Question:** What about Ranverso?  
 **Reference:** 24.209 °C.  
-**Recomputed:** `24.20859226379201` → **MATCH**
+**Recomputed:** `24.208592263792017` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -315,8 +315,8 @@ WHERE r.site_id = 'ranverso' AND o.property_id = 'temperature' AND o.value IS NO
 ## F011 · what_about_site
 
 **Turn 1:** What is the average voltage at Delos?  
-**Answer given in history:** The average voltage at Delos is 1.656.  
-**Recomputed:** `1.6559220909441186`
+**Answer given in history:** The average voltage at Delos is 2.387 V.  
+**Recomputed:** `2.387406240001124`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -325,11 +325,11 @@ WHERE r.site_id = 'delos' AND o.property_id = 'voltage' AND o.value IS NOT NULL;
 ```
 | avg | max | min | n | unit |
 |---|---|---|---|---|
-| 1.65592 | 4.94471 | -0.0016764 | 35822 | None |
+| 2.38741 | 13104 | -0.0016764 | 35824 | V |
 
 **Question:** What about Ranverso?  
 **Reference:** 1.543.  
-**Recomputed:** `1.5432252862908105` → **MATCH**
+**Recomputed:** `1.54322528629081` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -347,7 +347,7 @@ WHERE r.site_id = 'ranverso' AND o.property_id = 'voltage' AND o.value IS NOT NU
 
 **Turn 1:** What is the average temperature at Ranverso?  
 **Answer given in history:** The average temperature at Ranverso is 24.209 °C.  
-**Recomputed:** `24.20859226379203`
+**Recomputed:** `24.208592263792017`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -360,7 +360,7 @@ WHERE r.site_id = 'ranverso' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Question:** What about Schenkenberg?  
 **Reference:** 23.672 °C.  
-**Recomputed:** `23.672202985963768` → **MATCH**
+**Recomputed:** `23.67220298596378` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -625,8 +625,8 @@ WHERE r.site_id = 'ranverso' AND o.property_id = 'rainfall' AND o.value IS NOT N
 ## F021 · and_the_minimum
 
 **Turn 1:** What is the maximum voltage recorded at Delos?  
-**Answer given in history:** The maximum is 4.945.  
-**Recomputed:** `4.944706`
+**Answer given in history:** The maximum is 13104 V.  
+**Recomputed:** `13104.0`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -635,10 +635,10 @@ WHERE r.site_id = 'delos' AND o.property_id = 'voltage' AND o.value IS NOT NULL;
 ```
 | avg | max | min | n | unit |
 |---|---|---|---|---|
-| 1.65592 | 4.94471 | -0.0016764 | 35822 | None |
+| 2.38741 | 13104 | -0.0016764 | 35824 | V |
 
 **Question:** And the minimum?  
-**Reference:** -0.002.  
+**Reference:** -0.002 V.  
 **Recomputed:** `-0.0016764` → **MATCH**
 
 ```sql
@@ -648,7 +648,7 @@ WHERE r.site_id = 'delos' AND o.property_id = 'voltage' AND o.value IS NOT NULL;
 ```
 | avg | max | min | n | unit |
 |---|---|---|---|---|
-| 1.65592 | 4.94471 | -0.0016764 | 35822 | None |
+| 2.38741 | 13104 | -0.0016764 | 35824 | V |
 
 
 ---
@@ -687,7 +687,7 @@ WHERE r.site_id = 'delos' AND o.property_id = 'temperature' AND o.value IS NOT N
 ## F023 · when_recorded
 
 **Turn 1:** What is the maximum voltage recorded at Baltanas?  
-**Answer given in history:** The maximum is 3.722.  
+**Answer given in history:** The maximum is 3.722 V.  
 **Recomputed:** `3.722426`
 
 ```sql
@@ -697,7 +697,7 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'voltage' AND o.value IS NOT NU
 ```
 | avg | max | min | n | unit |
 |---|---|---|---|---|
-| 0.934916 | 3.72243 | -0.0011721 | 167572 | None |
+| 0.902933 | 3.72243 | -0.0011721 | 182636 | V |
 
 **Question:** When was it recorded?  
 **Reference:** 2026-07-01 23:15 UTC.  
@@ -885,11 +885,11 @@ ORDER BY o.value DESC, o.result_time ASC LIMIT 5;
 ```
 | value | result_time | sensor_id |
 |---|---|---|
-| 50 | 2026-07-31 11:30:00 | 82508f60-8269-11f0-b6dc-556f88243956 |
 | 50 | 2026-07-31 11:30:00 | 8250dd80-8269-11f0-9283-e956b63ef652 |
 | 50 | 2026-07-31 11:30:00 | 0cf22310-81be-11f0-9283-e956b63ef652 |
-| 50 | 2026-08-01 11:30:00 | 8250dd80-8269-11f0-9283-e956b63ef652 |
+| 50 | 2026-07-31 11:30:00 | 82508f60-8269-11f0-b6dc-556f88243956 |
 | 50 | 2026-08-01 11:30:00 | 82508f60-8269-11f0-b6dc-556f88243956 |
+| 50 | 2026-08-01 11:30:00 | 0cf22310-81be-11f0-9283-e956b63ef652 |
 
 - The maximum occurs more than once; the reference uses the earliest.
 
@@ -1003,15 +1003,15 @@ ORDER BY o.value DESC, o.result_time ASC LIMIT 5;
 ## F032 · among_these
 
 **Turn 1:** How many sensors have reported readings at Schenkenberg?  
-**Answer given in history:** 12 sensors.  
-**Recomputed:** `12`
+**Answer given in history:** 14 sensors.  
+**Recomputed:** `14`
 
 ```sql
 SELECT count(DISTINCT sensor_id) AS sensors FROM readings WHERE site_id = 'schenkenberg';
 ```
 | sensors |
 |---|
-| 12 |
+| 14 |
 
 **Question:** Among these, how many measure composed RMS acceleration (rmsComposed)?  
 **Reference:** 1 sensor.  
@@ -1031,15 +1031,15 @@ WHERE r.site_id = 'schenkenberg' AND o.property_id = 'rmsComposed';
 ## F033 · among_these
 
 **Turn 1:** How many sensors have reported readings at Schenkenberg?  
-**Answer given in history:** 12 sensors.  
-**Recomputed:** `12`
+**Answer given in history:** 14 sensors.  
+**Recomputed:** `14`
 
 ```sql
 SELECT count(DISTINCT sensor_id) AS sensors FROM readings WHERE site_id = 'schenkenberg';
 ```
 | sensors |
 |---|
-| 12 |
+| 14 |
 
 **Question:** Among these, how many measure composed peak ground acceleration (pgaComposed)?  
 **Reference:** 1 sensor.  
@@ -1059,15 +1059,15 @@ WHERE r.site_id = 'schenkenberg' AND o.property_id = 'pgaComposed';
 ## F034 · among_these
 
 **Turn 1:** How many sensors have reported readings at Delos?  
-**Answer given in history:** 26 sensors.  
-**Recomputed:** `26`
+**Answer given in history:** 30 sensors.  
+**Recomputed:** `30`
 
 ```sql
 SELECT count(DISTINCT sensor_id) AS sensors FROM readings WHERE site_id = 'delos';
 ```
 | sensors |
 |---|
-| 26 |
+| 30 |
 
 **Question:** Among these, how many measure potentiometer displacement?  
 **Reference:** 2 sensors.  
@@ -1087,15 +1087,15 @@ WHERE r.site_id = 'delos' AND o.property_id = 'potentiometer_displacement';
 ## F035 · among_these
 
 **Turn 1:** How many sensors have reported readings at Ranverso?  
-**Answer given in history:** 13 sensors.  
-**Recomputed:** `13`
+**Answer given in history:** 19 sensors.  
+**Recomputed:** `19`
 
 ```sql
 SELECT count(DISTINCT sensor_id) AS sensors FROM readings WHERE site_id = 'ranverso';
 ```
 | sensors |
 |---|
-| 13 |
+| 19 |
 
 **Question:** Among these, how many measure rainfall?  
 **Reference:** 1 sensor.  
@@ -1115,15 +1115,15 @@ WHERE r.site_id = 'ranverso' AND o.property_id = 'rainfall';
 ## F036 · among_these
 
 **Turn 1:** How many sensors have reported readings at Baltanas?  
-**Answer given in history:** 33 sensors.  
-**Recomputed:** `33`
+**Answer given in history:** 35 sensors.  
+**Recomputed:** `35`
 
 ```sql
 SELECT count(DISTINCT sensor_id) AS sensors FROM readings WHERE site_id = 'baltanas';
 ```
 | sensors |
 |---|
-| 33 |
+| 35 |
 
 **Question:** Among these, how many measure soil water potential?  
 **Reference:** 2 sensors.  
@@ -1143,15 +1143,15 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'soil_water_potential';
 ## F037 · among_these
 
 **Turn 1:** How many sensors have reported readings at Lucretili?  
-**Answer given in history:** 18 sensors.  
-**Recomputed:** `18`
+**Answer given in history:** 20 sensors.  
+**Recomputed:** `20`
 
 ```sql
 SELECT count(DISTINCT sensor_id) AS sensors FROM readings WHERE site_id = 'lucretili';
 ```
 | sensors |
 |---|
-| 18 |
+| 20 |
 
 **Question:** Among these, how many measure temperature?  
 **Reference:** 18 sensors.  
@@ -1171,15 +1171,15 @@ WHERE r.site_id = 'lucretili' AND o.property_id = 'temperature';
 ## F038 · among_these
 
 **Turn 1:** How many sensors have reported readings at Schenkenberg?  
-**Answer given in history:** 12 sensors.  
-**Recomputed:** `12`
+**Answer given in history:** 14 sensors.  
+**Recomputed:** `14`
 
 ```sql
 SELECT count(DISTINCT sensor_id) AS sensors FROM readings WHERE site_id = 'schenkenberg';
 ```
 | sensors |
 |---|
-| 12 |
+| 14 |
 
 **Question:** Among these, how many measure temperature?  
 **Reference:** 12 sensors.  
@@ -1199,15 +1199,15 @@ WHERE r.site_id = 'schenkenberg' AND o.property_id = 'temperature';
 ## F039 · among_these
 
 **Turn 1:** How many sensors have reported readings at Delos?  
-**Answer given in history:** 26 sensors.  
-**Recomputed:** `26`
+**Answer given in history:** 30 sensors.  
+**Recomputed:** `30`
 
 ```sql
 SELECT count(DISTINCT sensor_id) AS sensors FROM readings WHERE site_id = 'delos';
 ```
 | sensors |
 |---|
-| 26 |
+| 30 |
 
 **Question:** Among these, how many measure temperature?  
 **Reference:** 10 sensors.  
@@ -1227,15 +1227,15 @@ WHERE r.site_id = 'delos' AND o.property_id = 'temperature';
 ## F040 · among_these
 
 **Turn 1:** How many sensors have reported readings at Ranverso?  
-**Answer given in history:** 13 sensors.  
-**Recomputed:** `13`
+**Answer given in history:** 19 sensors.  
+**Recomputed:** `19`
 
 ```sql
 SELECT count(DISTINCT sensor_id) AS sensors FROM readings WHERE site_id = 'ranverso';
 ```
 | sensors |
 |---|
-| 13 |
+| 19 |
 
 **Question:** Among these, how many measure voltage?  
 **Reference:** 7 sensors.  
@@ -1255,19 +1255,19 @@ WHERE r.site_id = 'ranverso' AND o.property_id = 'voltage';
 ## F041 · among_these
 
 **Turn 1:** How many sensors have reported readings at Delos?  
-**Answer given in history:** 26 sensors.  
-**Recomputed:** `26`
+**Answer given in history:** 30 sensors.  
+**Recomputed:** `30`
 
 ```sql
 SELECT count(DISTINCT sensor_id) AS sensors FROM readings WHERE site_id = 'delos';
 ```
 | sensors |
 |---|
-| 26 |
+| 30 |
 
 **Question:** Among these, how many measure voltage?  
-**Reference:** 15 sensors.  
-**Recomputed:** `15` → **MATCH**
+**Reference:** 16 sensors.  
+**Recomputed:** `16` → **MATCH**
 
 ```sql
 SELECT count(DISTINCT r.sensor_id) AS sensors FROM observations o JOIN readings r USING (reading_id)
@@ -1275,7 +1275,7 @@ WHERE r.site_id = 'delos' AND o.property_id = 'voltage';
 ```
 | sensors |
 |---|
-| 15 |
+| 16 |
 
 
 ---
@@ -1322,8 +1322,8 @@ SELECT label, lat, lon, alt FROM n WHERE alt IS NOT NULL ORDER BY alt ASC LIMIT 
 ## F043 · and_the_lowest
 
 **Turn 1:** Which sensor node at Ranverso is at the highest altitude?  
-**Answer given in history:** LS-170894, at 339.42 m.  
-**Recomputed:** `LS-170894`
+**Answer given in history:** ae_ranverso, at 340.16 m.  
+**Recomputed:** `ae_ranverso`
 
 ```sql
 WITH n AS (SELECT DISTINCT n.node_id, n.label, n.latitude::float8 AS lat, n.longitude::float8 AS lon,
@@ -1334,9 +1334,9 @@ SELECT label, lat, lon, alt FROM n WHERE alt IS NOT NULL ORDER BY alt DESC LIMIT
 ```
 | label | lat | lon | alt |
 |---|---|---|---|
+| ae_ranverso | 45.0811 | 7.44965 | 340.16 |
+| A8610A3338359111 | 45.0811 | 7.44964 | 340.09 |
 | LS-170894 | 45.0811 | 7.44991 | 339.42 |
-| LS-143276 | 45.0812 | 7.44991 | 339.23 |
-| LS-174188 | 45.0812 | 7.44983 | 339.12 |
 
 **Question:** And which one is the lowest?  
 **Reference:** LS-177315, at 338.89 m.  
@@ -1353,7 +1353,7 @@ SELECT label, lat, lon, alt FROM n WHERE alt IS NOT NULL ORDER BY alt ASC LIMIT 
 |---|---|---|---|
 | LS-177315 | 45.0812 | 7.44935 | 338.89 |
 | LS-149361 | 45.0812 | 7.44935 | 338.91 |
-| LS-149248 | 45.0812 | 7.44983 | 339.11 |
+| LS-168442 | 45.0812 | 7.44983 | 339.11 |
 
 
 ---
@@ -1361,7 +1361,7 @@ SELECT label, lat, lon, alt FROM n WHERE alt IS NOT NULL ORDER BY alt ASC LIMIT 
 ## F044 · and_the_lowest
 
 **Turn 1:** Which sensor node at Baltanas is at the highest altitude?  
-**Answer given in history:** AF4, at 798.42 m.  
+**Answer given in history:** AF4, at 798.38 m.  
 **Recomputed:** `AF4`
 
 ```sql
@@ -1373,9 +1373,9 @@ SELECT label, lat, lon, alt FROM n WHERE alt IS NOT NULL ORDER BY alt DESC LIMIT
 ```
 | label | lat | lon | alt |
 |---|---|---|---|
-| AF4 | 41.9385 | -4.24394 | 798.424 |
-| AF3 | 41.9385 | -4.2439 | 797.918 |
-| WP1 | 41.9385 | -4.24384 | 797.842 |
+| AF4 | 41.9385 | -4.24394 | 798.38 |
+| AF3 | 41.9385 | -4.2439 | 797.81 |
+| WP1 | 41.9385 | -4.24384 | 797.75 |
 
 **Question:** And which one is the lowest?  
 **Reference:** GNSS_Base, at 779.9 m.  
@@ -1391,8 +1391,8 @@ SELECT label, lat, lon, alt FROM n WHERE alt IS NOT NULL ORDER BY alt ASC LIMIT 
 | label | lat | lon | alt |
 |---|---|---|---|
 | GNSS_Base | 41.9372 | -4.24758 | 779.901 |
-| Acc-3A | 41.9379 | -4.24331 | 796.895 |
-| Gases | 41.9385 | -4.24331 | 797.162 |
+| 2CF7F1C073400212 | 41.9391 | -4.24658 | 789.85 |
+| Acc-3A | 41.9379 | -4.24331 | 796.85 |
 
 
 ---
@@ -1400,8 +1400,8 @@ SELECT label, lat, lon, alt FROM n WHERE alt IS NOT NULL ORDER BY alt ASC LIMIT 
 ## F045 · and_the_lowest
 
 **Turn 1:** Which sensor node at Schenkenberg is at the highest altitude?  
-**Answer given in history:** LS-152914, at 643.53 m.  
-**Recomputed:** `LS-152914`
+**Answer given in history:** 2CF7F1C072300226, at 651.2 m.  
+**Recomputed:** `2CF7F1C072300226`
 
 ```sql
 WITH n AS (SELECT DISTINCT n.node_id, n.label, n.latitude::float8 AS lat, n.longitude::float8 AS lon,
@@ -1412,13 +1412,13 @@ SELECT label, lat, lon, alt FROM n WHERE alt IS NOT NULL ORDER BY alt DESC LIMIT
 ```
 | label | lat | lon | alt |
 |---|---|---|---|
-| LS-152914 | 47.4421 | 8.10102 | 643.53 |
-| LS-152555 | 47.4422 | 8.10108 | 643.52 |
-| LS-152479 | 47.4421 | 8.10106 | 643.18 |
+| 2CF7F1C072300226 | 47.4421 | 8.10104 | 651.2 |
+| LS-152555 | 47.4422 | 8.10105 | 648.52 |
+| LS-152914 | 47.4421 | 8.101 | 648.52 |
 
 **Question:** And which one is the lowest?  
-**Reference:** LS-149796, at 637.9 m.  
-**Recomputed:** `LS-149796` → **MATCH**
+**Reference:** 2CF7F1C072600345, at 643 m.  
+**Recomputed:** `2CF7F1C072600345` → **MATCH**
 
 ```sql
 WITH n AS (SELECT DISTINCT n.node_id, n.label, n.latitude::float8 AS lat, n.longitude::float8 AS lon,
@@ -1429,9 +1429,9 @@ SELECT label, lat, lon, alt FROM n WHERE alt IS NOT NULL ORDER BY alt ASC LIMIT 
 ```
 | label | lat | lon | alt |
 |---|---|---|---|
-| LS-149796 | 47.4421 | 8.10104 | 637.9 |
-| LS-159070 | 47.4421 | 8.10102 | 640.99 |
-| LS-152899 | 47.4421 | 8.10107 | 642.68 |
+| 2CF7F1C072600345 | 47.4421 | 8.10102 | 643 |
+| LS-149796 | 47.4421 | 8.10102 | 643.5 |
+| LS-159070 | 47.4421 | 8.10099 | 645.99 |
 
 
 ---
@@ -1452,12 +1452,12 @@ SELECT label, lat, lon, alt FROM n WHERE alt IS NOT NULL ORDER BY alt DESC LIMIT
 | label | lat | lon | alt |
 |---|---|---|---|
 | LS-153242 | 37.3977 | 25.2709 | 43.48 |
+| 2CF7F1C061300548 | 37.3963 | 25.2698 | 36.99 |
 | Outdoors area H. Masks_Mask_pole mounted | 37.3963 | 25.2698 | 36.99 |
-| H. Fournoi_wall attached 1 | 37.3914 | 25.2696 | 35.79 |
 
 **Question:** And which one is the lowest?  
-**Reference:** LS-153157, at 12.32 m.  
-**Recomputed:** `LS-153157` → **MATCH**
+**Reference:** 0004A30B0050C42F, at 9.64 m.  
+**Recomputed:** `0004A30B0050C42F` → **MATCH**
 
 ```sql
 WITH n AS (SELECT DISTINCT n.node_id, n.label, n.latitude::float8 AS lat, n.longitude::float8 AS lon,
@@ -1468,9 +1468,9 @@ SELECT label, lat, lon, alt FROM n WHERE alt IS NOT NULL ORDER BY alt ASC LIMIT 
 ```
 | label | lat | lon | alt |
 |---|---|---|---|
+| 0004A30B0050C42F | 37.406 | 25.2744 | 9.64 |
 | LS-153157 | 37.4033 | 25.2662 | 12.32 |
 | LS-150900 | 37.397 | 25.2675 | 17.92 |
-| LS-153295 | 37.3984 | 25.2699 | 26.45 |
 
 
 ---
@@ -1478,8 +1478,8 @@ SELECT label, lat, lon, alt FROM n WHERE alt IS NOT NULL ORDER BY alt ASC LIMIT 
 ## F047 · what_about_site_spatial
 
 **Turn 1:** How far apart are the two most distant sensor nodes at Delos?  
-**Answer given in history:** 1355.6 m, between H. Fournoi_wall attached 1 and LS-153157.  
-**Recomputed:** `1355.6`
+**Answer given in history:** 1669.9 m, between 0004A30B0050C42F and H. Fournoi_wall attached 1.  
+**Recomputed:** `1669.9`
 
 ```sql
 WITH n AS (SELECT DISTINCT n.node_id, n.label, n.latitude::float8 AS lat, n.longitude::float8 AS lon,
@@ -1491,15 +1491,31 @@ FROM n a JOIN n b ON a.node_id < b.node_id ORDER BY meters DESC LIMIT 5;
 ```
 | node_a | node_b | meters |
 |---|---|---|
+| 0004A30B0050C42F | H. Fournoi_wall attached 1 | 1669.92 |
+| 0004A30B0050C42F | H. Fournoi_pole mounted_outdoors | 1612.35 |
+| 0004A30B0050C42F | 2CF7F1C0723001F4 | 1612.35 |
 | LS-153157 | H. Fournoi_wall attached 1 | 1355.57 |
 | H. Fournoi_pole mounted_outdoors | LS-153157 | 1281.68 |
-| LS-153157 | Outdoors area H. Masks_Mask_pole mounted | 848.26 |
-| H. Masks_Dyonisios &panter mosaic_pole mounted 2 | LS-153157 | 834.772 |
-| LS-153157 | H. Masks_Dolphins mosaic_pole mounted | 830.345 |
+
+```sql
+WITH n AS (SELECT DISTINCT n.node_id, n.label, n.latitude::float8 AS lat, n.longitude::float8 AS lon,
+                  n.altitude::float8 AS alt
+           FROM nodes n JOIN readings r USING (node_id)
+           WHERE r.site_id = 'delos' AND n.latitude IS NOT NULL)
+SELECT a.label AS node_a, b.label AS node_b, sqrt(power(2*6371000*asin(sqrt(power(sin(radians(b.lat-a.lat)/2),2)+cos(radians(a.lat))*cos(radians(b.lat))*power(sin(radians(b.lon-a.lon)/2),2))),2)+power(b.alt-a.alt,2)) AS meters
+FROM n a JOIN n b ON a.node_id < b.node_id ORDER BY meters DESC LIMIT 5;
+```
+| node_a | node_b | meters |
+|---|---|---|
+| 0004A30B0050C42F | H. Fournoi_wall attached 1 | 1670.12 |
+| 0004A30B0050C42F | H. Fournoi_pole mounted_outdoors | 1612.49 |
+| 0004A30B0050C42F | 2CF7F1C0723001F4 | 1612.49 |
+| LS-153157 | H. Fournoi_wall attached 1 | 1355.77 |
+| H. Fournoi_pole mounted_outdoors | LS-153157 | 1281.82 |
 
 **Question:** What about at Baltanas?  
-**Reference:** 380.8 m, between Gases and GNSS_Base.  
-**Recomputed:** `380.8` → **MATCH**
+**Reference:** 382.3 m, between A8610A3230467704 and GNSS_Base. With the altitude difference: 382.7 m, between A8610A3230467704 and GNSS_Base.  
+**Recomputed:** `382.3` (with the altitude difference: `382.7`) → **MATCH**
 
 ```sql
 WITH n AS (SELECT DISTINCT n.node_id, n.label, n.latitude::float8 AS lat, n.longitude::float8 AS lon,
@@ -1511,11 +1527,27 @@ FROM n a JOIN n b ON a.node_id < b.node_id ORDER BY meters DESC LIMIT 5;
 ```
 | node_a | node_b | meters |
 |---|---|---|
-| Gases | GNSS_Base | 380.792 |
-| Acc-3A | GNSS_Base | 360.872 |
+| A8610A3230467704 | GNSS_Base | 382.302 |
+| Gases | GNSS_Base | 380.928 |
+| Acc-3A | GNSS_Base | 360.959 |
 | AF2 | GNSS_Base | 340.136 |
-| WP1 | GNSS_Base | 338.443 |
-| WP2 | GNSS_Base | 336.7 |
+| WP1 | GNSS_Base | 338.548 |
+
+```sql
+WITH n AS (SELECT DISTINCT n.node_id, n.label, n.latitude::float8 AS lat, n.longitude::float8 AS lon,
+                  n.altitude::float8 AS alt
+           FROM nodes n JOIN readings r USING (node_id)
+           WHERE r.site_id = 'baltanas' AND n.latitude IS NOT NULL)
+SELECT a.label AS node_a, b.label AS node_b, sqrt(power(2*6371000*asin(sqrt(power(sin(radians(b.lat-a.lat)/2),2)+cos(radians(a.lat))*cos(radians(b.lat))*power(sin(radians(b.lon-a.lon)/2),2))),2)+power(b.alt-a.alt,2)) AS meters
+FROM n a JOIN n b ON a.node_id < b.node_id ORDER BY meters DESC LIMIT 5;
+```
+| node_a | node_b | meters |
+|---|---|---|
+| A8610A3230467704 | GNSS_Base | 382.688 |
+| Gases | GNSS_Base | 381.315 |
+| Acc-3A | GNSS_Base | 361.357 |
+| AF2 | GNSS_Base | 340.592 |
+| WP1 | GNSS_Base | 339.019 |
 
 
 ---
@@ -1523,8 +1555,8 @@ FROM n a JOIN n b ON a.node_id < b.node_id ORDER BY meters DESC LIMIT 5;
 ## F048 · what_about_site_spatial
 
 **Turn 1:** How far apart are the two most distant sensor nodes at Schenkenberg?  
-**Answer given in history:** 5.5 m, between LS-152555 and LS-175480.  
-**Recomputed:** `5.5`
+**Answer given in history:** 5.3 m, between LS-152555 and LS-175480.  
+**Recomputed:** `5.3`
 
 ```sql
 WITH n AS (SELECT DISTINCT n.node_id, n.label, n.latitude::float8 AS lat, n.longitude::float8 AS lon,
@@ -1536,15 +1568,31 @@ FROM n a JOIN n b ON a.node_id < b.node_id ORDER BY meters DESC LIMIT 5;
 ```
 | node_a | node_b | meters |
 |---|---|---|
-| LS-175480 | LS-152555 | 5.53735 |
-| LS-159070 | LS-152555 | 4.55761 |
-| LS-159070 | LS-152899 | 4.33754 |
-| LS-152914 | LS-152555 | 4.157 |
-| LS-152555 | LS-152479 | 3.98453 |
+| LS-175480 | LS-152555 | 5.29804 |
+| LS-159070 | LS-152555 | 4.60259 |
+| LS-159070 | LS-152899 | 4.49877 |
+| LS-152914 | LS-152555 | 4.24127 |
+| LS-152914 | LS-152899 | 4.17605 |
+
+```sql
+WITH n AS (SELECT DISTINCT n.node_id, n.label, n.latitude::float8 AS lat, n.longitude::float8 AS lon,
+                  n.altitude::float8 AS alt
+           FROM nodes n JOIN readings r USING (node_id)
+           WHERE r.site_id = 'schenkenberg' AND n.latitude IS NOT NULL)
+SELECT a.label AS node_a, b.label AS node_b, sqrt(power(2*6371000*asin(sqrt(power(sin(radians(b.lat-a.lat)/2),2)+cos(radians(a.lat))*cos(radians(b.lat))*power(sin(radians(b.lon-a.lon)/2),2))),2)+power(b.alt-a.alt,2)) AS meters
+FROM n a JOIN n b ON a.node_id < b.node_id ORDER BY meters DESC LIMIT 5;
+```
+| node_a | node_b | meters |
+|---|---|---|
+| 2CF7F1C072300226 | 2CF7F1C072600345 | 8.35366 |
+| 2CF7F1C072300226 | LS-149796 | 7.86344 |
+| 2CF7F1C072600345 | LS-152555 | 6.66012 |
+| 2CF7F1C072300226 | LS-159070 | 6.5424 |
+| LS-149796 | LS-152555 | 6.25198 |
 
 **Question:** What about at Delos?  
-**Reference:** 1355.6 m, between H. Fournoi_wall attached 1 and LS-153157.  
-**Recomputed:** `1355.6` → **MATCH**
+**Reference:** 1669.9 m, between 0004A30B0050C42F and H. Fournoi_wall attached 1. With the altitude difference: 1670.1 m, between 0004A30B0050C42F and H. Fournoi_wall attached 1.  
+**Recomputed:** `1669.9` (with the altitude difference: `1670.1`) → **MATCH**
 
 ```sql
 WITH n AS (SELECT DISTINCT n.node_id, n.label, n.latitude::float8 AS lat, n.longitude::float8 AS lon,
@@ -1556,11 +1604,27 @@ FROM n a JOIN n b ON a.node_id < b.node_id ORDER BY meters DESC LIMIT 5;
 ```
 | node_a | node_b | meters |
 |---|---|---|
+| 0004A30B0050C42F | H. Fournoi_wall attached 1 | 1669.92 |
+| 0004A30B0050C42F | H. Fournoi_pole mounted_outdoors | 1612.35 |
+| 0004A30B0050C42F | 2CF7F1C0723001F4 | 1612.35 |
 | LS-153157 | H. Fournoi_wall attached 1 | 1355.57 |
 | H. Fournoi_pole mounted_outdoors | LS-153157 | 1281.68 |
-| LS-153157 | Outdoors area H. Masks_Mask_pole mounted | 848.26 |
-| H. Masks_Dyonisios &panter mosaic_pole mounted 2 | LS-153157 | 834.772 |
-| LS-153157 | H. Masks_Dolphins mosaic_pole mounted | 830.345 |
+
+```sql
+WITH n AS (SELECT DISTINCT n.node_id, n.label, n.latitude::float8 AS lat, n.longitude::float8 AS lon,
+                  n.altitude::float8 AS alt
+           FROM nodes n JOIN readings r USING (node_id)
+           WHERE r.site_id = 'delos' AND n.latitude IS NOT NULL)
+SELECT a.label AS node_a, b.label AS node_b, sqrt(power(2*6371000*asin(sqrt(power(sin(radians(b.lat-a.lat)/2),2)+cos(radians(a.lat))*cos(radians(b.lat))*power(sin(radians(b.lon-a.lon)/2),2))),2)+power(b.alt-a.alt,2)) AS meters
+FROM n a JOIN n b ON a.node_id < b.node_id ORDER BY meters DESC LIMIT 5;
+```
+| node_a | node_b | meters |
+|---|---|---|
+| 0004A30B0050C42F | H. Fournoi_wall attached 1 | 1670.12 |
+| 0004A30B0050C42F | H. Fournoi_pole mounted_outdoors | 1612.49 |
+| 0004A30B0050C42F | 2CF7F1C0723001F4 | 1612.49 |
+| LS-153157 | H. Fournoi_wall attached 1 | 1355.77 |
+| H. Fournoi_pole mounted_outdoors | LS-153157 | 1281.82 |
 
 
 ---
@@ -1568,8 +1632,8 @@ FROM n a JOIN n b ON a.node_id < b.node_id ORDER BY meters DESC LIMIT 5;
 ## F049 · what_about_site_spatial
 
 **Turn 1:** How far apart are the two most distant sensor nodes at Schenkenberg?  
-**Answer given in history:** 5.5 m, between LS-152555 and LS-175480.  
-**Recomputed:** `5.5`
+**Answer given in history:** 5.3 m, between LS-152555 and LS-175480.  
+**Recomputed:** `5.3`
 
 ```sql
 WITH n AS (SELECT DISTINCT n.node_id, n.label, n.latitude::float8 AS lat, n.longitude::float8 AS lon,
@@ -1581,15 +1645,31 @@ FROM n a JOIN n b ON a.node_id < b.node_id ORDER BY meters DESC LIMIT 5;
 ```
 | node_a | node_b | meters |
 |---|---|---|
-| LS-175480 | LS-152555 | 5.53735 |
-| LS-159070 | LS-152555 | 4.55761 |
-| LS-159070 | LS-152899 | 4.33754 |
-| LS-152914 | LS-152555 | 4.157 |
-| LS-152555 | LS-152479 | 3.98453 |
+| LS-175480 | LS-152555 | 5.29804 |
+| LS-159070 | LS-152555 | 4.60259 |
+| LS-159070 | LS-152899 | 4.49877 |
+| LS-152914 | LS-152555 | 4.24127 |
+| LS-152914 | LS-152899 | 4.17605 |
+
+```sql
+WITH n AS (SELECT DISTINCT n.node_id, n.label, n.latitude::float8 AS lat, n.longitude::float8 AS lon,
+                  n.altitude::float8 AS alt
+           FROM nodes n JOIN readings r USING (node_id)
+           WHERE r.site_id = 'schenkenberg' AND n.latitude IS NOT NULL)
+SELECT a.label AS node_a, b.label AS node_b, sqrt(power(2*6371000*asin(sqrt(power(sin(radians(b.lat-a.lat)/2),2)+cos(radians(a.lat))*cos(radians(b.lat))*power(sin(radians(b.lon-a.lon)/2),2))),2)+power(b.alt-a.alt,2)) AS meters
+FROM n a JOIN n b ON a.node_id < b.node_id ORDER BY meters DESC LIMIT 5;
+```
+| node_a | node_b | meters |
+|---|---|---|
+| 2CF7F1C072300226 | 2CF7F1C072600345 | 8.35366 |
+| 2CF7F1C072300226 | LS-149796 | 7.86344 |
+| 2CF7F1C072600345 | LS-152555 | 6.66012 |
+| 2CF7F1C072300226 | LS-159070 | 6.5424 |
+| LS-149796 | LS-152555 | 6.25198 |
 
 **Question:** What about at Lucretili?  
-**Reference:** 8653.3 m, between LS-153061 - Tiltmeter Conventillo and LS-177310 Crackmeter Montefalco.  
-**Recomputed:** `8653.3` → **MATCH**
+**Reference:** 8653.3 m, between LS-153061 - Tiltmeter Conventillo and LS-177310 Crackmeter Montefalco. With the altitude difference: 8655.2 m, between LS-153061 - Tiltmeter Conventillo and LS-177310 Crackmeter Montefalco.  
+**Recomputed:** `8653.3` (with the altitude difference: `8655.2`) → **MATCH**
 
 ```sql
 WITH n AS (SELECT DISTINCT n.node_id, n.label, n.latitude::float8 AS lat, n.longitude::float8 AS lon,
@@ -1607,14 +1687,30 @@ FROM n a JOIN n b ON a.node_id < b.node_id ORDER BY meters DESC LIMIT 5;
 | LS-177281 Humidity-Temperature Montefalco | LS-177253 Crackmeter Conventillo | 8651.81 |
 | LS-177310 Crackmeter Montefalco | LS-177266 - Crackmeter Conventillo | 8650.34 |
 
+```sql
+WITH n AS (SELECT DISTINCT n.node_id, n.label, n.latitude::float8 AS lat, n.longitude::float8 AS lon,
+                  n.altitude::float8 AS alt
+           FROM nodes n JOIN readings r USING (node_id)
+           WHERE r.site_id = 'lucretili' AND n.latitude IS NOT NULL)
+SELECT a.label AS node_a, b.label AS node_b, sqrt(power(2*6371000*asin(sqrt(power(sin(radians(b.lat-a.lat)/2),2)+cos(radians(a.lat))*cos(radians(b.lat))*power(sin(radians(b.lon-a.lon)/2),2))),2)+power(b.alt-a.alt,2)) AS meters
+FROM n a JOIN n b ON a.node_id < b.node_id ORDER BY meters DESC LIMIT 5;
+```
+| node_a | node_b | meters |
+|---|---|---|
+| LS-153061 - Tiltmeter Conventillo | LS-177310 Crackmeter Montefalco | 8655.18 |
+| LS-177281 Humidity-Temperature Montefalco | LS-153061 - Tiltmeter Conventillo | 8654.4 |
+| LS-177253 Crackmeter Conventillo | LS-177310 Crackmeter Montefalco | 8654.39 |
+| LS-177281 Humidity-Temperature Montefalco | LS-177253 Crackmeter Conventillo | 8653.61 |
+| LS-177310 Crackmeter Montefalco | LS-177266 - Crackmeter Conventillo | 8652.06 |
+
 
 ---
 
 ## F050 · what_about_site_spatial
 
 **Turn 1:** How far apart are the two most distant sensor nodes at Baltanas?  
-**Answer given in history:** 380.8 m, between Gases and GNSS_Base.  
-**Recomputed:** `380.8`
+**Answer given in history:** 382.3 m, between A8610A3230467704 and GNSS_Base.  
+**Recomputed:** `382.3`
 
 ```sql
 WITH n AS (SELECT DISTINCT n.node_id, n.label, n.latitude::float8 AS lat, n.longitude::float8 AS lon,
@@ -1626,15 +1722,31 @@ FROM n a JOIN n b ON a.node_id < b.node_id ORDER BY meters DESC LIMIT 5;
 ```
 | node_a | node_b | meters |
 |---|---|---|
-| Gases | GNSS_Base | 380.792 |
-| Acc-3A | GNSS_Base | 360.872 |
+| A8610A3230467704 | GNSS_Base | 382.302 |
+| Gases | GNSS_Base | 380.928 |
+| Acc-3A | GNSS_Base | 360.959 |
 | AF2 | GNSS_Base | 340.136 |
-| WP1 | GNSS_Base | 338.443 |
-| WP2 | GNSS_Base | 336.7 |
+| WP1 | GNSS_Base | 338.548 |
+
+```sql
+WITH n AS (SELECT DISTINCT n.node_id, n.label, n.latitude::float8 AS lat, n.longitude::float8 AS lon,
+                  n.altitude::float8 AS alt
+           FROM nodes n JOIN readings r USING (node_id)
+           WHERE r.site_id = 'baltanas' AND n.latitude IS NOT NULL)
+SELECT a.label AS node_a, b.label AS node_b, sqrt(power(2*6371000*asin(sqrt(power(sin(radians(b.lat-a.lat)/2),2)+cos(radians(a.lat))*cos(radians(b.lat))*power(sin(radians(b.lon-a.lon)/2),2))),2)+power(b.alt-a.alt,2)) AS meters
+FROM n a JOIN n b ON a.node_id < b.node_id ORDER BY meters DESC LIMIT 5;
+```
+| node_a | node_b | meters |
+|---|---|---|
+| A8610A3230467704 | GNSS_Base | 382.688 |
+| Gases | GNSS_Base | 381.315 |
+| Acc-3A | GNSS_Base | 361.357 |
+| AF2 | GNSS_Base | 340.592 |
+| WP1 | GNSS_Base | 339.019 |
 
 **Question:** What about at Lucretili?  
-**Reference:** 8653.3 m, between LS-153061 - Tiltmeter Conventillo and LS-177310 Crackmeter Montefalco.  
-**Recomputed:** `8653.3` → **MATCH**
+**Reference:** 8653.3 m, between LS-153061 - Tiltmeter Conventillo and LS-177310 Crackmeter Montefalco. With the altitude difference: 8655.2 m, between LS-153061 - Tiltmeter Conventillo and LS-177310 Crackmeter Montefalco.  
+**Recomputed:** `8653.3` (with the altitude difference: `8655.2`) → **MATCH**
 
 ```sql
 WITH n AS (SELECT DISTINCT n.node_id, n.label, n.latitude::float8 AS lat, n.longitude::float8 AS lon,
@@ -1651,6 +1763,22 @@ FROM n a JOIN n b ON a.node_id < b.node_id ORDER BY meters DESC LIMIT 5;
 | LS-177281 Humidity-Temperature Montefalco | LS-153061 - Tiltmeter Conventillo | 8652.57 |
 | LS-177281 Humidity-Temperature Montefalco | LS-177253 Crackmeter Conventillo | 8651.81 |
 | LS-177310 Crackmeter Montefalco | LS-177266 - Crackmeter Conventillo | 8650.34 |
+
+```sql
+WITH n AS (SELECT DISTINCT n.node_id, n.label, n.latitude::float8 AS lat, n.longitude::float8 AS lon,
+                  n.altitude::float8 AS alt
+           FROM nodes n JOIN readings r USING (node_id)
+           WHERE r.site_id = 'lucretili' AND n.latitude IS NOT NULL)
+SELECT a.label AS node_a, b.label AS node_b, sqrt(power(2*6371000*asin(sqrt(power(sin(radians(b.lat-a.lat)/2),2)+cos(radians(a.lat))*cos(radians(b.lat))*power(sin(radians(b.lon-a.lon)/2),2))),2)+power(b.alt-a.alt,2)) AS meters
+FROM n a JOIN n b ON a.node_id < b.node_id ORDER BY meters DESC LIMIT 5;
+```
+| node_a | node_b | meters |
+|---|---|---|
+| LS-153061 - Tiltmeter Conventillo | LS-177310 Crackmeter Montefalco | 8655.18 |
+| LS-177281 Humidity-Temperature Montefalco | LS-153061 - Tiltmeter Conventillo | 8654.4 |
+| LS-177253 Crackmeter Conventillo | LS-177310 Crackmeter Montefalco | 8654.39 |
+| LS-177281 Humidity-Temperature Montefalco | LS-177253 Crackmeter Conventillo | 8653.61 |
+| LS-177310 Crackmeter Montefalco | LS-177266 - Crackmeter Conventillo | 8652.06 |
 
 
 ---
@@ -1677,9 +1805,25 @@ FROM n a JOIN n b ON a.node_id < b.node_id ORDER BY meters DESC LIMIT 5;
 | LS-177281 Humidity-Temperature Montefalco | LS-177253 Crackmeter Conventillo | 8651.81 |
 | LS-177310 Crackmeter Montefalco | LS-177266 - Crackmeter Conventillo | 8650.34 |
 
+```sql
+WITH n AS (SELECT DISTINCT n.node_id, n.label, n.latitude::float8 AS lat, n.longitude::float8 AS lon,
+                  n.altitude::float8 AS alt
+           FROM nodes n JOIN readings r USING (node_id)
+           WHERE r.site_id = 'lucretili' AND n.latitude IS NOT NULL)
+SELECT a.label AS node_a, b.label AS node_b, sqrt(power(2*6371000*asin(sqrt(power(sin(radians(b.lat-a.lat)/2),2)+cos(radians(a.lat))*cos(radians(b.lat))*power(sin(radians(b.lon-a.lon)/2),2))),2)+power(b.alt-a.alt,2)) AS meters
+FROM n a JOIN n b ON a.node_id < b.node_id ORDER BY meters DESC LIMIT 5;
+```
+| node_a | node_b | meters |
+|---|---|---|
+| LS-153061 - Tiltmeter Conventillo | LS-177310 Crackmeter Montefalco | 8655.18 |
+| LS-177281 Humidity-Temperature Montefalco | LS-153061 - Tiltmeter Conventillo | 8654.4 |
+| LS-177253 Crackmeter Conventillo | LS-177310 Crackmeter Montefalco | 8654.39 |
+| LS-177281 Humidity-Temperature Montefalco | LS-177253 Crackmeter Conventillo | 8653.61 |
+| LS-177310 Crackmeter Montefalco | LS-177266 - Crackmeter Conventillo | 8652.06 |
+
 **Question:** What about at Ranverso?  
 **Reference:** 45.2 m, between LS-170894 and LS-177315.  
-**Recomputed:** `45.2` → **MATCH**
+**Recomputed:** `45.2` (with the altitude difference: `45.2`) → **MATCH**
 
 ```sql
 WITH n AS (SELECT DISTINCT n.node_id, n.label, n.latitude::float8 AS lat, n.longitude::float8 AS lon,
@@ -1695,7 +1839,23 @@ FROM n a JOIN n b ON a.node_id < b.node_id ORDER BY meters DESC LIMIT 5;
 | LS-149361 | LS-170894 | 45.0197 |
 | LS-177315 | LS-143276 | 44.3612 |
 | LS-149361 | LS-143276 | 44.2287 |
-| LS-177315 | LS-174188 | 37.4466 |
+| LS-177315 | A8610A333526680F | 39.1749 |
+
+```sql
+WITH n AS (SELECT DISTINCT n.node_id, n.label, n.latitude::float8 AS lat, n.longitude::float8 AS lon,
+                  n.altitude::float8 AS alt
+           FROM nodes n JOIN readings r USING (node_id)
+           WHERE r.site_id = 'ranverso' AND n.latitude IS NOT NULL)
+SELECT a.label AS node_a, b.label AS node_b, sqrt(power(2*6371000*asin(sqrt(power(sin(radians(b.lat-a.lat)/2),2)+cos(radians(a.lat))*cos(radians(b.lat))*power(sin(radians(b.lon-a.lon)/2),2))),2)+power(b.alt-a.alt,2)) AS meters
+FROM n a JOIN n b ON a.node_id < b.node_id ORDER BY meters DESC LIMIT 5;
+```
+| node_a | node_b | meters |
+|---|---|---|
+| LS-177315 | LS-170894 | 45.2226 |
+| LS-149361 | LS-170894 | 45.0226 |
+| LS-177315 | LS-143276 | 44.3625 |
+| LS-149361 | LS-143276 | 44.2299 |
+| LS-177315 | A8610A333526680F | 39.1756 |
 
 
 ---
@@ -1703,8 +1863,8 @@ FROM n a JOIN n b ON a.node_id < b.node_id ORDER BY meters DESC LIMIT 5;
 ## F052 · what_about_site_spatial
 
 **Turn 1:** How far apart are the two most distant sensor nodes at Baltanas?  
-**Answer given in history:** 380.8 m, between Gases and GNSS_Base.  
-**Recomputed:** `380.8`
+**Answer given in history:** 382.3 m, between A8610A3230467704 and GNSS_Base.  
+**Recomputed:** `382.3`
 
 ```sql
 WITH n AS (SELECT DISTINCT n.node_id, n.label, n.latitude::float8 AS lat, n.longitude::float8 AS lon,
@@ -1716,15 +1876,31 @@ FROM n a JOIN n b ON a.node_id < b.node_id ORDER BY meters DESC LIMIT 5;
 ```
 | node_a | node_b | meters |
 |---|---|---|
-| Gases | GNSS_Base | 380.792 |
-| Acc-3A | GNSS_Base | 360.872 |
+| A8610A3230467704 | GNSS_Base | 382.302 |
+| Gases | GNSS_Base | 380.928 |
+| Acc-3A | GNSS_Base | 360.959 |
 | AF2 | GNSS_Base | 340.136 |
-| WP1 | GNSS_Base | 338.443 |
-| WP2 | GNSS_Base | 336.7 |
+| WP1 | GNSS_Base | 338.548 |
+
+```sql
+WITH n AS (SELECT DISTINCT n.node_id, n.label, n.latitude::float8 AS lat, n.longitude::float8 AS lon,
+                  n.altitude::float8 AS alt
+           FROM nodes n JOIN readings r USING (node_id)
+           WHERE r.site_id = 'baltanas' AND n.latitude IS NOT NULL)
+SELECT a.label AS node_a, b.label AS node_b, sqrt(power(2*6371000*asin(sqrt(power(sin(radians(b.lat-a.lat)/2),2)+cos(radians(a.lat))*cos(radians(b.lat))*power(sin(radians(b.lon-a.lon)/2),2))),2)+power(b.alt-a.alt,2)) AS meters
+FROM n a JOIN n b ON a.node_id < b.node_id ORDER BY meters DESC LIMIT 5;
+```
+| node_a | node_b | meters |
+|---|---|---|
+| A8610A3230467704 | GNSS_Base | 382.688 |
+| Gases | GNSS_Base | 381.315 |
+| Acc-3A | GNSS_Base | 361.357 |
+| AF2 | GNSS_Base | 340.592 |
+| WP1 | GNSS_Base | 339.019 |
 
 **Question:** What about at Ranverso?  
 **Reference:** 45.2 m, between LS-170894 and LS-177315.  
-**Recomputed:** `45.2` → **MATCH**
+**Recomputed:** `45.2` (with the altitude difference: `45.2`) → **MATCH**
 
 ```sql
 WITH n AS (SELECT DISTINCT n.node_id, n.label, n.latitude::float8 AS lat, n.longitude::float8 AS lon,
@@ -1740,7 +1916,23 @@ FROM n a JOIN n b ON a.node_id < b.node_id ORDER BY meters DESC LIMIT 5;
 | LS-149361 | LS-170894 | 45.0197 |
 | LS-177315 | LS-143276 | 44.3612 |
 | LS-149361 | LS-143276 | 44.2287 |
-| LS-177315 | LS-174188 | 37.4466 |
+| LS-177315 | A8610A333526680F | 39.1749 |
+
+```sql
+WITH n AS (SELECT DISTINCT n.node_id, n.label, n.latitude::float8 AS lat, n.longitude::float8 AS lon,
+                  n.altitude::float8 AS alt
+           FROM nodes n JOIN readings r USING (node_id)
+           WHERE r.site_id = 'ranverso' AND n.latitude IS NOT NULL)
+SELECT a.label AS node_a, b.label AS node_b, sqrt(power(2*6371000*asin(sqrt(power(sin(radians(b.lat-a.lat)/2),2)+cos(radians(a.lat))*cos(radians(b.lat))*power(sin(radians(b.lon-a.lon)/2),2))),2)+power(b.alt-a.alt,2)) AS meters
+FROM n a JOIN n b ON a.node_id < b.node_id ORDER BY meters DESC LIMIT 5;
+```
+| node_a | node_b | meters |
+|---|---|---|
+| LS-177315 | LS-170894 | 45.2226 |
+| LS-149361 | LS-170894 | 45.0226 |
+| LS-177315 | LS-143276 | 44.3625 |
+| LS-149361 | LS-143276 | 44.2299 |
+| LS-177315 | A8610A333526680F | 39.1756 |
 
 
 ---
@@ -1748,8 +1940,8 @@ FROM n a JOIN n b ON a.node_id < b.node_id ORDER BY meters DESC LIMIT 5;
 ## F053 · what_about_site_spatial
 
 **Turn 1:** How far apart are the two most distant sensor nodes at Schenkenberg?  
-**Answer given in history:** 5.5 m, between LS-152555 and LS-175480.  
-**Recomputed:** `5.5`
+**Answer given in history:** 5.3 m, between LS-152555 and LS-175480.  
+**Recomputed:** `5.3`
 
 ```sql
 WITH n AS (SELECT DISTINCT n.node_id, n.label, n.latitude::float8 AS lat, n.longitude::float8 AS lon,
@@ -1761,15 +1953,31 @@ FROM n a JOIN n b ON a.node_id < b.node_id ORDER BY meters DESC LIMIT 5;
 ```
 | node_a | node_b | meters |
 |---|---|---|
-| LS-175480 | LS-152555 | 5.53735 |
-| LS-159070 | LS-152555 | 4.55761 |
-| LS-159070 | LS-152899 | 4.33754 |
-| LS-152914 | LS-152555 | 4.157 |
-| LS-152555 | LS-152479 | 3.98453 |
+| LS-175480 | LS-152555 | 5.29804 |
+| LS-159070 | LS-152555 | 4.60259 |
+| LS-159070 | LS-152899 | 4.49877 |
+| LS-152914 | LS-152555 | 4.24127 |
+| LS-152914 | LS-152899 | 4.17605 |
+
+```sql
+WITH n AS (SELECT DISTINCT n.node_id, n.label, n.latitude::float8 AS lat, n.longitude::float8 AS lon,
+                  n.altitude::float8 AS alt
+           FROM nodes n JOIN readings r USING (node_id)
+           WHERE r.site_id = 'schenkenberg' AND n.latitude IS NOT NULL)
+SELECT a.label AS node_a, b.label AS node_b, sqrt(power(2*6371000*asin(sqrt(power(sin(radians(b.lat-a.lat)/2),2)+cos(radians(a.lat))*cos(radians(b.lat))*power(sin(radians(b.lon-a.lon)/2),2))),2)+power(b.alt-a.alt,2)) AS meters
+FROM n a JOIN n b ON a.node_id < b.node_id ORDER BY meters DESC LIMIT 5;
+```
+| node_a | node_b | meters |
+|---|---|---|
+| 2CF7F1C072300226 | 2CF7F1C072600345 | 8.35366 |
+| 2CF7F1C072300226 | LS-149796 | 7.86344 |
+| 2CF7F1C072600345 | LS-152555 | 6.66012 |
+| 2CF7F1C072300226 | LS-159070 | 6.5424 |
+| LS-149796 | LS-152555 | 6.25198 |
 
 **Question:** What about at Ranverso?  
 **Reference:** 45.2 m, between LS-170894 and LS-177315.  
-**Recomputed:** `45.2` → **MATCH**
+**Recomputed:** `45.2` (with the altitude difference: `45.2`) → **MATCH**
 
 ```sql
 WITH n AS (SELECT DISTINCT n.node_id, n.label, n.latitude::float8 AS lat, n.longitude::float8 AS lon,
@@ -1785,7 +1993,23 @@ FROM n a JOIN n b ON a.node_id < b.node_id ORDER BY meters DESC LIMIT 5;
 | LS-149361 | LS-170894 | 45.0197 |
 | LS-177315 | LS-143276 | 44.3612 |
 | LS-149361 | LS-143276 | 44.2287 |
-| LS-177315 | LS-174188 | 37.4466 |
+| LS-177315 | A8610A333526680F | 39.1749 |
+
+```sql
+WITH n AS (SELECT DISTINCT n.node_id, n.label, n.latitude::float8 AS lat, n.longitude::float8 AS lon,
+                  n.altitude::float8 AS alt
+           FROM nodes n JOIN readings r USING (node_id)
+           WHERE r.site_id = 'ranverso' AND n.latitude IS NOT NULL)
+SELECT a.label AS node_a, b.label AS node_b, sqrt(power(2*6371000*asin(sqrt(power(sin(radians(b.lat-a.lat)/2),2)+cos(radians(a.lat))*cos(radians(b.lat))*power(sin(radians(b.lon-a.lon)/2),2))),2)+power(b.alt-a.alt,2)) AS meters
+FROM n a JOIN n b ON a.node_id < b.node_id ORDER BY meters DESC LIMIT 5;
+```
+| node_a | node_b | meters |
+|---|---|---|
+| LS-177315 | LS-170894 | 45.2226 |
+| LS-149361 | LS-170894 | 45.0226 |
+| LS-177315 | LS-143276 | 44.3625 |
+| LS-149361 | LS-143276 | 44.2299 |
+| LS-177315 | A8610A333526680F | 39.1756 |
 
 
 ---
@@ -1812,9 +2036,25 @@ FROM n a JOIN n b ON a.node_id < b.node_id ORDER BY meters DESC LIMIT 5;
 | LS-177281 Humidity-Temperature Montefalco | LS-177253 Crackmeter Conventillo | 8651.81 |
 | LS-177310 Crackmeter Montefalco | LS-177266 - Crackmeter Conventillo | 8650.34 |
 
+```sql
+WITH n AS (SELECT DISTINCT n.node_id, n.label, n.latitude::float8 AS lat, n.longitude::float8 AS lon,
+                  n.altitude::float8 AS alt
+           FROM nodes n JOIN readings r USING (node_id)
+           WHERE r.site_id = 'lucretili' AND n.latitude IS NOT NULL)
+SELECT a.label AS node_a, b.label AS node_b, sqrt(power(2*6371000*asin(sqrt(power(sin(radians(b.lat-a.lat)/2),2)+cos(radians(a.lat))*cos(radians(b.lat))*power(sin(radians(b.lon-a.lon)/2),2))),2)+power(b.alt-a.alt,2)) AS meters
+FROM n a JOIN n b ON a.node_id < b.node_id ORDER BY meters DESC LIMIT 5;
+```
+| node_a | node_b | meters |
+|---|---|---|
+| LS-153061 - Tiltmeter Conventillo | LS-177310 Crackmeter Montefalco | 8655.18 |
+| LS-177281 Humidity-Temperature Montefalco | LS-153061 - Tiltmeter Conventillo | 8654.4 |
+| LS-177253 Crackmeter Conventillo | LS-177310 Crackmeter Montefalco | 8654.39 |
+| LS-177281 Humidity-Temperature Montefalco | LS-177253 Crackmeter Conventillo | 8653.61 |
+| LS-177310 Crackmeter Montefalco | LS-177266 - Crackmeter Conventillo | 8652.06 |
+
 **Question:** What about at Schenkenberg?  
-**Reference:** 5.5 m, between LS-152555 and LS-175480.  
-**Recomputed:** `5.5` → **MATCH**
+**Reference:** 5.3 m, between LS-152555 and LS-175480. With the altitude difference: 8.4 m, between 2CF7F1C072300226 and 2CF7F1C072600345.  
+**Recomputed:** `5.3` (with the altitude difference: `8.4`) → **MATCH**
 
 ```sql
 WITH n AS (SELECT DISTINCT n.node_id, n.label, n.latitude::float8 AS lat, n.longitude::float8 AS lon,
@@ -1826,11 +2066,27 @@ FROM n a JOIN n b ON a.node_id < b.node_id ORDER BY meters DESC LIMIT 5;
 ```
 | node_a | node_b | meters |
 |---|---|---|
-| LS-175480 | LS-152555 | 5.53735 |
-| LS-159070 | LS-152555 | 4.55761 |
-| LS-159070 | LS-152899 | 4.33754 |
-| LS-152914 | LS-152555 | 4.157 |
-| LS-152555 | LS-152479 | 3.98453 |
+| LS-175480 | LS-152555 | 5.29804 |
+| LS-159070 | LS-152555 | 4.60259 |
+| LS-159070 | LS-152899 | 4.49877 |
+| LS-152914 | LS-152555 | 4.24127 |
+| LS-152914 | LS-152899 | 4.17605 |
+
+```sql
+WITH n AS (SELECT DISTINCT n.node_id, n.label, n.latitude::float8 AS lat, n.longitude::float8 AS lon,
+                  n.altitude::float8 AS alt
+           FROM nodes n JOIN readings r USING (node_id)
+           WHERE r.site_id = 'schenkenberg' AND n.latitude IS NOT NULL)
+SELECT a.label AS node_a, b.label AS node_b, sqrt(power(2*6371000*asin(sqrt(power(sin(radians(b.lat-a.lat)/2),2)+cos(radians(a.lat))*cos(radians(b.lat))*power(sin(radians(b.lon-a.lon)/2),2))),2)+power(b.alt-a.alt,2)) AS meters
+FROM n a JOIN n b ON a.node_id < b.node_id ORDER BY meters DESC LIMIT 5;
+```
+| node_a | node_b | meters |
+|---|---|---|
+| 2CF7F1C072300226 | 2CF7F1C072600345 | 8.35366 |
+| 2CF7F1C072300226 | LS-149796 | 7.86344 |
+| 2CF7F1C072600345 | LS-152555 | 6.66012 |
+| 2CF7F1C072300226 | LS-159070 | 6.5424 |
+| LS-149796 | LS-152555 | 6.25198 |
 
 
 ---
@@ -1839,7 +2095,7 @@ FROM n a JOIN n b ON a.node_id < b.node_id ORDER BY meters DESC LIMIT 5;
 
 **Turn 1:** What was the average temperature at Lucretili on 2026-06-09?  
 **Answer given in history:** 21.503.  
-**Recomputed:** `21.503242853711274`
+**Recomputed:** `21.503242853711267`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -1870,7 +2126,7 @@ WHERE r.site_id = 'lucretili' AND o.property_id = 'temperature' AND o.value IS N
 
 **Turn 1:** What was the average temperature at Baltanas on 2026-07-22?  
 **Answer given in history:** 24.493.  
-**Recomputed:** `24.492799023596426`
+**Recomputed:** `24.492799023596422`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -1883,7 +2139,7 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Question:** And on the following day?  
 **Reference:** 24.908.  
-**Recomputed:** `24.90815040650405` → **MATCH**
+**Recomputed:** `24.908150406504053` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -1901,7 +2157,7 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Turn 1:** What was the average temperature at Baltanas on 2026-08-04?  
 **Answer given in history:** 23.591.  
-**Recomputed:** `23.590855081688975`
+**Recomputed:** `23.59085508168897`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -1914,7 +2170,7 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Question:** And on the following day?  
 **Reference:** 23.098.  
-**Recomputed:** `23.097539244802746` → **MATCH**
+**Recomputed:** `23.097539244802753` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -1945,7 +2201,7 @@ WHERE r.site_id = 'schenkenberg' AND o.property_id = 'temperature' AND o.value I
 
 **Question:** And on the following day?  
 **Reference:** 28.817.  
-**Recomputed:** `28.81652173913044` → **MATCH**
+**Recomputed:** `28.816521739130437` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -1963,7 +2219,7 @@ WHERE r.site_id = 'schenkenberg' AND o.property_id = 'temperature' AND o.value I
 
 **Turn 1:** What was the average temperature at Baltanas on 2026-06-26?  
 **Answer given in history:** 23.187.  
-**Recomputed:** `23.187002437043077`
+**Recomputed:** `23.18700243704307`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -1976,7 +2232,7 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Question:** And on the following day?  
 **Reference:** 23.945.  
-**Recomputed:** `23.944534577164898` → **MATCH**
+**Recomputed:** `23.944534577164905` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -1994,7 +2250,7 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Turn 1:** What was the average temperature at Schenkenberg on 2026-06-01?  
 **Answer given in history:** 20.081.  
-**Recomputed:** `20.081005586592163`
+**Recomputed:** `20.081005586592184`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -2007,7 +2263,7 @@ WHERE r.site_id = 'schenkenberg' AND o.property_id = 'temperature' AND o.value I
 
 **Question:** And on the following day?  
 **Reference:** 17.686.  
-**Recomputed:** `17.685934489402705` → **MATCH**
+**Recomputed:** `17.685934489402698` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -2056,7 +2312,7 @@ WHERE r.site_id = 'ranverso' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Turn 1:** What was the average temperature at Schenkenberg on 2026-06-19?  
 **Answer given in history:** 29.542.  
-**Recomputed:** `29.54239999999999`
+**Recomputed:** `29.5424`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -2069,7 +2325,7 @@ WHERE r.site_id = 'schenkenberg' AND o.property_id = 'temperature' AND o.value I
 
 **Question:** And on the following day?  
 **Reference:** 30.13.  
-**Recomputed:** `30.12962962962964` → **MATCH**
+**Recomputed:** `30.12962962962963` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -2118,7 +2374,7 @@ WHERE r.site_id = 'ranverso' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Turn 1:** What was the average temperature at Baltanas on 2026-07-06?  
 **Answer given in history:** 26.049.  
-**Recomputed:** `26.048882113821165`
+**Recomputed:** `26.048882113821172`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -2131,7 +2387,7 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Question:** And on the following day?  
 **Reference:** 23.947.  
-**Recomputed:** `23.94689977637729` → **MATCH**
+**Recomputed:** `23.94689977637728` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -2162,7 +2418,7 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Question:** And on the following day?  
 **Reference:** 23.981.  
-**Recomputed:** `23.98112050739958` → **MATCH**
+**Recomputed:** `23.98112050739957` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -2190,9 +2446,9 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'ranverso' 
 | 20 | {"R2_rain_7d_diff": 20} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'ranverso' AND lower(o.property_id) LIKE '%rain%' AND lower(o.property_id) NOT LIKE '%acc%' AND o.value IS NOT NULL AND o.result_time <= '2026-05-23 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'ranverso' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'acc') = 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-05-23 23:59:59+00')
 SELECT r.sensor_id, o.property_id, count(*) AS n, sum(o.value) AS metric
-FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'ranverso' AND lower(o.property_id) LIKE '%rain%' AND lower(o.property_id) NOT LIKE '%acc%' AND o.value IS NOT NULL
+FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'ranverso' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'acc') = 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time BETWEEN anchor.t - interval '168 hours' AND anchor.t
 GROUP BY 1, 2 ORDER BY metric DESC;
 ```
@@ -2212,9 +2468,9 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'ranverso' 
 | 20 | {"R2_rain_7d_diff": 20} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'ranverso' AND lower(o.property_id) LIKE '%rain%' AND lower(o.property_id) NOT LIKE '%acc%' AND o.value IS NOT NULL AND o.result_time <= '2026-05-26 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'ranverso' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'acc') = 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-05-26 23:59:59+00')
 SELECT r.sensor_id, o.property_id, count(*) AS n, sum(o.value) AS metric
-FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'ranverso' AND lower(o.property_id) LIKE '%rain%' AND lower(o.property_id) NOT LIKE '%acc%' AND o.value IS NOT NULL
+FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'ranverso' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'acc') = 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time BETWEEN anchor.t - interval '168 hours' AND anchor.t
 GROUP BY 1, 2 ORDER BY metric DESC;
 ```
@@ -2242,8 +2498,8 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 3 | {"R5_visitors_peak": 3} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%counter%' AND o.value IS NOT NULL AND o.result_time <= '2026-06-06 23:59:59+00')
-SELECT r.sensor_id, o.property_id, o.result_time, o.value AS metric FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%counter%' AND o.value IS NOT NULL
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'counter') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-06-06 23:59:59+00')
+SELECT r.sensor_id, o.property_id, o.result_time, o.value AS metric FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'counter') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time = anchor.t ORDER BY metric DESC;
 ```
 | sensor_id | property_id | result_time | metric |
@@ -2262,8 +2518,8 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 3 | {"R5_visitors_peak": 3} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%counter%' AND o.value IS NOT NULL AND o.result_time <= '2026-06-09 23:59:59+00')
-SELECT r.sensor_id, o.property_id, o.result_time, o.value AS metric FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%counter%' AND o.value IS NOT NULL
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'counter') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-06-09 23:59:59+00')
+SELECT r.sensor_id, o.property_id, o.result_time, o.value AS metric FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'counter') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time = anchor.t ORDER BY metric DESC;
 ```
 | sensor_id | property_id | result_time | metric |
@@ -2290,9 +2546,9 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 20 | {"R9a_temp_lt": 20} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL AND o.result_time <= '2026-06-13 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-06-13 23:59:59+00')
 SELECT r.sensor_id, o.property_id, count(*) AS n, min(o.value), max(o.value), max(o.value) - min(o.value) AS metric
-FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL
+FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time BETWEEN anchor.t - interval '24 hours' AND anchor.t
 GROUP BY 1, 2 ORDER BY metric DESC;
 ```
@@ -2325,10 +2581,10 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 5 | {"R9b_temp_st": 5} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL AND o.result_time <= '2026-06-13 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-06-13 23:59:59+00')
 , w AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value,
         o.value - lag(o.value) OVER (PARTITION BY r.sensor_id, o.property_id ORDER BY o.result_time) AS diff
-      FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL
+      FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
         AND o.result_time BETWEEN anchor.t - interval '1 hours' AND anchor.t)
 SELECT sensor_id, property_id, count(*) AS n, max(abs(diff)) AS metric FROM w
 GROUP BY 1, 2 ORDER BY metric DESC NULLS LAST;
@@ -2355,7 +2611,7 @@ GROUP BY 1, 2 ORDER BY metric DESC NULLS LAST;
 | 8533f470-5c02-11f0-8a4b-6bd692b5baa4 | temperature | 1 | None |
 
 **Question:** What about on 2026-06-21?  
-**Reference:** Yes. R9a_temp_lt: metric 27 vs threshold 20 (window ending 2026-06-21 23:55 UTC); R9b_temp_st: max 1h change 1 vs threshold 5 (ending 2026-06-21 23:55 UTC)  
+**Reference:** Yes. R9a_temp_lt: metric 27 vs threshold 20 (window ending 2026-06-21 23:56 UTC); R9b_temp_st: max 1h change 1 vs threshold 5 (ending 2026-06-21 23:56 UTC)  
 **Recomputed:** `Yes` → **MATCH**
 
 ```sql
@@ -2366,32 +2622,33 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 20 | {"R9a_temp_lt": 20} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL AND o.result_time <= '2026-06-21 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-06-21 23:59:59+00')
 SELECT r.sensor_id, o.property_id, count(*) AS n, min(o.value), max(o.value), max(o.value) - min(o.value) AS metric
-FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL
+FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time BETWEEN anchor.t - interval '24 hours' AND anchor.t
 GROUP BY 1, 2 ORDER BY metric DESC;
 ```
 | sensor_id | property_id | n | min | max | metric |
 |---|---|---|---|---|---|
-| 9eefebd0-8191-11f0-9283-e956b63ef652 | temperature | 289 | 13 | 40 | 27 |
+| 9eefebd0-8191-11f0-9283-e956b63ef652 | temperature | 288 | 13 | 40 | 27 |
 | 8250dd80-8269-11f0-9283-e956b63ef652 | temperature | 41 | 20 | 44 | 24 |
 | 0cf22310-81be-11f0-9283-e956b63ef652 | temperature | 41 | 20 | 44 | 24 |
 | 82508f60-8269-11f0-b6dc-556f88243956 | temperature | 41 | 20 | 44 | 24 |
-| 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 289 | 19 | 42 | 23 |
-| c0d43040-c86c-11f0-8080-e5362df2da58 | temperature | 245 | 20 | 41 | 21 |
+| 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 288 | 19 | 42 | 23 |
+| c0d43040-c86c-11f0-8080-e5362df2da58 | temperature | 244 | 20 | 41 | 21 |
 | 8533f470-5c02-11f0-8a4b-6bd692b5baa4 | temperature | 24 | 24.3 | 45.1 | 20.8 |
-| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 289 | 18 | 38 | 20 |
-| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 289 | 18 | 38 | 20 |
-| 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 289 | 18 | 38 | 20 |
-| 37c9dd80-833f-11f0-9283-e956b63ef652 | temperature | 289 | 21.1 | 40.5 | 19.4 |
-| 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 285 | 21 | 37 | 16 |
-| 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 285 | 21 | 37 | 16 |
-| b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 287 | 21 | 36 | 15 |
-| 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 288 | 24 | 37 | 13 |
-| 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 289 | 27.3 | 39.4 | 12.1 |
-| f3058610-83ff-11f0-9a67-6d25b7d467e7 | temperature | 275 | 21.8 | 28.2 | 6.4 |
-| b8184060-831e-11f0-9283-e956b63ef652 | temperature | 289 | 24 | 30 | 6 |
+| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 288 | 18 | 38 | 20 |
+| 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 288 | 18 | 38 | 20 |
+| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 288 | 18 | 38 | 20 |
+| 37c9dd80-833f-11f0-9283-e956b63ef652 | temperature | 288 | 21.1 | 40.5 | 19.4 |
+| 2CF7F1C072300286 | temp1 | 358 | 17.9 | 35.2 | 17.3 |
+| 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 284 | 21 | 37 | 16 |
+| 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 284 | 21 | 37 | 16 |
+| b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 286 | 21 | 36 | 15 |
+| 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 287 | 24 | 37 | 13 |
+| 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 288 | 27.3 | 39.4 | 12.1 |
+| f3058610-83ff-11f0-9a67-6d25b7d467e7 | temperature | 274 | 21.8 | 28.2 | 6.4 |
+| b8184060-831e-11f0-9283-e956b63ef652 | temperature | 288 | 24 | 30 | 6 |
 
 ```sql
 SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili' AND rule_id = 'R9b_temp_st';
@@ -2401,47 +2658,48 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 5 | {"R9b_temp_st": 5} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL AND o.result_time <= '2026-06-21 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-06-21 23:59:59+00')
 , w AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value,
         o.value - lag(o.value) OVER (PARTITION BY r.sensor_id, o.property_id ORDER BY o.result_time) AS diff
-      FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL
+      FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
         AND o.result_time BETWEEN anchor.t - interval '1 hours' AND anchor.t)
 SELECT sensor_id, property_id, count(*) AS n, max(abs(diff)) AS metric FROM w
 GROUP BY 1, 2 ORDER BY metric DESC NULLS LAST;
 ```
 | sensor_id | property_id | n | metric |
 |---|---|---|---|
-| b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 13 | 1 |
-| b8184060-831e-11f0-9283-e956b63ef652 | temperature | 13 | 1 |
-| 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 13 | 1 |
+| 9eefebd0-8191-11f0-9283-e956b63ef652 | temperature | 12 | 1 |
+| b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 12 | 1 |
+| b8184060-831e-11f0-9283-e956b63ef652 | temperature | 12 | 1 |
 | 0cf22310-81be-11f0-9283-e956b63ef652 | temperature | 2 | 1 |
-| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
-| 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
-| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
-| 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 13 | 1 |
-| 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 13 | 1 |
-| 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
+| 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 12 | 1 |
+| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 12 | 1 |
+| 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 12 | 1 |
+| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 12 | 1 |
+| 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 12 | 1 |
+| 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 12 | 1 |
+| 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 12 | 1 |
 | 82508f60-8269-11f0-b6dc-556f88243956 | temperature | 2 | 1 |
 | 8250dd80-8269-11f0-9283-e956b63ef652 | temperature | 2 | 1 |
-| c0d43040-c86c-11f0-8080-e5362df2da58 | temperature | 13 | 1 |
-| 9eefebd0-8191-11f0-9283-e956b63ef652 | temperature | 13 | 1 |
-| f3058610-83ff-11f0-9a67-6d25b7d467e7 | temperature | 13 | 0.3 |
-| 37c9dd80-833f-11f0-9283-e956b63ef652 | temperature | 13 | 0.3 |
-| 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 13 | 0.3 |
+| c0d43040-c86c-11f0-8080-e5362df2da58 | temperature | 12 | 1 |
+| f3058610-83ff-11f0-9a67-6d25b7d467e7 | temperature | 12 | 0.3 |
+| 2CF7F1C072300286 | temp1 | 13 | 0.3 |
+| 37c9dd80-833f-11f0-9283-e956b63ef652 | temperature | 12 | 0.3 |
+| 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 12 | 0.3 |
 | 8533f470-5c02-11f0-8a4b-6bd692b5baa4 | temperature | 1 | None |
 
 - as_of = 2026-06-21 23:59:59+00 (windows end at the latest matching reading at or before it)
 - R9a_temp_lt: metric 27 vs threshold 20 → fires
 - R9b_temp_st: metric 1 vs threshold 5 → does not fire
-- Raw readings: [data/F068_R9a_temp_lt.csv](data/F068_R9a_temp_lt.csv) (4124 rows)
-- Raw readings: [data/F068_R9b_temp_st.csv](data/F068_R9b_temp_st.csv) (189 rows)
+- Raw readings: [data/F068_R9a_temp_lt.csv](data/F068_R9a_temp_lt.csv) (4468 rows)
+- Raw readings: [data/F068_R9b_temp_st.csv](data/F068_R9b_temp_st.csv) (188 rows)
 
 ---
 
 ## F069 · anomaly_other_date
 
 **Turn 1:** Was the temperature at Lucretili anomalous on 2026-06-25 according to its AD-RT rules?  
-**Answer given in history:** Yes. R9a_temp_lt: metric 27 vs threshold 20 (window ending 2026-06-25 23:55 UTC); R9b_temp_st: max 1h change 1 vs threshold 5 (ending 2026-06-25 23:55 UTC)  
+**Answer given in history:** Yes. R9a_temp_lt: metric 27 vs threshold 20 (window ending 2026-06-25 23:58 UTC); R9b_temp_st: max 1h change 1 vs threshold 5 (ending 2026-06-25 23:58 UTC)  
 **Recomputed:** `Yes`
 
 ```sql
@@ -2452,32 +2710,33 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 20 | {"R9a_temp_lt": 20} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL AND o.result_time <= '2026-06-25 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-06-25 23:59:59+00')
 SELECT r.sensor_id, o.property_id, count(*) AS n, min(o.value), max(o.value), max(o.value) - min(o.value) AS metric
-FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL
+FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time BETWEEN anchor.t - interval '24 hours' AND anchor.t
 GROUP BY 1, 2 ORDER BY metric DESC;
 ```
 | sensor_id | property_id | n | min | max | metric |
 |---|---|---|---|---|---|
-| 9eefebd0-8191-11f0-9283-e956b63ef652 | temperature | 289 | 12 | 39 | 27 |
-| 0cf22310-81be-11f0-9283-e956b63ef652 | temperature | 45 | 19 | 41 | 22 |
+| 9eefebd0-8191-11f0-9283-e956b63ef652 | temperature | 288 | 12 | 39 | 27 |
 | 82508f60-8269-11f0-b6dc-556f88243956 | temperature | 45 | 19 | 41 | 22 |
 | 8250dd80-8269-11f0-9283-e956b63ef652 | temperature | 45 | 19 | 41 | 22 |
+| 0cf22310-81be-11f0-9283-e956b63ef652 | temperature | 45 | 19 | 41 | 22 |
 | 8533f470-5c02-11f0-8a4b-6bd692b5baa4 | temperature | 22 | 22.5 | 43.5 | 21 |
-| 37c9dd80-833f-11f0-9283-e956b63ef652 | temperature | 288 | 19.1 | 39 | 19.9 |
-| c0d43040-c86c-11f0-8080-e5362df2da58 | temperature | 274 | 19 | 38 | 19 |
-| 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 289 | 16 | 33 | 17 |
-| 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 289 | 19 | 35 | 16 |
-| 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 289 | 19 | 35 | 16 |
-| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 289 | 16 | 31 | 15 |
-| 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 289 | 16 | 31 | 15 |
-| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 289 | 16 | 31 | 15 |
-| b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 289 | 19 | 34 | 15 |
-| 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 289 | 22 | 35 | 13 |
-| 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 288 | 25.2 | 36.7 | 11.5 |
-| b8184060-831e-11f0-9283-e956b63ef652 | temperature | 288 | 22 | 28 | 6 |
-| f3058610-83ff-11f0-9a67-6d25b7d467e7 | temperature | 284 | 20 | 25.3 | 5.3 |
+| 37c9dd80-833f-11f0-9283-e956b63ef652 | temperature | 287 | 19.1 | 39 | 19.9 |
+| c0d43040-c86c-11f0-8080-e5362df2da58 | temperature | 273 | 19 | 38 | 19 |
+| 2CF7F1C072300286 | temp1 | 293 | 16.4 | 34.3 | 17.9 |
+| 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 288 | 16 | 33 | 17 |
+| 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 288 | 19 | 35 | 16 |
+| 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 288 | 19 | 35 | 16 |
+| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 288 | 16 | 31 | 15 |
+| 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 288 | 16 | 31 | 15 |
+| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 288 | 16 | 31 | 15 |
+| b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 288 | 19 | 34 | 15 |
+| 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 288 | 22 | 35 | 13 |
+| 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 287 | 25.2 | 36.7 | 11.5 |
+| b8184060-831e-11f0-9283-e956b63ef652 | temperature | 287 | 22 | 28 | 6 |
+| f3058610-83ff-11f0-9a67-6d25b7d467e7 | temperature | 283 | 20 | 25.3 | 5.3 |
 
 ```sql
 SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili' AND rule_id = 'R9b_temp_st';
@@ -2487,37 +2746,38 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 5 | {"R9b_temp_st": 5} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL AND o.result_time <= '2026-06-25 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-06-25 23:59:59+00')
 , w AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value,
         o.value - lag(o.value) OVER (PARTITION BY r.sensor_id, o.property_id ORDER BY o.result_time) AS diff
-      FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL
+      FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
         AND o.result_time BETWEEN anchor.t - interval '1 hours' AND anchor.t)
 SELECT sensor_id, property_id, count(*) AS n, max(abs(diff)) AS metric FROM w
 GROUP BY 1, 2 ORDER BY metric DESC NULLS LAST;
 ```
 | sensor_id | property_id | n | metric |
 |---|---|---|---|
-| 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
-| c0d43040-c86c-11f0-8080-e5362df2da58 | temperature | 13 | 1 |
-| 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 13 | 1 |
-| b8184060-831e-11f0-9283-e956b63ef652 | temperature | 13 | 1 |
-| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
-| 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
-| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
-| b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 13 | 1 |
-| 9eefebd0-8191-11f0-9283-e956b63ef652 | temperature | 13 | 1 |
-| 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 13 | 0.3 |
-| 37c9dd80-833f-11f0-9283-e956b63ef652 | temperature | 13 | 0.2 |
-| f3058610-83ff-11f0-9a67-6d25b7d467e7 | temperature | 13 | 0.2 |
-| 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 13 | 0 |
-| 82508f60-8269-11f0-b6dc-556f88243956 | temperature | 2 | 0 |
-| 0cf22310-81be-11f0-9283-e956b63ef652 | temperature | 2 | 0 |
-| 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 13 | 0 |
+| 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 12 | 1 |
+| 9eefebd0-8191-11f0-9283-e956b63ef652 | temperature | 12 | 1 |
+| 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 12 | 1 |
+| b8184060-831e-11f0-9283-e956b63ef652 | temperature | 12 | 1 |
+| b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 12 | 1 |
+| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 12 | 1 |
+| 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 12 | 1 |
+| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 12 | 1 |
+| c0d43040-c86c-11f0-8080-e5362df2da58 | temperature | 12 | 1 |
+| 2CF7F1C072300286 | temp1 | 12 | 0.3 |
+| 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 12 | 0.3 |
+| f3058610-83ff-11f0-9a67-6d25b7d467e7 | temperature | 12 | 0.2 |
+| 37c9dd80-833f-11f0-9283-e956b63ef652 | temperature | 12 | 0.2 |
 | 8250dd80-8269-11f0-9283-e956b63ef652 | temperature | 2 | 0 |
+| 82508f60-8269-11f0-b6dc-556f88243956 | temperature | 2 | 0 |
+| 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 12 | 0 |
+| 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 12 | 0 |
+| 0cf22310-81be-11f0-9283-e956b63ef652 | temperature | 2 | 0 |
 | 8533f470-5c02-11f0-8a4b-6bd692b5baa4 | temperature | 1 | None |
 
 **Question:** What about on 2026-06-30?  
-**Reference:** Yes. R9a_temp_lt: metric 27 vs threshold 20 (window ending 2026-06-30 23:55 UTC); R9b_temp_st: max 1h change 1 vs threshold 5 (ending 2026-06-30 23:55 UTC)  
+**Reference:** Yes. R9a_temp_lt: metric 27 vs threshold 20 (window ending 2026-06-30 23:57 UTC); R9b_temp_st: max 1h change 1 vs threshold 5 (ending 2026-06-30 23:57 UTC)  
 **Recomputed:** `Yes` → **MATCH**
 
 ```sql
@@ -2528,32 +2788,33 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 20 | {"R9a_temp_lt": 20} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL AND o.result_time <= '2026-06-30 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-06-30 23:59:59+00')
 SELECT r.sensor_id, o.property_id, count(*) AS n, min(o.value), max(o.value), max(o.value) - min(o.value) AS metric
-FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL
+FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time BETWEEN anchor.t - interval '24 hours' AND anchor.t
 GROUP BY 1, 2 ORDER BY metric DESC;
 ```
 | sensor_id | property_id | n | min | max | metric |
 |---|---|---|---|---|---|
-| 9eefebd0-8191-11f0-9283-e956b63ef652 | temperature | 289 | 13 | 40 | 27 |
-| 82508f60-8269-11f0-b6dc-556f88243956 | temperature | 34 | 18 | 43 | 25 |
-| 0cf22310-81be-11f0-9283-e956b63ef652 | temperature | 34 | 18 | 43 | 25 |
+| 9eefebd0-8191-11f0-9283-e956b63ef652 | temperature | 288 | 13 | 40 | 27 |
 | 8250dd80-8269-11f0-9283-e956b63ef652 | temperature | 34 | 18 | 43 | 25 |
+| 0cf22310-81be-11f0-9283-e956b63ef652 | temperature | 34 | 18 | 43 | 25 |
+| 82508f60-8269-11f0-b6dc-556f88243956 | temperature | 34 | 18 | 43 | 25 |
+| 2CF7F1C072300286 | temp1 | 295 | 17.2 | 36.7 | 19.5 |
 | 8533f470-5c02-11f0-8a4b-6bd692b5baa4 | temperature | 23 | 23.1 | 41.8 | 18.7 |
-| 37c9dd80-833f-11f0-9283-e956b63ef652 | temperature | 289 | 20.1 | 38.3 | 18.2 |
-| 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 289 | 17 | 34 | 17 |
-| b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 288 | 19 | 35 | 16 |
-| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 289 | 17 | 33 | 16 |
-| 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 289 | 17 | 33 | 16 |
-| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 289 | 17 | 33 | 16 |
-| 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 276 | 20 | 36 | 16 |
-| 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 276 | 20 | 36 | 16 |
-| c0d43040-c86c-11f0-8080-e5362df2da58 | temperature | 135 | 18 | 31 | 13 |
-| 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 287 | 24 | 36 | 12 |
-| 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 288 | 26.5 | 37.8 | 11.3 |
-| b8184060-831e-11f0-9283-e956b63ef652 | temperature | 287 | 23 | 29 | 6 |
-| f3058610-83ff-11f0-9a67-6d25b7d467e7 | temperature | 265 | 21.6 | 27.2 | 5.6 |
+| 37c9dd80-833f-11f0-9283-e956b63ef652 | temperature | 288 | 20.1 | 38.3 | 18.2 |
+| 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 288 | 17 | 34 | 17 |
+| b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 287 | 19 | 35 | 16 |
+| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 288 | 17 | 33 | 16 |
+| 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 288 | 17 | 33 | 16 |
+| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 288 | 17 | 33 | 16 |
+| 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 275 | 20 | 36 | 16 |
+| 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 275 | 20 | 36 | 16 |
+| c0d43040-c86c-11f0-8080-e5362df2da58 | temperature | 134 | 18 | 31 | 13 |
+| 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 286 | 24 | 36 | 12 |
+| 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 287 | 26.5 | 37.8 | 11.3 |
+| b8184060-831e-11f0-9283-e956b63ef652 | temperature | 286 | 23 | 29 | 6 |
+| f3058610-83ff-11f0-9a67-6d25b7d467e7 | temperature | 264 | 21.6 | 27.2 | 5.6 |
 
 ```sql
 SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili' AND rule_id = 'R9b_temp_st';
@@ -2563,47 +2824,48 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 5 | {"R9b_temp_st": 5} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL AND o.result_time <= '2026-06-30 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-06-30 23:59:59+00')
 , w AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value,
         o.value - lag(o.value) OVER (PARTITION BY r.sensor_id, o.property_id ORDER BY o.result_time) AS diff
-      FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL
+      FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
         AND o.result_time BETWEEN anchor.t - interval '1 hours' AND anchor.t)
 SELECT sensor_id, property_id, count(*) AS n, max(abs(diff)) AS metric FROM w
 GROUP BY 1, 2 ORDER BY metric DESC NULLS LAST;
 ```
 | sensor_id | property_id | n | metric |
 |---|---|---|---|
-| b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 13 | 1 |
-| b8184060-831e-11f0-9283-e956b63ef652 | temperature | 13 | 1 |
-| 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 13 | 1 |
-| 9eefebd0-8191-11f0-9283-e956b63ef652 | temperature | 13 | 1 |
-| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
-| 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
-| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
-| 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 13 | 1 |
-| 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 13 | 1 |
-| 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
-| 37c9dd80-833f-11f0-9283-e956b63ef652 | temperature | 13 | 0.4 |
-| f3058610-83ff-11f0-9a67-6d25b7d467e7 | temperature | 13 | 0.3 |
-| 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 13 | 0.3 |
-| 8250dd80-8269-11f0-9283-e956b63ef652 | temperature | 2 | 0 |
+| 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 12 | 1 |
+| b8184060-831e-11f0-9283-e956b63ef652 | temperature | 12 | 1 |
+| 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 12 | 1 |
+| b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 12 | 1 |
+| 9eefebd0-8191-11f0-9283-e956b63ef652 | temperature | 12 | 1 |
+| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 12 | 1 |
+| 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 12 | 1 |
+| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 12 | 1 |
+| 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 12 | 1 |
+| 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 12 | 1 |
+| 37c9dd80-833f-11f0-9283-e956b63ef652 | temperature | 12 | 0.4 |
+| f3058610-83ff-11f0-9a67-6d25b7d467e7 | temperature | 12 | 0.3 |
+| 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 12 | 0.3 |
+| 2CF7F1C072300286 | temp1 | 13 | 0.1 |
 | 82508f60-8269-11f0-b6dc-556f88243956 | temperature | 2 | 0 |
 | 0cf22310-81be-11f0-9283-e956b63ef652 | temperature | 2 | 0 |
-| c0d43040-c86c-11f0-8080-e5362df2da58 | temperature | 13 | 0 |
+| c0d43040-c86c-11f0-8080-e5362df2da58 | temperature | 12 | 0 |
+| 8250dd80-8269-11f0-9283-e956b63ef652 | temperature | 2 | 0 |
 | 8533f470-5c02-11f0-8a4b-6bd692b5baa4 | temperature | 1 | None |
 
 - as_of = 2026-06-30 23:59:59+00 (windows end at the latest matching reading at or before it)
 - R9a_temp_lt: metric 27 vs threshold 20 → fires
 - R9b_temp_st: metric 1 vs threshold 5 → does not fire
-- Raw readings: [data/F069_R9a_temp_lt.csv](data/F069_R9a_temp_lt.csv) (3961 rows)
-- Raw readings: [data/F069_R9b_temp_st.csv](data/F069_R9b_temp_st.csv) (189 rows)
+- Raw readings: [data/F069_R9a_temp_lt.csv](data/F069_R9a_temp_lt.csv) (4242 rows)
+- Raw readings: [data/F069_R9b_temp_st.csv](data/F069_R9b_temp_st.csv) (188 rows)
 
 ---
 
 ## F070 · anomaly_other_date
 
 **Turn 1:** Was the temperature at Lucretili anomalous on 2026-07-06 according to its AD-RT rules?  
-**Answer given in history:** Yes. R9a_temp_lt: metric 25 vs threshold 20 (window ending 2026-07-06 23:55 UTC); R9b_temp_st: max 1h change 1 vs threshold 5 (ending 2026-07-06 23:55 UTC)  
+**Answer given in history:** Yes. R9a_temp_lt: metric 25 vs threshold 20 (window ending 2026-07-06 23:58 UTC); R9b_temp_st: max 1h change 1 vs threshold 5 (ending 2026-07-06 23:58 UTC)  
 **Recomputed:** `Yes`
 
 ```sql
@@ -2614,32 +2876,33 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 20 | {"R9a_temp_lt": 20} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL AND o.result_time <= '2026-07-06 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-07-06 23:59:59+00')
 SELECT r.sensor_id, o.property_id, count(*) AS n, min(o.value), max(o.value), max(o.value) - min(o.value) AS metric
-FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL
+FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time BETWEEN anchor.t - interval '24 hours' AND anchor.t
 GROUP BY 1, 2 ORDER BY metric DESC;
 ```
 | sensor_id | property_id | n | min | max | metric |
 |---|---|---|---|---|---|
-| 9eefebd0-8191-11f0-9283-e956b63ef652 | temperature | 288 | 12 | 37 | 25 |
-| 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 289 | 17 | 42 | 25 |
+| 9eefebd0-8191-11f0-9283-e956b63ef652 | temperature | 287 | 12 | 37 | 25 |
+| 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 288 | 17 | 42 | 25 |
 | 8250dd80-8269-11f0-9283-e956b63ef652 | temperature | 31 | 17 | 40 | 23 |
 | 0cf22310-81be-11f0-9283-e956b63ef652 | temperature | 31 | 17 | 40 | 23 |
 | 82508f60-8269-11f0-b6dc-556f88243956 | temperature | 31 | 17 | 40 | 23 |
 | 8533f470-5c02-11f0-8a4b-6bd692b5baa4 | temperature | 24 | 21 | 41 | 20 |
-| 37c9dd80-833f-11f0-9283-e956b63ef652 | temperature | 288 | 17.7 | 37.6 | 19.9 |
-| 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 289 | 17 | 35 | 18 |
-| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 289 | 17 | 35 | 18 |
-| c0d43040-c86c-11f0-8080-e5362df2da58 | temperature | 66 | 18 | 36 | 18 |
-| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 289 | 17 | 35 | 18 |
-| 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 258 | 18 | 33 | 15 |
-| 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 258 | 18 | 33 | 15 |
-| b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 286 | 18 | 31 | 13 |
-| 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 286 | 21 | 33 | 12 |
-| 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 288 | 23.9 | 34.9 | 11 |
-| b8184060-831e-11f0-9283-e956b63ef652 | temperature | 280 | 20 | 26 | 6 |
-| f3058610-83ff-11f0-9a67-6d25b7d467e7 | temperature | 254 | 19.1 | 24.2 | 5.1 |
+| 37c9dd80-833f-11f0-9283-e956b63ef652 | temperature | 287 | 17.7 | 37.6 | 19.9 |
+| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 288 | 17 | 35 | 18 |
+| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 288 | 17 | 35 | 18 |
+| c0d43040-c86c-11f0-8080-e5362df2da58 | temperature | 65 | 18 | 36 | 18 |
+| 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 288 | 17 | 35 | 18 |
+| 2CF7F1C072300286 | temp1 | 300 | 16 | 32.5 | 16.5 |
+| 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 257 | 18 | 33 | 15 |
+| 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 257 | 18 | 33 | 15 |
+| b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 285 | 18 | 31 | 13 |
+| 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 285 | 21 | 33 | 12 |
+| 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 287 | 23.9 | 34.9 | 11 |
+| b8184060-831e-11f0-9283-e956b63ef652 | temperature | 279 | 20 | 26 | 6 |
+| f3058610-83ff-11f0-9a67-6d25b7d467e7 | temperature | 253 | 19.1 | 24.2 | 5.1 |
 
 ```sql
 SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili' AND rule_id = 'R9b_temp_st';
@@ -2649,37 +2912,38 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 5 | {"R9b_temp_st": 5} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL AND o.result_time <= '2026-07-06 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-07-06 23:59:59+00')
 , w AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value,
         o.value - lag(o.value) OVER (PARTITION BY r.sensor_id, o.property_id ORDER BY o.result_time) AS diff
-      FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL
+      FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
         AND o.result_time BETWEEN anchor.t - interval '1 hours' AND anchor.t)
 SELECT sensor_id, property_id, count(*) AS n, max(abs(diff)) AS metric FROM w
 GROUP BY 1, 2 ORDER BY metric DESC NULLS LAST;
 ```
 | sensor_id | property_id | n | metric |
 |---|---|---|---|
-| b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 13 | 1 |
+| b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 12 | 1 |
 | c0d43040-c86c-11f0-8080-e5362df2da58 | temperature | 5 | 1 |
-| 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 13 | 1 |
-| 9eefebd0-8191-11f0-9283-e956b63ef652 | temperature | 13 | 1 |
-| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
-| 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
-| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
-| 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 13 | 1 |
-| 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 13 | 1 |
-| 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
-| b8184060-831e-11f0-9283-e956b63ef652 | temperature | 13 | 1 |
-| 37c9dd80-833f-11f0-9283-e956b63ef652 | temperature | 13 | 0.4 |
-| f3058610-83ff-11f0-9a67-6d25b7d467e7 | temperature | 13 | 0.3 |
-| 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 13 | 0.1 |
+| 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 12 | 1 |
+| b8184060-831e-11f0-9283-e956b63ef652 | temperature | 12 | 1 |
+| 9eefebd0-8191-11f0-9283-e956b63ef652 | temperature | 12 | 1 |
+| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 12 | 1 |
+| 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 12 | 1 |
+| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 12 | 1 |
+| 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 12 | 1 |
+| 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 12 | 1 |
+| 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 12 | 1 |
+| 37c9dd80-833f-11f0-9283-e956b63ef652 | temperature | 12 | 0.4 |
+| f3058610-83ff-11f0-9a67-6d25b7d467e7 | temperature | 12 | 0.3 |
+| 2CF7F1C072300286 | temp1 | 12 | 0.1 |
+| 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 12 | 0.1 |
 | 8250dd80-8269-11f0-9283-e956b63ef652 | temperature | 2 | 0 |
 | 82508f60-8269-11f0-b6dc-556f88243956 | temperature | 2 | 0 |
 | 0cf22310-81be-11f0-9283-e956b63ef652 | temperature | 2 | 0 |
 | 8533f470-5c02-11f0-8a4b-6bd692b5baa4 | temperature | 1 | None |
 
 **Question:** What about on 2026-07-14?  
-**Reference:** Yes. R9a_temp_lt: metric 25 vs threshold 20 (window ending 2026-07-14 23:55 UTC); R9b_temp_st: max 1h change 1 vs threshold 5 (ending 2026-07-14 23:55 UTC)  
+**Reference:** Yes. R9a_temp_lt: metric 25 vs threshold 20 (window ending 2026-07-14 23:58 UTC); R9b_temp_st: max 1h change 1 vs threshold 5 (ending 2026-07-14 23:58 UTC)  
 **Recomputed:** `Yes` → **MATCH**
 
 ```sql
@@ -2690,32 +2954,33 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 20 | {"R9a_temp_lt": 20} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL AND o.result_time <= '2026-07-14 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-07-14 23:59:59+00')
 SELECT r.sensor_id, o.property_id, count(*) AS n, min(o.value), max(o.value), max(o.value) - min(o.value) AS metric
-FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL
+FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time BETWEEN anchor.t - interval '24 hours' AND anchor.t
 GROUP BY 1, 2 ORDER BY metric DESC;
 ```
 | sensor_id | property_id | n | min | max | metric |
 |---|---|---|---|---|---|
-| 9eefebd0-8191-11f0-9283-e956b63ef652 | temperature | 289 | 14 | 39 | 25 |
-| 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 289 | 20 | 43 | 23 |
+| 9eefebd0-8191-11f0-9283-e956b63ef652 | temperature | 288 | 14 | 39 | 25 |
+| 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 288 | 20 | 43 | 23 |
 | 8533f470-5c02-11f0-8a4b-6bd692b5baa4 | temperature | 24 | 23.8 | 43.9 | 20.1 |
 | 8250dd80-8269-11f0-9283-e956b63ef652 | temperature | 31 | 21 | 41 | 20 |
 | 0cf22310-81be-11f0-9283-e956b63ef652 | temperature | 31 | 21 | 41 | 20 |
 | 82508f60-8269-11f0-b6dc-556f88243956 | temperature | 31 | 21 | 41 | 20 |
-| 37c9dd80-833f-11f0-9283-e956b63ef652 | temperature | 289 | 20.6 | 39.8 | 19.2 |
-| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 289 | 19 | 38 | 19 |
-| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 289 | 19 | 38 | 19 |
-| 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 289 | 19 | 38 | 19 |
-| c0d43040-c86c-11f0-8080-e5362df2da58 | temperature | 187 | 22 | 38 | 16 |
-| b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 287 | 20 | 35 | 15 |
-| 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 283 | 21 | 36 | 15 |
-| 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 283 | 21 | 36 | 15 |
-| 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 288 | 23 | 36 | 13 |
-| 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 287 | 26.5 | 39.3 | 12.8 |
-| b8184060-831e-11f0-9283-e956b63ef652 | temperature | 288 | 23 | 30 | 7 |
-| f3058610-83ff-11f0-9a67-6d25b7d467e7 | temperature | 275 | 21.6 | 27.8 | 6.2 |
+| 37c9dd80-833f-11f0-9283-e956b63ef652 | temperature | 288 | 20.6 | 39.8 | 19.2 |
+| 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 288 | 19 | 38 | 19 |
+| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 288 | 19 | 38 | 19 |
+| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 288 | 19 | 38 | 19 |
+| 2CF7F1C072300286 | temp1 | 292 | 18.8 | 36 | 17.2 |
+| c0d43040-c86c-11f0-8080-e5362df2da58 | temperature | 186 | 22 | 38 | 16 |
+| b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 286 | 20 | 35 | 15 |
+| 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 282 | 21 | 36 | 15 |
+| 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 282 | 21 | 36 | 15 |
+| 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 287 | 23 | 36 | 13 |
+| 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 286 | 26.5 | 39.3 | 12.8 |
+| b8184060-831e-11f0-9283-e956b63ef652 | temperature | 287 | 23 | 30 | 7 |
+| f3058610-83ff-11f0-9a67-6d25b7d467e7 | temperature | 274 | 21.6 | 27.8 | 6.2 |
 
 ```sql
 SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili' AND rule_id = 'R9b_temp_st';
@@ -2725,40 +2990,41 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 5 | {"R9b_temp_st": 5} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL AND o.result_time <= '2026-07-14 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-07-14 23:59:59+00')
 , w AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value,
         o.value - lag(o.value) OVER (PARTITION BY r.sensor_id, o.property_id ORDER BY o.result_time) AS diff
-      FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL
+      FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
         AND o.result_time BETWEEN anchor.t - interval '1 hours' AND anchor.t)
 SELECT sensor_id, property_id, count(*) AS n, max(abs(diff)) AS metric FROM w
 GROUP BY 1, 2 ORDER BY metric DESC NULLS LAST;
 ```
 | sensor_id | property_id | n | metric |
 |---|---|---|---|
-| b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 13 | 1 |
-| b8184060-831e-11f0-9283-e956b63ef652 | temperature | 13 | 1 |
-| 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 13 | 1 |
+| 9eefebd0-8191-11f0-9283-e956b63ef652 | temperature | 12 | 1 |
+| b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 12 | 1 |
+| 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 12 | 1 |
+| c0d43040-c86c-11f0-8080-e5362df2da58 | temperature | 12 | 1 |
 | 0cf22310-81be-11f0-9283-e956b63ef652 | temperature | 2 | 1 |
-| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
-| 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
-| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
-| 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 13 | 1 |
-| 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 13 | 1 |
-| 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
+| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 12 | 1 |
+| 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 12 | 1 |
+| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 12 | 1 |
+| 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 12 | 1 |
+| 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 12 | 1 |
+| 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 12 | 1 |
 | 82508f60-8269-11f0-b6dc-556f88243956 | temperature | 2 | 1 |
 | 8250dd80-8269-11f0-9283-e956b63ef652 | temperature | 2 | 1 |
-| c0d43040-c86c-11f0-8080-e5362df2da58 | temperature | 13 | 1 |
-| 9eefebd0-8191-11f0-9283-e956b63ef652 | temperature | 13 | 1 |
-| 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 13 | 0.3 |
-| 37c9dd80-833f-11f0-9283-e956b63ef652 | temperature | 13 | 0.3 |
-| f3058610-83ff-11f0-9a67-6d25b7d467e7 | temperature | 13 | 0.2 |
+| b8184060-831e-11f0-9283-e956b63ef652 | temperature | 12 | 1 |
+| 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 12 | 0.3 |
+| 37c9dd80-833f-11f0-9283-e956b63ef652 | temperature | 12 | 0.3 |
+| 2CF7F1C072300286 | temp1 | 12 | 0.2 |
+| f3058610-83ff-11f0-9a67-6d25b7d467e7 | temperature | 12 | 0.2 |
 | 8533f470-5c02-11f0-8a4b-6bd692b5baa4 | temperature | 1 | None |
 
 - as_of = 2026-07-14 23:59:59+00 (windows end at the latest matching reading at or before it)
 - R9a_temp_lt: metric 25 vs threshold 20 → fires
 - R9b_temp_st: metric 1 vs threshold 5 → does not fire
-- Raw readings: [data/F070_R9a_temp_lt.csv](data/F070_R9a_temp_lt.csv) (4029 rows)
-- Raw readings: [data/F070_R9b_temp_st.csv](data/F070_R9b_temp_st.csv) (189 rows)
+- Raw readings: [data/F070_R9a_temp_lt.csv](data/F070_R9a_temp_lt.csv) (4307 rows)
+- Raw readings: [data/F070_R9b_temp_st.csv](data/F070_R9b_temp_st.csv) (187 rows)
 
 ---
 
@@ -2776,9 +3042,9 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'ranverso' 
 | 20 | {"R2_rain_7d_diff": 20} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'ranverso' AND lower(o.property_id) LIKE '%rain%' AND lower(o.property_id) NOT LIKE '%acc%' AND o.value IS NOT NULL AND o.result_time <= '2026-07-10 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'ranverso' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'acc') = 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-07-10 23:59:59+00')
 SELECT r.sensor_id, o.property_id, count(*) AS n, sum(o.value) AS metric
-FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'ranverso' AND lower(o.property_id) LIKE '%rain%' AND lower(o.property_id) NOT LIKE '%acc%' AND o.value IS NOT NULL
+FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'ranverso' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'acc') = 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time BETWEEN anchor.t - interval '168 hours' AND anchor.t
 GROUP BY 1, 2 ORDER BY metric DESC;
 ```
@@ -2798,9 +3064,9 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'ranverso' 
 | 20 | {"R2_rain_7d_diff": 20} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'ranverso' AND lower(o.property_id) LIKE '%rain%' AND lower(o.property_id) NOT LIKE '%acc%' AND o.value IS NOT NULL AND o.result_time <= '2026-07-16 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'ranverso' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'acc') = 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-07-16 23:59:59+00')
 SELECT r.sensor_id, o.property_id, count(*) AS n, sum(o.value) AS metric
-FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'ranverso' AND lower(o.property_id) LIKE '%rain%' AND lower(o.property_id) NOT LIKE '%acc%' AND o.value IS NOT NULL
+FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'ranverso' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'acc') = 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time BETWEEN anchor.t - interval '168 hours' AND anchor.t
 GROUP BY 1, 2 ORDER BY metric DESC;
 ```
@@ -2828,9 +3094,9 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'ranverso' 
 | 20 | {"R2_rain_7d_diff": 20} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'ranverso' AND lower(o.property_id) LIKE '%rain%' AND lower(o.property_id) NOT LIKE '%acc%' AND o.value IS NOT NULL AND o.result_time <= '2026-07-15 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'ranverso' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'acc') = 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-07-15 23:59:59+00')
 SELECT r.sensor_id, o.property_id, count(*) AS n, sum(o.value) AS metric
-FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'ranverso' AND lower(o.property_id) LIKE '%rain%' AND lower(o.property_id) NOT LIKE '%acc%' AND o.value IS NOT NULL
+FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'ranverso' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'acc') = 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time BETWEEN anchor.t - interval '168 hours' AND anchor.t
 GROUP BY 1, 2 ORDER BY metric DESC;
 ```
@@ -2850,9 +3116,9 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'ranverso' 
 | 20 | {"R2_rain_7d_diff": 20} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'ranverso' AND lower(o.property_id) LIKE '%rain%' AND lower(o.property_id) NOT LIKE '%acc%' AND o.value IS NOT NULL AND o.result_time <= '2026-07-22 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'ranverso' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'acc') = 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-07-22 23:59:59+00')
 SELECT r.sensor_id, o.property_id, count(*) AS n, sum(o.value) AS metric
-FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'ranverso' AND lower(o.property_id) LIKE '%rain%' AND lower(o.property_id) NOT LIKE '%acc%' AND o.value IS NOT NULL
+FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'ranverso' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'acc') = 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time BETWEEN anchor.t - interval '168 hours' AND anchor.t
 GROUP BY 1, 2 ORDER BY metric DESC;
 ```
@@ -2880,7 +3146,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 4.5 | {"R3_vib_zscore": 4.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (lower(o.property_id) LIKE '%pga%' OR lower(o.property_id) LIKE '%rms%') AND o.value IS NOT NULL AND o.result_time <= '2026-07-23 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (strpos(lower(o.property_id), 'pga') > 0 OR strpos(lower(o.property_id), 'rms') > 0) AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-07-23 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -2893,14 +3159,14 @@ FROM st JOIN lt USING (sensor_id, property_id) ORDER BY metric DESC NULLS LAST;
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | pgaXAxis | 932 | 0.337661 | 0.0757516 | 0.9 | 2026-07-14 00:00:00 | 7.42346 |
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | pgaXAxis | 879 | 0.301251 | 0.0417019 | 0.2 | 2026-07-23 23:30:00 | 2.42798 |
 | 69755440-5b34-11f1-9208-83a949003bcf | rmsZAxis | 1658 | 0.1 | 1.63114e-15 | 0.1 | 2026-07-23 23:30:00 | 1.89729 |
-| 69755440-5b34-11f1-9208-83a949003bcf | rmsYAxis | 1658 | 0.1 | 1.63114e-15 | 0.1 | 2026-07-23 23:30:00 | 1.89729 |
 | 69755440-5b34-11f1-9208-83a949003bcf | rmsXAxis | 1658 | 0.1 | 1.63114e-15 | 0.1 | 2026-07-23 23:30:00 | 1.89729 |
+| 69755440-5b34-11f1-9208-83a949003bcf | rmsYAxis | 1658 | 0.1 | 1.63114e-15 | 0.1 | 2026-07-23 23:30:00 | 1.89729 |
+| e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsYAxis | 932 | 0.1 | 6.255e-16 | 0.1 | 2026-07-14 00:00:00 | 1.75275 |
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsZAxis | 932 | 0.1 | 6.255e-16 | 0.1 | 2026-07-14 00:00:00 | 1.75275 |
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsXAxis | 932 | 0.1 | 6.255e-16 | 0.1 | 2026-07-14 00:00:00 | 1.75275 |
-| e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsYAxis | 932 | 0.1 | 6.255e-16 | 0.1 | 2026-07-14 00:00:00 | 1.75275 |
-| 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsXAxis | 879 | 0.1 | 5.98255e-16 | 0.1 | 2026-07-23 23:30:00 | 1.36863 |
-| 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsYAxis | 879 | 0.1 | 5.98255e-16 | 0.1 | 2026-07-23 23:30:00 | 1.36863 |
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsZAxis | 879 | 0.1 | 5.98255e-16 | 0.1 | 2026-07-23 23:30:00 | 1.36863 |
+| 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsYAxis | 879 | 0.1 | 5.98255e-16 | 0.1 | 2026-07-23 23:30:00 | 1.36863 |
+| 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsXAxis | 879 | 0.1 | 5.98255e-16 | 0.1 | 2026-07-23 23:30:00 | 1.36863 |
 | 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsXAxis | 2634 | 0.1 | 2.56311e-15 | 0.1 | 2026-07-23 23:30:00 | 1.2778 |
 | 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsYAxis | 2634 | 0.1 | 2.56311e-15 | 0.1 | 2026-07-23 23:30:00 | 1.2778 |
 | 84d47f00-5a9d-11f1-9208-83a949003bcf | pgaZAxis | 2634 | 0.431359 | 0.0724077 | 0.5 | 2026-07-23 23:30:00 | 0.947977 |
@@ -2921,7 +3187,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 0.5 | {"R4_pga": 0.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND lower(o.property_id) LIKE '%pga%' AND o.value IS NOT NULL AND o.result_time <= '2026-07-23 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND strpos(lower(o.property_id), 'pga') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-07-23 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -2960,7 +3226,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 4.5 | {"R3_vib_zscore": 4.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (lower(o.property_id) LIKE '%pga%' OR lower(o.property_id) LIKE '%rms%') AND o.value IS NOT NULL AND o.result_time <= '2026-07-27 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (strpos(lower(o.property_id), 'pga') > 0 OR strpos(lower(o.property_id), 'rms') > 0) AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-07-27 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -2974,17 +3240,17 @@ FROM st JOIN lt USING (sensor_id, property_id) ORDER BY metric DESC NULLS LAST;
 | 69755440-5b34-11f1-9208-83a949003bcf | pgaYAxis | 1757 | 0.308139 | 0.0476757 | 0.2 | 2026-07-27 23:30:00 | 2.26822 |
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | pgaZAxis | 990 | 0.407677 | 0.0504691 | 0.3 | 2026-07-27 23:30:00 | 2.13352 |
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsYAxis | 990 | 0.1 | 6.77406e-16 | 0.1 | 2026-07-27 23:30:00 | 2.02818 |
-| 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsZAxis | 990 | 0.1 | 6.77406e-16 | 0.1 | 2026-07-27 23:30:00 | 2.02818 |
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsXAxis | 990 | 0.1 | 6.77406e-16 | 0.1 | 2026-07-27 23:30:00 | 2.02818 |
+| 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsZAxis | 990 | 0.1 | 6.77406e-16 | 0.1 | 2026-07-27 23:30:00 | 2.02818 |
 | 69755440-5b34-11f1-9208-83a949003bcf | rmsZAxis | 1757 | 0.1 | 1.75501e-15 | 0.1 | 2026-07-27 23:30:00 | 1.85036 |
 | 69755440-5b34-11f1-9208-83a949003bcf | rmsXAxis | 1757 | 0.1 | 1.75501e-15 | 0.1 | 2026-07-27 23:30:00 | 1.85036 |
 | 69755440-5b34-11f1-9208-83a949003bcf | rmsYAxis | 1757 | 0.1 | 1.75501e-15 | 0.1 | 2026-07-27 23:30:00 | 1.85036 |
-| e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsZAxis | 932 | 0.1 | 6.255e-16 | 0.1 | 2026-07-14 00:00:00 | 1.75275 |
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsXAxis | 932 | 0.1 | 6.255e-16 | 0.1 | 2026-07-14 00:00:00 | 1.75275 |
+| e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsZAxis | 932 | 0.1 | 6.255e-16 | 0.1 | 2026-07-14 00:00:00 | 1.75275 |
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsYAxis | 932 | 0.1 | 6.255e-16 | 0.1 | 2026-07-14 00:00:00 | 1.75275 |
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | pgaZAxis | 932 | 0.428863 | 0.110469 | 0.5 | 2026-07-14 00:00:00 | 0.643957 |
-| 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsXAxis | 2826 | 0.1 | 2.55349e-15 | 0.1 | 2026-07-27 23:30:00 | 0.592397 |
 | 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsYAxis | 2826 | 0.1 | 2.55349e-15 | 0.1 | 2026-07-27 23:30:00 | 0.592397 |
+| 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsXAxis | 2826 | 0.1 | 2.55349e-15 | 0.1 | 2026-07-27 23:30:00 | 0.592397 |
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | pgaYAxis | 932 | 0.332511 | 0.0637266 | 0.3 | 2026-07-14 00:00:00 | 0.51016 |
 | 69755440-5b34-11f1-9208-83a949003bcf | pgaZAxis | 1757 | 0.433182 | 0.0767715 | 0.4 | 2026-07-27 23:30:00 | 0.432212 |
 | 84d47f00-5a9d-11f1-9208-83a949003bcf | pgaZAxis | 2826 | 0.429689 | 0.0704829 | 0.4 | 2026-07-27 23:30:00 | 0.421217 |
@@ -3001,7 +3267,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 0.5 | {"R4_pga": 0.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND lower(o.property_id) LIKE '%pga%' AND o.value IS NOT NULL AND o.result_time <= '2026-07-27 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND strpos(lower(o.property_id), 'pga') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-07-27 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -3050,7 +3316,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 4.5 | {"R3_vib_zscore": 4.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (lower(o.property_id) LIKE '%pga%' OR lower(o.property_id) LIKE '%rms%') AND o.value IS NOT NULL AND o.result_time <= '2026-07-23 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (strpos(lower(o.property_id), 'pga') > 0 OR strpos(lower(o.property_id), 'rms') > 0) AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-07-23 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -3063,14 +3329,14 @@ FROM st JOIN lt USING (sensor_id, property_id) ORDER BY metric DESC NULLS LAST;
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | pgaXAxis | 932 | 0.337661 | 0.0757516 | 0.9 | 2026-07-14 00:00:00 | 7.42346 |
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | pgaXAxis | 879 | 0.301251 | 0.0417019 | 0.2 | 2026-07-23 23:30:00 | 2.42798 |
 | 69755440-5b34-11f1-9208-83a949003bcf | rmsZAxis | 1658 | 0.1 | 1.63114e-15 | 0.1 | 2026-07-23 23:30:00 | 1.89729 |
-| 69755440-5b34-11f1-9208-83a949003bcf | rmsYAxis | 1658 | 0.1 | 1.63114e-15 | 0.1 | 2026-07-23 23:30:00 | 1.89729 |
 | 69755440-5b34-11f1-9208-83a949003bcf | rmsXAxis | 1658 | 0.1 | 1.63114e-15 | 0.1 | 2026-07-23 23:30:00 | 1.89729 |
+| 69755440-5b34-11f1-9208-83a949003bcf | rmsYAxis | 1658 | 0.1 | 1.63114e-15 | 0.1 | 2026-07-23 23:30:00 | 1.89729 |
+| e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsYAxis | 932 | 0.1 | 6.255e-16 | 0.1 | 2026-07-14 00:00:00 | 1.75275 |
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsZAxis | 932 | 0.1 | 6.255e-16 | 0.1 | 2026-07-14 00:00:00 | 1.75275 |
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsXAxis | 932 | 0.1 | 6.255e-16 | 0.1 | 2026-07-14 00:00:00 | 1.75275 |
-| e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsYAxis | 932 | 0.1 | 6.255e-16 | 0.1 | 2026-07-14 00:00:00 | 1.75275 |
-| 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsXAxis | 879 | 0.1 | 5.98255e-16 | 0.1 | 2026-07-23 23:30:00 | 1.36863 |
-| 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsYAxis | 879 | 0.1 | 5.98255e-16 | 0.1 | 2026-07-23 23:30:00 | 1.36863 |
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsZAxis | 879 | 0.1 | 5.98255e-16 | 0.1 | 2026-07-23 23:30:00 | 1.36863 |
+| 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsYAxis | 879 | 0.1 | 5.98255e-16 | 0.1 | 2026-07-23 23:30:00 | 1.36863 |
+| 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsXAxis | 879 | 0.1 | 5.98255e-16 | 0.1 | 2026-07-23 23:30:00 | 1.36863 |
 | 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsXAxis | 2634 | 0.1 | 2.56311e-15 | 0.1 | 2026-07-23 23:30:00 | 1.2778 |
 | 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsYAxis | 2634 | 0.1 | 2.56311e-15 | 0.1 | 2026-07-23 23:30:00 | 1.2778 |
 | 84d47f00-5a9d-11f1-9208-83a949003bcf | pgaZAxis | 2634 | 0.431359 | 0.0724077 | 0.5 | 2026-07-23 23:30:00 | 0.947977 |
@@ -3091,7 +3357,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 0.5 | {"R4_pga": 0.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND lower(o.property_id) LIKE '%pga%' AND o.value IS NOT NULL AND o.result_time <= '2026-07-23 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND strpos(lower(o.property_id), 'pga') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-07-23 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -3130,7 +3396,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 4.5 | {"R3_vib_zscore": 4.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (lower(o.property_id) LIKE '%pga%' OR lower(o.property_id) LIKE '%rms%') AND o.value IS NOT NULL AND o.result_time <= '2026-07-30 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (strpos(lower(o.property_id), 'pga') > 0 OR strpos(lower(o.property_id), 'rms') > 0) AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-07-30 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -3142,12 +3408,12 @@ FROM st JOIN lt USING (sensor_id, property_id) ORDER BY metric DESC NULLS LAST;
 |---|---|---|---|---|---|---|---|
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | pgaXAxis | 932 | 0.337661 | 0.0757516 | 0.9 | 2026-07-14 00:00:00 | 7.42346 |
 | 84d47f00-5a9d-11f1-9208-83a949003bcf | pgaXAxis | 2969 | 0.311216 | 0.0368721 | 0.2 | 2026-07-30 23:30:00 | 3.01626 |
-| 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsXAxis | 1061 | 0.1 | 7.63694e-16 | 0.1 | 2026-07-30 22:30:00 | 2.16246 |
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsZAxis | 1061 | 0.1 | 7.63694e-16 | 0.1 | 2026-07-30 22:30:00 | 2.16246 |
+| 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsXAxis | 1061 | 0.1 | 7.63694e-16 | 0.1 | 2026-07-30 22:30:00 | 2.16246 |
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsYAxis | 1061 | 0.1 | 7.63694e-16 | 0.1 | 2026-07-30 22:30:00 | 2.16246 |
-| 69755440-5b34-11f1-9208-83a949003bcf | rmsXAxis | 1830 | 0.1 | 1.84156e-15 | 0.1 | 2026-07-30 22:30:00 | 1.81615 |
 | 69755440-5b34-11f1-9208-83a949003bcf | rmsZAxis | 1830 | 0.1 | 1.84156e-15 | 0.1 | 2026-07-30 22:30:00 | 1.81615 |
 | 69755440-5b34-11f1-9208-83a949003bcf | rmsYAxis | 1830 | 0.1 | 1.84156e-15 | 0.1 | 2026-07-30 22:30:00 | 1.81615 |
+| 69755440-5b34-11f1-9208-83a949003bcf | rmsXAxis | 1830 | 0.1 | 1.84156e-15 | 0.1 | 2026-07-30 22:30:00 | 1.81615 |
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsZAxis | 932 | 0.1 | 6.255e-16 | 0.1 | 2026-07-14 00:00:00 | 1.75275 |
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsXAxis | 932 | 0.1 | 6.255e-16 | 0.1 | 2026-07-14 00:00:00 | 1.75275 |
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsYAxis | 932 | 0.1 | 6.255e-16 | 0.1 | 2026-07-14 00:00:00 | 1.75275 |
@@ -3158,8 +3424,8 @@ FROM st JOIN lt USING (sensor_id, property_id) ORDER BY metric DESC NULLS LAST;
 | 84d47f00-5a9d-11f1-9208-83a949003bcf | pgaYAxis | 2969 | 0.310677 | 0.0372132 | 0.3 | 2026-07-30 23:30:00 | 0.286914 |
 | 69755440-5b34-11f1-9208-83a949003bcf | pgaYAxis | 1830 | 0.307486 | 0.0472607 | 0.3 | 2026-07-30 22:30:00 | 0.158405 |
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | pgaZAxis | 1061 | 0.406786 | 0.0496087 | 0.4 | 2026-07-30 22:30:00 | 0.136792 |
-| 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsYAxis | 2969 | 0.1 | 2.50027e-15 | 0.1 | 2026-07-30 23:30:00 | 0.133212 |
 | 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsXAxis | 2969 | 0.1 | 2.50027e-15 | 0.1 | 2026-07-30 23:30:00 | 0.133212 |
+| 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsYAxis | 2969 | 0.1 | 2.50027e-15 | 0.1 | 2026-07-30 23:30:00 | 0.133212 |
 
 _… 9 more rows_
 
@@ -3171,7 +3437,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 0.5 | {"R4_pga": 0.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND lower(o.property_id) LIKE '%pga%' AND o.value IS NOT NULL AND o.result_time <= '2026-07-30 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND strpos(lower(o.property_id), 'pga') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-07-30 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -3220,12 +3486,12 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | None | {"R6a_rain_1h": 5, "R6a_rain_24h": 20} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%rain%' AND o.value IS NOT NULL AND o.result_time <= '2026-07-22 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-07-22 23:59:59+00')
 SELECT r.sensor_id, o.property_id, count(*) AS n_24h,
        avg(o.value) FILTER (WHERE o.result_time >= anchor.t - interval '1 hour') AS mean_1h,
        avg(o.value) AS mean_24h,
        greatest(avg(o.value) FILTER (WHERE o.result_time >= anchor.t - interval '1 hour'), avg(o.value)) AS metric
-FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%rain%' AND o.value IS NOT NULL
+FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time BETWEEN anchor.t - interval '24 hours' AND anchor.t
 GROUP BY 1, 2 ORDER BY metric DESC;
 ```
@@ -3241,9 +3507,9 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 100 | {"R6b_rain_cum7d": 100} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%rain%' AND o.value IS NOT NULL AND o.result_time <= '2026-07-22 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-07-22 23:59:59+00')
 SELECT r.sensor_id, o.property_id, count(*) AS n, sum(o.value) AS metric
-FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%rain%' AND o.value IS NOT NULL
+FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time BETWEEN anchor.t - interval '168 hours' AND anchor.t
 GROUP BY 1, 2 ORDER BY metric DESC;
 ```
@@ -3263,12 +3529,12 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | None | {"R6a_rain_1h": 5, "R6a_rain_24h": 20} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%rain%' AND o.value IS NOT NULL AND o.result_time <= '2026-07-31 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-07-31 23:59:59+00')
 SELECT r.sensor_id, o.property_id, count(*) AS n_24h,
        avg(o.value) FILTER (WHERE o.result_time >= anchor.t - interval '1 hour') AS mean_1h,
        avg(o.value) AS mean_24h,
        greatest(avg(o.value) FILTER (WHERE o.result_time >= anchor.t - interval '1 hour'), avg(o.value)) AS metric
-FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%rain%' AND o.value IS NOT NULL
+FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time BETWEEN anchor.t - interval '24 hours' AND anchor.t
 GROUP BY 1, 2 ORDER BY metric DESC;
 ```
@@ -3284,9 +3550,9 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 100 | {"R6b_rain_cum7d": 100} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%rain%' AND o.value IS NOT NULL AND o.result_time <= '2026-07-31 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-07-31 23:59:59+00')
 SELECT r.sensor_id, o.property_id, count(*) AS n, sum(o.value) AS metric
-FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%rain%' AND o.value IS NOT NULL
+FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time BETWEEN anchor.t - interval '168 hours' AND anchor.t
 GROUP BY 1, 2 ORDER BY metric DESC;
 ```
@@ -3305,7 +3571,7 @@ GROUP BY 1, 2 ORDER BY metric DESC;
 ## F076 · anomaly_other_date
 
 **Turn 1:** Was the visitor count at Lucretili anomalous on 2026-08-02 according to its AD-RT rules?  
-**Answer given in history:** No. R5_visitors: latest reading 0 at 2026-08-02 23:55 UTC vs threshold 3  
+**Answer given in history:** No. R5_visitors: latest reading 0 at 2026-08-02 23:59 UTC vs threshold 3  
 **Recomputed:** `No`
 
 ```sql
@@ -3316,16 +3582,17 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 3 | {"R5_visitors_peak": 3} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%counter%' AND o.value IS NOT NULL AND o.result_time <= '2026-08-02 23:59:59+00')
-SELECT r.sensor_id, o.property_id, o.result_time, o.value AS metric FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%counter%' AND o.value IS NOT NULL
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'counter') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-08-02 23:59:59+00')
+SELECT r.sensor_id, o.property_id, o.result_time, o.value AS metric FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'counter') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time = anchor.t ORDER BY metric DESC;
 ```
 | sensor_id | property_id | result_time | metric |
 |---|---|---|---|
-| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | pulse_counter | 2026-08-02 23:55:00 | 0 |
+| 24E124600E450308 | counter_out | 2026-08-02 23:59:17 | 0 |
+| 24E124600E450308 | counter_in | 2026-08-02 23:59:17 | 0 |
 
 **Question:** What about on 2026-08-07?  
-**Reference:** No. R5_visitors: latest reading 0 at 2026-08-07 23:55 UTC vs threshold 3  
+**Reference:** No. R5_visitors: latest reading 0 at 2026-08-07 23:59 UTC vs threshold 3  
 **Recomputed:** `No` → **MATCH**
 
 ```sql
@@ -3336,17 +3603,18 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 3 | {"R5_visitors_peak": 3} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%counter%' AND o.value IS NOT NULL AND o.result_time <= '2026-08-07 23:59:59+00')
-SELECT r.sensor_id, o.property_id, o.result_time, o.value AS metric FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%counter%' AND o.value IS NOT NULL
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'counter') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-08-07 23:59:59+00')
+SELECT r.sensor_id, o.property_id, o.result_time, o.value AS metric FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'counter') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time = anchor.t ORDER BY metric DESC;
 ```
 | sensor_id | property_id | result_time | metric |
 |---|---|---|---|
-| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | pulse_counter | 2026-08-07 23:55:00 | 0 |
+| 24E124600E450308 | counter_out | 2026-08-07 23:59:17 | 0 |
+| 24E124600E450308 | counter_in | 2026-08-07 23:59:17 | 0 |
 
 - as_of = 2026-08-07 23:59:59+00 (windows end at the latest matching reading at or before it)
 - R5_visitors: metric 0 vs threshold 3 → does not fire
-- Raw readings: [data/F076_R5_visitors.csv](data/F076_R5_visitors.csv) (1 rows)
+- Raw readings: [data/F076_R5_visitors.csv](data/F076_R5_visitors.csv) (2 rows)
 
 ---
 
@@ -3364,7 +3632,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 4.5 | {"R3_vib_zscore": 4.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (lower(o.property_id) LIKE '%pga%' OR lower(o.property_id) LIKE '%rms%') AND o.value IS NOT NULL AND o.result_time <= '2026-08-04 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (strpos(lower(o.property_id), 'pga') > 0 OR strpos(lower(o.property_id), 'rms') > 0) AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-08-04 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -3376,14 +3644,14 @@ FROM st JOIN lt USING (sensor_id, property_id) ORDER BY metric DESC NULLS LAST;
 |---|---|---|---|---|---|---|---|
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | pgaXAxis | 932 | 0.337661 | 0.0757516 | 0.9 | 2026-07-14 00:00:00 | 7.42346 |
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsZAxis | 1179 | 0.1 | 9.35909e-16 | 0.1 | 2026-08-04 10:00:00 | 2.20939 |
-| 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsYAxis | 1179 | 0.1 | 9.35909e-16 | 0.1 | 2026-08-04 10:00:00 | 2.20939 |
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsXAxis | 1179 | 0.1 | 9.35909e-16 | 0.1 | 2026-08-04 10:00:00 | 2.20939 |
-| 69755440-5b34-11f1-9208-83a949003bcf | rmsYAxis | 1957 | 0.1 | 1.98304e-15 | 0.1 | 2026-08-04 13:30:00 | 1.76355 |
-| 69755440-5b34-11f1-9208-83a949003bcf | rmsZAxis | 1957 | 0.1 | 1.98304e-15 | 0.1 | 2026-08-04 13:30:00 | 1.76355 |
+| 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsYAxis | 1179 | 0.1 | 9.35909e-16 | 0.1 | 2026-08-04 10:00:00 | 2.20939 |
 | 69755440-5b34-11f1-9208-83a949003bcf | rmsXAxis | 1957 | 0.1 | 1.98304e-15 | 0.1 | 2026-08-04 13:30:00 | 1.76355 |
-| e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsZAxis | 932 | 0.1 | 6.255e-16 | 0.1 | 2026-07-14 00:00:00 | 1.75275 |
-| e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsXAxis | 932 | 0.1 | 6.255e-16 | 0.1 | 2026-07-14 00:00:00 | 1.75275 |
+| 69755440-5b34-11f1-9208-83a949003bcf | rmsZAxis | 1957 | 0.1 | 1.98304e-15 | 0.1 | 2026-08-04 13:30:00 | 1.76355 |
+| 69755440-5b34-11f1-9208-83a949003bcf | rmsYAxis | 1957 | 0.1 | 1.98304e-15 | 0.1 | 2026-08-04 13:30:00 | 1.76355 |
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsYAxis | 932 | 0.1 | 6.255e-16 | 0.1 | 2026-07-14 00:00:00 | 1.75275 |
+| e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsXAxis | 932 | 0.1 | 6.255e-16 | 0.1 | 2026-07-14 00:00:00 | 1.75275 |
+| e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsZAxis | 932 | 0.1 | 6.255e-16 | 0.1 | 2026-07-14 00:00:00 | 1.75275 |
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | pgaZAxis | 932 | 0.428863 | 0.110469 | 0.5 | 2026-07-14 00:00:00 | 0.643957 |
 | 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsYAxis | 3196 | 0.1 | 2.41686e-15 | 0.1 | 2026-08-04 23:30:00 | 0.539756 |
 | 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsXAxis | 3196 | 0.1 | 2.41686e-15 | 0.1 | 2026-08-04 23:30:00 | 0.539756 |
@@ -3405,7 +3673,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 0.5 | {"R4_pga": 0.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND lower(o.property_id) LIKE '%pga%' AND o.value IS NOT NULL AND o.result_time <= '2026-08-04 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND strpos(lower(o.property_id), 'pga') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-08-04 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -3444,7 +3712,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 4.5 | {"R3_vib_zscore": 4.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (lower(o.property_id) LIKE '%pga%' OR lower(o.property_id) LIKE '%rms%') AND o.value IS NOT NULL AND o.result_time <= '2026-08-11 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (strpos(lower(o.property_id), 'pga') > 0 OR strpos(lower(o.property_id), 'rms') > 0) AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-08-11 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -3456,14 +3724,14 @@ FROM st JOIN lt USING (sensor_id, property_id) ORDER BY metric DESC NULLS LAST;
 |---|---|---|---|---|---|---|---|
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | pgaXAxis | 932 | 0.337661 | 0.0757516 | 0.9 | 2026-07-14 00:00:00 | 7.42346 |
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsZAxis | 1297 | 0.1 | 1.11812e-15 | 0.1 | 2026-08-11 23:30:00 | 2.13481 |
-| 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsYAxis | 1297 | 0.1 | 1.11812e-15 | 0.1 | 2026-08-11 23:30:00 | 2.13481 |
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsXAxis | 1297 | 0.1 | 1.11812e-15 | 0.1 | 2026-08-11 23:30:00 | 2.13481 |
-| e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsXAxis | 932 | 0.1 | 6.255e-16 | 0.1 | 2026-07-14 00:00:00 | 1.75275 |
-| e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsZAxis | 932 | 0.1 | 6.255e-16 | 0.1 | 2026-07-14 00:00:00 | 1.75275 |
+| 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsYAxis | 1297 | 0.1 | 1.11812e-15 | 0.1 | 2026-08-11 23:30:00 | 2.13481 |
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsYAxis | 932 | 0.1 | 6.255e-16 | 0.1 | 2026-07-14 00:00:00 | 1.75275 |
+| e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsZAxis | 932 | 0.1 | 6.255e-16 | 0.1 | 2026-07-14 00:00:00 | 1.75275 |
+| e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsXAxis | 932 | 0.1 | 6.255e-16 | 0.1 | 2026-07-14 00:00:00 | 1.75275 |
 | 69755440-5b34-11f1-9208-83a949003bcf | rmsXAxis | 2076 | 0.1 | 2.10585e-15 | 0.1 | 2026-08-11 23:30:00 | 1.72002 |
-| 69755440-5b34-11f1-9208-83a949003bcf | rmsYAxis | 2076 | 0.1 | 2.10585e-15 | 0.1 | 2026-08-11 23:30:00 | 1.72002 |
 | 69755440-5b34-11f1-9208-83a949003bcf | rmsZAxis | 2076 | 0.1 | 2.10585e-15 | 0.1 | 2026-08-11 23:30:00 | 1.72002 |
+| 69755440-5b34-11f1-9208-83a949003bcf | rmsYAxis | 2076 | 0.1 | 2.10585e-15 | 0.1 | 2026-08-11 23:30:00 | 1.72002 |
 | 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsYAxis | 3521 | 0.1 | 2.41459e-15 | 0.1 | 2026-08-11 23:30:00 | 1.3564 |
 | 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsXAxis | 3521 | 0.1 | 2.41459e-15 | 0.1 | 2026-08-11 23:30:00 | 1.3564 |
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | pgaZAxis | 932 | 0.428863 | 0.110469 | 0.5 | 2026-07-14 00:00:00 | 0.643957 |
@@ -3485,7 +3753,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 0.5 | {"R4_pga": 0.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND lower(o.property_id) LIKE '%pga%' AND o.value IS NOT NULL AND o.result_time <= '2026-08-11 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND strpos(lower(o.property_id), 'pga') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-08-11 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -3535,8 +3803,8 @@ SELECT count(*) AS readings FROM readings WHERE site_id = 'lucretili'
 | 60353 |
 
 **Question:** And in the following month?  
-**Reference:** 198983 readings.  
-**Recomputed:** `198983` → **MATCH**
+**Reference:** 206492 readings.  
+**Recomputed:** `206492` → **MATCH**
 
 ```sql
 SELECT count(*) AS readings FROM readings WHERE site_id = 'lucretili'
@@ -3544,7 +3812,7 @@ SELECT count(*) AS readings FROM readings WHERE site_id = 'lucretili'
 ```
 | readings |
 |---|
-| 198983 |
+| 206492 |
 
 
 ---
@@ -3552,8 +3820,8 @@ SELECT count(*) AS readings FROM readings WHERE site_id = 'lucretili'
 ## F079 · next_month
 
 **Turn 1:** How many readings were recorded at Delos in July 2026?  
-**Answer given in history:** 40130 readings.  
-**Recomputed:** `40130`
+**Answer given in history:** 102364 readings.  
+**Recomputed:** `102364`
 
 ```sql
 SELECT count(*) AS readings FROM readings WHERE site_id = 'delos'
@@ -3561,11 +3829,11 @@ SELECT count(*) AS readings FROM readings WHERE site_id = 'delos'
 ```
 | readings |
 |---|
-| 40130 |
+| 102364 |
 
 **Question:** And in the following month?  
-**Reference:** 14501 readings.  
-**Recomputed:** `14501` → **MATCH**
+**Reference:** 37315 readings.  
+**Recomputed:** `37315` → **MATCH**
 
 ```sql
 SELECT count(*) AS readings FROM readings WHERE site_id = 'delos'
@@ -3573,7 +3841,7 @@ SELECT count(*) AS readings FROM readings WHERE site_id = 'delos'
 ```
 | readings |
 |---|
-| 14501 |
+| 37315 |
 
 
 ---
@@ -3593,8 +3861,8 @@ SELECT count(*) AS readings FROM readings WHERE site_id = 'delos'
 | 20715 |
 
 **Question:** And in the following month?  
-**Reference:** 38443 readings.  
-**Recomputed:** `38443` → **MATCH**
+**Reference:** 65551 readings.  
+**Recomputed:** `65551` → **MATCH**
 
 ```sql
 SELECT count(*) AS readings FROM readings WHERE site_id = 'delos'
@@ -3602,7 +3870,7 @@ SELECT count(*) AS readings FROM readings WHERE site_id = 'delos'
 ```
 | readings |
 |---|
-| 38443 |
+| 65551 |
 
 
 ---
@@ -3610,8 +3878,8 @@ SELECT count(*) AS readings FROM readings WHERE site_id = 'delos'
 ## F081 · next_month
 
 **Turn 1:** How many readings were recorded at Lucretili in July 2026?  
-**Answer given in history:** 199288 readings.  
-**Recomputed:** `199288`
+**Answer given in history:** 220581 readings.  
+**Recomputed:** `220581`
 
 ```sql
 SELECT count(*) AS readings FROM readings WHERE site_id = 'lucretili'
@@ -3619,11 +3887,11 @@ SELECT count(*) AS readings FROM readings WHERE site_id = 'lucretili'
 ```
 | readings |
 |---|
-| 199288 |
+| 220581 |
 
 **Question:** And in the following month?  
-**Reference:** 67447 readings.  
-**Recomputed:** `67447` → **MATCH**
+**Reference:** 87152 readings.  
+**Recomputed:** `87152` → **MATCH**
 
 ```sql
 SELECT count(*) AS readings FROM readings WHERE site_id = 'lucretili'
@@ -3631,7 +3899,7 @@ SELECT count(*) AS readings FROM readings WHERE site_id = 'lucretili'
 ```
 | readings |
 |---|
-| 67447 |
+| 87152 |
 
 
 ---
@@ -3639,8 +3907,8 @@ SELECT count(*) AS readings FROM readings WHERE site_id = 'lucretili'
 ## F082 · next_month
 
 **Turn 1:** How many readings were recorded at Baltanas in July 2026?  
-**Answer given in history:** 220893 readings.  
-**Recomputed:** `220893`
+**Answer given in history:** 239902 readings.  
+**Recomputed:** `239902`
 
 ```sql
 SELECT count(*) AS readings FROM readings WHERE site_id = 'baltanas'
@@ -3648,11 +3916,11 @@ SELECT count(*) AS readings FROM readings WHERE site_id = 'baltanas'
 ```
 | readings |
 |---|
-| 220893 |
+| 239902 |
 
 **Question:** And in the following month?  
-**Reference:** 77492 readings.  
-**Recomputed:** `77492` → **MATCH**
+**Reference:** 82932 readings.  
+**Recomputed:** `82932` → **MATCH**
 
 ```sql
 SELECT count(*) AS readings FROM readings WHERE site_id = 'baltanas'
@@ -3660,7 +3928,7 @@ SELECT count(*) AS readings FROM readings WHERE site_id = 'baltanas'
 ```
 | readings |
 |---|
-| 77492 |
+| 82932 |
 
 
 ---
@@ -3668,8 +3936,8 @@ SELECT count(*) AS readings FROM readings WHERE site_id = 'baltanas'
 ## F083 · next_month
 
 **Turn 1:** How many readings were recorded at Delos in June 2026?  
-**Answer given in history:** 38443 readings.  
-**Recomputed:** `38443`
+**Answer given in history:** 65551 readings.  
+**Recomputed:** `65551`
 
 ```sql
 SELECT count(*) AS readings FROM readings WHERE site_id = 'delos'
@@ -3677,11 +3945,11 @@ SELECT count(*) AS readings FROM readings WHERE site_id = 'delos'
 ```
 | readings |
 |---|
-| 38443 |
+| 65551 |
 
 **Question:** And in the following month?  
-**Reference:** 40130 readings.  
-**Recomputed:** `40130` → **MATCH**
+**Reference:** 102364 readings.  
+**Recomputed:** `102364` → **MATCH**
 
 ```sql
 SELECT count(*) AS readings FROM readings WHERE site_id = 'delos'
@@ -3689,7 +3957,7 @@ SELECT count(*) AS readings FROM readings WHERE site_id = 'delos'
 ```
 | readings |
 |---|
-| 40130 |
+| 102364 |
 
 
 ---
@@ -3697,8 +3965,8 @@ SELECT count(*) AS readings FROM readings WHERE site_id = 'delos'
 ## F084 · next_month
 
 **Turn 1:** How many readings were recorded at Lucretili in June 2026?  
-**Answer given in history:** 198983 readings.  
-**Recomputed:** `198983`
+**Answer given in history:** 206492 readings.  
+**Recomputed:** `206492`
 
 ```sql
 SELECT count(*) AS readings FROM readings WHERE site_id = 'lucretili'
@@ -3706,11 +3974,11 @@ SELECT count(*) AS readings FROM readings WHERE site_id = 'lucretili'
 ```
 | readings |
 |---|
-| 198983 |
+| 206492 |
 
 **Question:** And in the following month?  
-**Reference:** 199288 readings.  
-**Recomputed:** `199288` → **MATCH**
+**Reference:** 220581 readings.  
+**Recomputed:** `220581` → **MATCH**
 
 ```sql
 SELECT count(*) AS readings FROM readings WHERE site_id = 'lucretili'
@@ -3718,7 +3986,7 @@ SELECT count(*) AS readings FROM readings WHERE site_id = 'lucretili'
 ```
 | readings |
 |---|
-| 199288 |
+| 220581 |
 
 
 ---
@@ -3738,8 +4006,8 @@ SELECT count(*) AS readings FROM readings WHERE site_id = 'baltanas'
 | 141404 |
 
 **Question:** And in the following month?  
-**Reference:** 236483 readings.  
-**Recomputed:** `236483` → **MATCH**
+**Reference:** 244932 readings.  
+**Recomputed:** `244932` → **MATCH**
 
 ```sql
 SELECT count(*) AS readings FROM readings WHERE site_id = 'baltanas'
@@ -3747,7 +4015,7 @@ SELECT count(*) AS readings FROM readings WHERE site_id = 'baltanas'
 ```
 | readings |
 |---|
-| 236483 |
+| 244932 |
 
 
 ---
@@ -3756,7 +4024,7 @@ SELECT count(*) AS readings FROM readings WHERE site_id = 'baltanas'
 
 **Turn 1:** What is the average temperature at Lucretili?  
 **Answer given in history:** 23.639 °C.  
-**Recomputed:** `23.63857854954556`
+**Recomputed:** `23.63857854954561`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -3769,7 +4037,7 @@ WHERE r.site_id = 'lucretili' AND o.property_id = 'temperature' AND o.value IS N
 
 **Turn 2:** What about Baltanas?  
 **Answer given in history:** 21.722 °C.  
-**Recomputed:** `21.721905265213707`
+**Recomputed:** `21.72190526521373`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -3800,7 +4068,7 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Turn 1:** What is the average temperature at Delos?  
 **Answer given in history:** 26.087.  
-**Recomputed:** `26.08703019975384`
+**Recomputed:** `26.08703019975385`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -3813,7 +4081,7 @@ WHERE r.site_id = 'delos' AND o.property_id = 'temperature' AND o.value IS NOT N
 
 **Turn 2:** What about Ranverso?  
 **Answer given in history:** 24.209 °C.  
-**Recomputed:** `24.20859226379203`
+**Recomputed:** `24.20859226379202`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -3844,7 +4112,7 @@ WHERE r.site_id = 'ranverso' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Turn 1:** What is the average temperature at Delos?  
 **Answer given in history:** 26.087.  
-**Recomputed:** `26.08703019975386`
+**Recomputed:** `26.087030199753844`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -3857,7 +4125,7 @@ WHERE r.site_id = 'delos' AND o.property_id = 'temperature' AND o.value IS NOT N
 
 **Turn 2:** What about Schenkenberg?  
 **Answer given in history:** 23.672 °C.  
-**Recomputed:** `23.672202985963786`
+**Recomputed:** `23.672202985963782`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -3888,7 +4156,7 @@ WHERE r.site_id = 'schenkenberg' AND o.property_id = 'temperature' AND o.value I
 
 **Turn 1:** What is the average temperature at Baltanas?  
 **Answer given in history:** 21.722 °C.  
-**Recomputed:** `21.721905265213753`
+**Recomputed:** `21.721905265213728`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -3901,7 +4169,7 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Turn 2:** What about Ranverso?  
 **Answer given in history:** 24.209 °C.  
-**Recomputed:** `24.208592263792013`
+**Recomputed:** `24.20859226379203`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -3932,7 +4200,7 @@ WHERE r.site_id = 'ranverso' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Turn 1:** What is the average temperature at Schenkenberg?  
 **Answer given in history:** 23.672 °C.  
-**Recomputed:** `23.672202985963793`
+**Recomputed:** `23.672202985963782`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -3945,7 +4213,7 @@ WHERE r.site_id = 'schenkenberg' AND o.property_id = 'temperature' AND o.value I
 
 **Turn 2:** What about Ranverso?  
 **Answer given in history:** 24.209 °C.  
-**Recomputed:** `24.208592263792006`
+**Recomputed:** `24.20859226379202`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -3976,7 +4244,7 @@ WHERE r.site_id = 'ranverso' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Turn 1:** What is the average temperature at Ranverso?  
 **Answer given in history:** 24.209 °C.  
-**Recomputed:** `24.208592263792017`
+**Recomputed:** `24.20859226379203`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -3989,7 +4257,7 @@ WHERE r.site_id = 'ranverso' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Turn 2:** What about Lucretili?  
 **Answer given in history:** 23.639 °C.  
-**Recomputed:** `23.63857854954555`
+**Recomputed:** `23.63857854954562`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -4020,7 +4288,7 @@ WHERE r.site_id = 'lucretili' AND o.property_id = 'temperature' AND o.value IS N
 
 **Turn 1:** What is the average temperature at Lucretili?  
 **Answer given in history:** 23.639 °C.  
-**Recomputed:** `23.63857854954556`
+**Recomputed:** `23.638578549545592`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -4077,7 +4345,7 @@ WHERE r.site_id = 'schenkenberg' AND o.property_id = 'temperature' AND o.value I
 
 **Turn 2:** What about Baltanas?  
 **Answer given in history:** 21.722 °C.  
-**Recomputed:** `21.721905265213735`
+**Recomputed:** `21.72190526521373`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -4121,7 +4389,7 @@ WHERE r.site_id = 'ranverso' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Turn 2:** What about Delos?  
 **Answer given in history:** 26.087.  
-**Recomputed:** `26.087030199753862`
+**Recomputed:** `26.08703019975385`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -4165,7 +4433,7 @@ WHERE r.site_id = 'ranverso' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Turn 2:** What about Schenkenberg?  
 **Answer given in history:** 23.672 °C.  
-**Recomputed:** `23.672202985963775`
+**Recomputed:** `23.672202985963793`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -4196,7 +4464,7 @@ WHERE r.site_id = 'schenkenberg' AND o.property_id = 'temperature' AND o.value I
 
 **Turn 1:** What is the average temperature at Lucretili?  
 **Answer given in history:** 23.639 °C.  
-**Recomputed:** `23.63857854954556`
+**Recomputed:** `23.638578549545606`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -4240,7 +4508,7 @@ WHERE r.site_id = 'schenkenberg' AND o.property_id = 'temperature' AND o.value I
 
 **Turn 1:** What is the average temperature at Delos?  
 **Answer given in history:** 26.087.  
-**Recomputed:** `26.087030199753862`
+**Recomputed:** `26.087030199753844`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -4253,7 +4521,7 @@ WHERE r.site_id = 'delos' AND o.property_id = 'temperature' AND o.value IS NOT N
 
 **Turn 2:** What about Baltanas?  
 **Answer given in history:** 21.722 °C.  
-**Recomputed:** `21.721905265213756`
+**Recomputed:** `21.721905265213746`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -4280,11 +4548,11 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'temperature' AND o.value IS NO
 
 ---
 
-## F098 · unanswerable
+## F098 · and_the_quantity
 
 **Turn 1:** What is the average temperature at Baltanas?  
 **Answer given in history:** 21.722 °C.  
-**Recomputed:** `21.721905265213735`
+**Recomputed:** `21.72190526521371`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -4296,24 +4564,26 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'temperature' AND o.value IS NO
 | 21.7219 | 44.6 | -0.6 | 435215 | Cel |
 
 **Question:** And the relative humidity?  
-**Reference:** Cannot be answered: no humidity data at Baltanas.  
-**Recomputed:** `None` → **MATCH**
+**Reference:** 42.292 %.  
+**Recomputed:** `42.29167911116421` → **MATCH**
 
 ```sql
-SELECT DISTINCT o.property_id FROM observations o JOIN readings r USING (reading_id)
-WHERE r.site_id = 'baltanas' AND (lower(o.property_id) LIKE '%hum%');
+SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
+FROM observations o JOIN readings r USING (reading_id)
+WHERE r.site_id = 'baltanas' AND o.property_id = 'hum1' AND o.value IS NOT NULL;
 ```
-_(no rows)_
+| avg | max | min | n | unit |
+|---|---|---|---|---|
+| 42.2917 | 91 | 9 | 16741 | % |
 
-- Expected: no rows (no relative humidity data at baltanas). Got 0 row(s).
 
 ---
 
-## F099 · unanswerable
+## F099 · and_the_quantity
 
 **Turn 1:** What is the average temperature at Lucretili?  
 **Answer given in history:** 23.639 °C.  
-**Recomputed:** `23.638578549545674`
+**Recomputed:** `23.638578549545585`
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
@@ -4325,20 +4595,22 @@ WHERE r.site_id = 'lucretili' AND o.property_id = 'temperature' AND o.value IS N
 | 23.6386 | 50 | 0 | 318576 | Cel |
 
 **Question:** And the relative humidity?  
-**Reference:** Cannot be answered: no humidity data at Lucretili.  
-**Recomputed:** `None` → **MATCH**
+**Reference:** 64.216 %.  
+**Recomputed:** `64.21552020144215` → **MATCH**
 
 ```sql
-SELECT DISTINCT o.property_id FROM observations o JOIN readings r USING (reading_id)
-WHERE r.site_id = 'lucretili' AND (lower(o.property_id) LIKE '%hum%');
+SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
+FROM observations o JOIN readings r USING (reading_id)
+WHERE r.site_id = 'lucretili' AND o.property_id = 'hum1' AND o.value IS NOT NULL;
 ```
-_(no rows)_
+| avg | max | min | n | unit |
+|---|---|---|---|---|
+| 64.2155 | 99 | 21 | 17474 | % |
 
-- Expected: no rows (no relative humidity data at lucretili). Got 0 row(s).
 
 ---
 
-## F100 · unanswerable
+## F100 · and_the_quantity
 
 **Turn 1:** What is the average temperature at Delos?  
 **Answer given in history:** 26.087.  
@@ -4354,15 +4626,17 @@ WHERE r.site_id = 'delos' AND o.property_id = 'temperature' AND o.value IS NOT N
 | 26.087 | 54.2 | 11.5 | 21126 | None |
 
 **Question:** And the relative humidity?  
-**Reference:** Cannot be answered: no humidity data at Delos.  
-**Recomputed:** `None` → **MATCH**
+**Reference:** 63.983 %.  
+**Recomputed:** `63.98309841778984` → **MATCH**
 
 ```sql
-SELECT DISTINCT o.property_id FROM observations o JOIN readings r USING (reading_id)
-WHERE r.site_id = 'delos' AND (lower(o.property_id) LIKE '%hum%');
+SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit
+FROM observations o JOIN readings r USING (reading_id)
+WHERE r.site_id = 'delos' AND o.property_id = 'hum1' AND o.value IS NOT NULL;
 ```
-_(no rows)_
+| avg | max | min | n | unit |
+|---|---|---|---|---|
+| 63.9831 | 4334 | 30 | 32423 | % |
 
-- Expected: no rows (no relative humidity data at delos). Got 0 row(s).
 
 ---

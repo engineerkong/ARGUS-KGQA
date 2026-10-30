@@ -1,0 +1,739 @@
+[
+ {
+  "id": "S001",
+  "type": "spatial",
+  "question": "How far apart are the two most distant sensor nodes at Baltanas?",
+  "reference": {
+   "old": "382.3 m, between A8610A3230467704 and GNSS_Base.",
+   "new": "382.3 m, between A8610A3230467704 and GNSS_Base. With the altitude difference: 382.7 m, between A8610A3230467704 and GNSS_Base."
+  },
+  "reference_value_alt": {
+   "old": null,
+   "new": 382.7
+  }
+ },
+ {
+  "id": "S002",
+  "type": "spatial",
+  "question": "How far apart are the two most distant sensor nodes at Delos?",
+  "reference": {
+   "old": "1669.9 m, between 0004A30B0050C42F and H. Fournoi_wall attached 1.",
+   "new": "1669.9 m, between 0004A30B0050C42F and H. Fournoi_wall attached 1. With the altitude difference: 1670.1 m, between 0004A30B0050C42F and H. Fournoi_wall attached 1."
+  },
+  "reference_value_alt": {
+   "old": null,
+   "new": 1670.1
+  }
+ },
+ {
+  "id": "S003",
+  "type": "spatial",
+  "question": "How far apart are the two most distant sensor nodes at Lucretili?",
+  "reference": {
+   "old": "8653.3 m, between LS-153061 - Tiltmeter Conventillo and LS-177310 Crackmeter Montefalco.",
+   "new": "8653.3 m, between LS-153061 - Tiltmeter Conventillo and LS-177310 Crackmeter Montefalco. With the altitude difference: 8655.2 m, between LS-153061 - Tiltmeter Conventillo and LS-177310 Crackmeter Montefalco."
+  },
+  "reference_value_alt": {
+   "old": null,
+   "new": 8655.2
+  }
+ },
+ {
+  "id": "S004",
+  "type": "spatial",
+  "question": "How far apart are the two most distant sensor nodes at Ranverso?",
+  "reference_value_alt": {
+   "old": null,
+   "new": 45.2
+  }
+ },
+ {
+  "id": "S005",
+  "type": "spatial",
+  "question": "How far apart are the two most distant sensor nodes at Schenkenberg?",
+  "reference": {
+   "old": "5.3 m, between LS-152555 and LS-175480.",
+   "new": "5.3 m, between LS-152555 and LS-175480. With the altitude difference: 8.4 m, between 2CF7F1C072300226 and 2CF7F1C072600345."
+  },
+  "reference_value_alt": {
+   "old": null,
+   "new": 8.4
+  }
+ },
+ {
+  "id": "S032",
+  "type": "spatial",
+  "question": "What is the distance between sensor nodes AF3 and GNSS-Rover at Baltanas?",
+  "reference_value_alt": {
+   "old": null,
+   "new": 11.0
+  }
+ },
+ {
+  "id": "S033",
+  "type": "spatial",
+  "question": "What is the distance between sensor nodes AF4 and GNSS_Base at Baltanas?",
+  "reference": {
+   "old": "333.7 m.",
+   "new": "333.7 m. With the altitude difference: 334.2 m."
+  },
+  "reference_value_alt": {
+   "old": null,
+   "new": 334.2
+  }
+ },
+ {
+  "id": "S034",
+  "type": "spatial",
+  "question": "What is the distance between sensor nodes Acc-2A and AF4 at Baltanas?",
+  "reference": {
+   "old": "13.7 m.",
+   "new": "13.7 m. With the altitude difference: 13.8 m."
+  },
+  "reference_value_alt": {
+   "old": null,
+   "new": 13.8
+  }
+ },
+ {
+  "id": "S035",
+  "type": "spatial",
+  "question": "What is the distance between sensor nodes Gases and P_WL at Baltanas?",
+  "reference_value_alt": {
+   "old": null,
+   "new": 46.5
+  }
+ },
+ {
+  "id": "S036",
+  "type": "spatial",
+  "question": "What is the distance between sensor nodes Gases and WP2 at Baltanas?",
+  "reference_value_alt": {
+   "old": null,
+   "new": 45.1
+  }
+ },
+ {
+  "id": "S037",
+  "type": "spatial",
+  "question": "What is the distance between sensor nodes H. Fournoi_wall attached 1 and H. Masks_Dyonisios &panter mosaic_pole mounted 2 at Delos?",
+  "reference_value_alt": {
+   "old": null,
+   "new": 540.3
+  }
+ },
+ {
+  "id": "S038",
+  "type": "spatial",
+  "question": "What is the distance between sensor nodes H. Fournoi_wall attached 1 and LS-150900 at Delos?",
+  "reference": {
+   "old": "645.7 m.",
+   "new": "645.7 m. With the altitude difference: 645.9 m."
+  },
+  "reference_value_alt": {
+   "old": null,
+   "new": 645.9
+  }
+ },
+ {
+  "id": "S039",
+  "type": "spatial",
+  "question": "What is the distance between sensor nodes H. Masks_Dolphins mosaic_pole mounted and H. Masks_Dyonisios &panter mosaic_pole mounted 2 at Delos?",
+  "reference": {
+   "old": "20 m.",
+   "new": "20 m. With the altitude difference: 20.1 m."
+  },
+  "reference_value_alt": {
+   "old": null,
+   "new": 20.1
+  }
+ },
+ {
+  "id": "S040",
+  "type": "spatial",
+  "question": "What is the distance between sensor nodes H. Masks_Mask mosaic_pole mounted 2 and LS-153242 at Delos?",
+  "reference": {
+   "old": "199.9 m.",
+   "new": "199.9 m. With the altitude difference: 200.1 m."
+  },
+  "reference_value_alt": {
+   "old": null,
+   "new": 200.1
+  }
+ },
+ {
+  "id": "S041",
+  "type": "spatial",
+  "question": "What is the distance between sensor nodes H. Masks_Mask mosaic_pole mounted 2 and Outdoors area H. Masks_Mask_pole mounted at Delos?",
+  "reference": {
+   "old": "40.2 m.",
+   "new": "40.2 m. With the altitude difference: 40.3 m."
+  },
+  "reference_value_alt": {
+   "old": null,
+   "new": 40.3
+  }
+ },
+ {
+  "id": "S042",
+  "type": "spatial",
+  "question": "What is the distance between sensor nodes H. Masks_Mask mosaic_window and LS-153295 at Delos?",
+  "reference": {
+   "old": "230.8 m.",
+   "new": "230.8 m. With the altitude difference: 231 m."
+  },
+  "reference_value_alt": {
+   "old": null,
+   "new": 231.0
+  }
+ },
+ {
+  "id": "S043",
+  "type": "spatial",
+  "question": "What is the distance between sensor nodes LS-143276 and LS-149248 at Ranverso?",
+  "reference_value_alt": {
+   "old": null,
+   "new": 7.0
+  }
+ },
+ {
+  "id": "S044",
+  "type": "spatial",
+  "question": "What is the distance between sensor nodes LS-143276 and LS-149361 at Ranverso?",
+  "reference_value_alt": {
+   "old": null,
+   "new": 44.2
+  }
+ },
+ {
+  "id": "S045",
+  "type": "spatial",
+  "question": "What is the distance between sensor nodes LS-143276 and LS-168442 at Ranverso?",
+  "reference_value_alt": {
+   "old": null,
+   "new": 7.0
+  }
+ },
+ {
+  "id": "S046",
+  "type": "spatial",
+  "question": "What is the distance between sensor nodes LS-149248 and LS-168442 at Ranverso?",
+  "reference_value_alt": {
+   "old": null,
+   "new": 0.0
+  }
+ },
+ {
+  "id": "S047",
+  "type": "spatial",
+  "question": "What is the distance between sensor nodes LS-149361 and LS-174188 at Ranverso?",
+  "reference_value_alt": {
+   "old": null,
+   "new": 37.3
+  }
+ },
+ {
+  "id": "S048",
+  "type": "spatial",
+  "question": "What is the distance between sensor nodes LS-149361 and LS-177315 at Ranverso?",
+  "reference_value_alt": {
+   "old": null,
+   "new": 0.9
+  }
+ },
+ {
+  "id": "S049",
+  "type": "spatial",
+  "question": "What is the distance between sensor nodes LS-149796 and LS-152479 at Schenkenberg?",
+  "reference": {
+   "old": "1.5 m.",
+   "new": "1.5 m. With the altitude difference: 4.9 m."
+  },
+  "reference_value_alt": {
+   "old": null,
+   "new": 4.9
+  }
+ },
+ {
+  "id": "S050",
+  "type": "spatial",
+  "question": "What is the distance between sensor nodes LS-149796 and LS-175480 at Schenkenberg?",
+  "reference": {
+   "old": "1.8 m.",
+   "new": "1.8 m. With the altitude difference: 5 m."
+  },
+  "reference_value_alt": {
+   "old": null,
+   "new": 5.0
+  }
+ },
+ {
+  "id": "S051",
+  "type": "spatial",
+  "question": "What is the distance between sensor nodes LS-152479 and LS-152899 at Schenkenberg?",
+  "reference": {
+   "old": "0.9 m.",
+   "new": "0.9 m. With the altitude difference: 1.3 m."
+  },
+  "reference_value_alt": {
+   "old": null,
+   "new": 1.3
+  }
+ },
+ {
+  "id": "S052",
+  "type": "spatial",
+  "question": "What is the distance between sensor nodes LS-152479 and LS-152914 at Schenkenberg?",
+  "reference_value_alt": {
+   "old": null,
+   "new": 3.7
+  }
+ },
+ {
+  "id": "S053",
+  "type": "spatial",
+  "question": "What is the distance between sensor nodes LS-152555 and LS-152914 at Schenkenberg?",
+  "reference_value_alt": {
+   "old": null,
+   "new": 4.2
+  }
+ },
+ {
+  "id": "S054",
+  "type": "spatial",
+  "question": "What is the distance between sensor nodes LS-152555 and LS-159070 at Schenkenberg?",
+  "reference": {
+   "old": "4.6 m.",
+   "new": "4.6 m. With the altitude difference: 5.3 m."
+  },
+  "reference_value_alt": {
+   "old": null,
+   "new": 5.3
+  }
+ },
+ {
+  "id": "S055",
+  "type": "spatial",
+  "question": "What is the distance between sensor nodes LS-152608 - Tiltmeter Conventillo and LS-177239 - Humidity sensor Conventillo at Lucretili?",
+  "reference": {
+   "old": "3.1 m.",
+   "new": "3.1 m. With the altitude difference: 3.8 m."
+  },
+  "reference_value_alt": {
+   "old": null,
+   "new": 3.8
+  }
+ },
+ {
+  "id": "S056",
+  "type": "spatial",
+  "question": "What is the distance between sensor nodes LS-152608 - Tiltmeter Conventillo and LS-177320 CrackMeter Conventillo at Lucretili?",
+  "reference": {
+   "old": "6.7 m.",
+   "new": "6.7 m. With the altitude difference: 7.6 m."
+  },
+  "reference_value_alt": {
+   "old": null,
+   "new": 7.6
+  }
+ },
+ {
+  "id": "S057",
+  "type": "spatial",
+  "question": "What is the distance between sensor nodes LS-152816 Tiltmeter Conventillo and LS-174156 Crackmeter Villa Orazio at Lucretili?",
+  "reference": {
+   "old": "7736.3 m.",
+   "new": "7736.3 m. With the altitude difference: 7742.2 m."
+  },
+  "reference_value_alt": {
+   "old": null,
+   "new": 7742.2
+  }
+ },
+ {
+  "id": "S058",
+  "type": "spatial",
+  "question": "What is the distance between sensor nodes LS-159070 and LS-175480 at Schenkenberg?",
+  "reference": {
+   "old": "1.9 m.",
+   "new": "1.9 m. With the altitude difference: 2.9 m."
+  },
+  "reference_value_alt": {
+   "old": null,
+   "new": 2.9
+  }
+ },
+ {
+  "id": "S059",
+  "type": "spatial",
+  "question": "What is the distance between sensor nodes LS-170894 and LS-174188 at Ranverso?",
+  "reference_value_alt": {
+   "old": null,
+   "new": 8.6
+  }
+ },
+ {
+  "id": "S060",
+  "type": "spatial",
+  "question": "Which sensor node is closest to Acc-3A at Baltanas?",
+  "reference_value_alt": {
+   "old": null,
+   "new": "sensor"
+  }
+ },
+ {
+  "id": "S061",
+  "type": "spatial",
+  "question": "Which sensor node is closest to Gases at Baltanas?",
+  "reference_value_alt": {
+   "old": null,
+   "new": "A8610A3230467704"
+  }
+ },
+ {
+  "id": "S062",
+  "type": "spatial",
+  "question": "Which sensor node is closest to H. Masks_Mask mosaic_pole mounted 2 at Delos?",
+  "reference_value_alt": {
+   "old": null,
+   "new": "H. Masks_Masks mosaic_flow meter"
+  }
+ },
+ {
+  "id": "S063",
+  "type": "spatial",
+  "question": "Which sensor node is closest to H. Masks_Mask mosaic_window at Delos?",
+  "reference_value_alt": {
+   "old": null,
+   "new": "H. Masks_Mask mosaic_pole mounted"
+  }
+ },
+ {
+  "id": "S064",
+  "type": "spatial",
+  "question": "Which sensor node is closest to LS-143276 at Ranverso?",
+  "reference_value_alt": {
+   "old": null,
+   "new": "LS-170894"
+  }
+ },
+ {
+  "id": "S065",
+  "type": "spatial",
+  "question": "Which sensor node is closest to LS-149248 at Ranverso?",
+  "reference_value_alt": {
+   "old": null,
+   "new": "LS-168442"
+  }
+ },
+ {
+  "id": "S066",
+  "type": "spatial",
+  "question": "Which sensor node is closest to LS-152608 - Tiltmeter Conventillo at Lucretili?",
+  "reference": {
+   "old": "LS-177239 - Humidity sensor Conventillo, 3.1 m away.",
+   "new": "LS-177239 - Humidity sensor Conventillo, 3.1 m away. With the altitude difference: LS-177239 - Humidity sensor Conventillo, 3.8 m away."
+  },
+  "reference_value_alt": {
+   "old": null,
+   "new": "LS-177239 - Humidity sensor Conventillo"
+  }
+ },
+ {
+  "id": "S067",
+  "type": "spatial",
+  "question": "Which sensor node is closest to LS-152899 at Schenkenberg?",
+  "reference": {
+   "old": "2CF7F1C072300226, 0.6 m away.",
+   "new": "2CF7F1C072300226, 0.6 m away. With the altitude difference: LS-152479, 1.3 m away."
+  },
+  "reference_value_alt": {
+   "old": null,
+   "new": "LS-152479"
+  }
+ },
+ {
+  "id": "S068",
+  "type": "spatial",
+  "question": "Which sensor node is closest to LS-152914 at Schenkenberg?",
+  "reference": {
+   "old": "LS-159070, 0.4 m away.",
+   "new": "LS-159070, 0.4 m away. With the altitude difference: LS-175480, 1.9 m away."
+  },
+  "reference_value_alt": {
+   "old": null,
+   "new": "LS-175480"
+  }
+ },
+ {
+  "id": "S069",
+  "type": "spatial",
+  "question": "Which sensor node is closest to LS-170894 at Ranverso?",
+  "reference_value_alt": {
+   "old": null,
+   "new": "LS-143276"
+  }
+ },
+ {
+  "id": "S070",
+  "type": "spatial",
+  "question": "Which sensor node is closest to LS-177266 - Crackmeter Conventillo at Lucretili?",
+  "reference": {
+   "old": "LS-152931 Tiltemeter Conventillo, 0.2 m away.",
+   "new": "LS-152931 Tiltemeter Conventillo, 0.2 m away. With the altitude difference: LS-152931 Tiltemeter Conventillo, 0.6 m away."
+  },
+  "reference_value_alt": {
+   "old": null,
+   "new": "LS-152931 Tiltemeter Conventillo"
+  }
+ },
+ {
+  "id": "S071",
+  "type": "spatial",
+  "question": "Which sensor node is closest to P_WL at Baltanas?",
+  "reference_value_alt": {
+   "old": null,
+   "new": "Acc-2A"
+  }
+ },
+ {
+  "id": "S072",
+  "type": "spatial",
+  "question": "Which sensor node is closest to WP2 at Baltanas?",
+  "reference": {
+   "old": "P_WL, 2.3 m away.",
+   "new": "P_WL, 2.3 m away. With the altitude difference: P_WL, 2.4 m away."
+  },
+  "reference_value_alt": {
+   "old": null,
+   "new": "P_WL"
+  }
+ },
+ {
+  "id": "S073",
+  "type": "spatial",
+  "question": "How many other sensor nodes at Baltanas are within 10 m of P_WL?",
+  "reference_value_alt": {
+   "old": null,
+   "new": 8
+  }
+ },
+ {
+  "id": "S074",
+  "type": "spatial",
+  "question": "How many other sensor nodes at Baltanas are within 50 m of Acc-3A?",
+  "reference_value_alt": {
+   "old": null,
+   "new": 0
+  }
+ },
+ {
+  "id": "S075",
+  "type": "spatial",
+  "question": "How many other sensor nodes at Delos are within 10 m of H. Masks_Mask mosaic_window?",
+  "reference_value_alt": {
+   "old": null,
+   "new": 7
+  }
+ },
+ {
+  "id": "S076",
+  "type": "spatial",
+  "question": "How many other sensor nodes at Delos are within 10 m of H. Masks_Masks mosaic_flow meter?",
+  "reference_value_alt": {
+   "old": null,
+   "new": 7
+  }
+ },
+ {
+  "id": "S077",
+  "type": "spatial",
+  "question": "How many other sensor nodes at Delos are within 100 m of H. Masks_Dyonisios mosaic_pole mounted?",
+  "reference_value_alt": {
+   "old": null,
+   "new": 10
+  }
+ },
+ {
+  "id": "S078",
+  "type": "spatial",
+  "question": "How many other sensor nodes at Delos are within 100 m of H. Masks_Mask mosaic_pole mounted 2?",
+  "reference_value_alt": {
+   "old": null,
+   "new": 10
+  }
+ },
+ {
+  "id": "S079",
+  "type": "spatial",
+  "question": "How many other sensor nodes at Lucretili are within 100 m of LS-152608 - Tiltmeter Conventillo?",
+  "reference_value_alt": {
+   "old": null,
+   "new": 7
+  }
+ },
+ {
+  "id": "S080",
+  "type": "spatial",
+  "question": "How many other sensor nodes at Lucretili are within 100 m of LS-177281 Humidity-Temperature Montefalco?",
+  "reference_value_alt": {
+   "old": null,
+   "new": 1
+  }
+ },
+ {
+  "id": "S081",
+  "type": "spatial",
+  "question": "How many other sensor nodes at Lucretili are within 100 m of LS-177310 Crackmeter Montefalco?",
+  "reference_value_alt": {
+   "old": null,
+   "new": 1
+  }
+ },
+ {
+  "id": "S082",
+  "type": "spatial",
+  "question": "How many other sensor nodes at Lucretili are within 500 m of LS-152816 Tiltmeter Conventillo?",
+  "reference_value_alt": {
+   "old": null,
+   "new": 7
+  }
+ },
+ {
+  "id": "S083",
+  "type": "spatial",
+  "question": "How many other sensor nodes at Lucretili are within 500 m of LS-177266 - Crackmeter Conventillo?",
+  "reference_value_alt": {
+   "old": null,
+   "new": 7
+  }
+ },
+ {
+  "id": "S084",
+  "type": "spatial",
+  "question": "How many other sensor nodes at Ranverso are within 100 m of LS-149248?",
+  "reference_value_alt": {
+   "old": null,
+   "new": 9
+  }
+ },
+ {
+  "id": "S085",
+  "type": "spatial",
+  "question": "How many other sensor nodes at Ranverso are within 500 m of LS-174188?",
+  "reference_value_alt": {
+   "old": null,
+   "new": 9
+  }
+ },
+ {
+  "id": "S086",
+  "type": "spatial",
+  "question": "How many other sensor nodes at Ranverso are within 500 m of LS-177315?",
+  "reference_value_alt": {
+   "old": null,
+   "new": 9
+  }
+ },
+ {
+  "id": "S087",
+  "type": "spatial",
+  "question": "How many other sensor nodes at Schenkenberg are within 50 m of LS-152555?",
+  "reference_value_alt": {
+   "old": null,
+   "new": 8
+  }
+ },
+ {
+  "id": "F047",
+  "type": "followup",
+  "question": "What about at Baltanas?",
+  "reference": {
+   "old": "382.3 m, between A8610A3230467704 and GNSS_Base.",
+   "new": "382.3 m, between A8610A3230467704 and GNSS_Base. With the altitude difference: 382.7 m, between A8610A3230467704 and GNSS_Base."
+  },
+  "reference_value_alt": {
+   "old": null,
+   "new": 382.7
+  }
+ },
+ {
+  "id": "F048",
+  "type": "followup",
+  "question": "What about at Delos?",
+  "reference": {
+   "old": "1669.9 m, between 0004A30B0050C42F and H. Fournoi_wall attached 1.",
+   "new": "1669.9 m, between 0004A30B0050C42F and H. Fournoi_wall attached 1. With the altitude difference: 1670.1 m, between 0004A30B0050C42F and H. Fournoi_wall attached 1."
+  },
+  "reference_value_alt": {
+   "old": null,
+   "new": 1670.1
+  }
+ },
+ {
+  "id": "F049",
+  "type": "followup",
+  "question": "What about at Lucretili?",
+  "reference": {
+   "old": "8653.3 m, between LS-153061 - Tiltmeter Conventillo and LS-177310 Crackmeter Montefalco.",
+   "new": "8653.3 m, between LS-153061 - Tiltmeter Conventillo and LS-177310 Crackmeter Montefalco. With the altitude difference: 8655.2 m, between LS-153061 - Tiltmeter Conventillo and LS-177310 Crackmeter Montefalco."
+  },
+  "reference_value_alt": {
+   "old": null,
+   "new": 8655.2
+  }
+ },
+ {
+  "id": "F050",
+  "type": "followup",
+  "question": "What about at Lucretili?",
+  "reference": {
+   "old": "8653.3 m, between LS-153061 - Tiltmeter Conventillo and LS-177310 Crackmeter Montefalco.",
+   "new": "8653.3 m, between LS-153061 - Tiltmeter Conventillo and LS-177310 Crackmeter Montefalco. With the altitude difference: 8655.2 m, between LS-153061 - Tiltmeter Conventillo and LS-177310 Crackmeter Montefalco."
+  },
+  "reference_value_alt": {
+   "old": null,
+   "new": 8655.2
+  }
+ },
+ {
+  "id": "F051",
+  "type": "followup",
+  "question": "What about at Ranverso?",
+  "reference_value_alt": {
+   "old": null,
+   "new": 45.2
+  }
+ },
+ {
+  "id": "F052",
+  "type": "followup",
+  "question": "What about at Ranverso?",
+  "reference_value_alt": {
+   "old": null,
+   "new": 45.2
+  }
+ },
+ {
+  "id": "F053",
+  "type": "followup",
+  "question": "What about at Ranverso?",
+  "reference_value_alt": {
+   "old": null,
+   "new": 45.2
+  }
+ },
+ {
+  "id": "F054",
+  "type": "followup",
+  "question": "What about at Schenkenberg?",
+  "reference": {
+   "old": "5.3 m, between LS-152555 and LS-175480.",
+   "new": "5.3 m, between LS-152555 and LS-175480. With the altitude difference: 8.4 m, between 2CF7F1C072300226 and 2CF7F1C072600345."
+  },
+  "reference_value_alt": {
+   "old": null,
+   "new": 8.4
+  }
+ }
+]

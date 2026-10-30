@@ -16,12 +16,12 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | None | {"R6a_rain_1h": 5, "R6a_rain_24h": 20} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%rain%' AND o.value IS NOT NULL AND o.result_time <= '2026-06-01 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-06-01 23:59:59+00')
 SELECT r.sensor_id, o.property_id, count(*) AS n_24h,
        avg(o.value) FILTER (WHERE o.result_time >= anchor.t - interval '1 hour') AS mean_1h,
        avg(o.value) AS mean_24h,
        greatest(avg(o.value) FILTER (WHERE o.result_time >= anchor.t - interval '1 hour'), avg(o.value)) AS metric
-FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%rain%' AND o.value IS NOT NULL
+FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time BETWEEN anchor.t - interval '24 hours' AND anchor.t
 GROUP BY 1, 2 ORDER BY metric DESC;
 ```
@@ -37,9 +37,9 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 100 | {"R6b_rain_cum7d": 100} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%rain%' AND o.value IS NOT NULL AND o.result_time <= '2026-06-01 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-06-01 23:59:59+00')
 SELECT r.sensor_id, o.property_id, count(*) AS n, sum(o.value) AS metric
-FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%rain%' AND o.value IS NOT NULL
+FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time BETWEEN anchor.t - interval '168 hours' AND anchor.t
 GROUP BY 1, 2 ORDER BY metric DESC;
 ```
@@ -69,12 +69,12 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | None | {"R6a_rain_1h": 5, "R6a_rain_24h": 20} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%rain%' AND o.value IS NOT NULL AND o.result_time <= '2026-06-18 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-06-18 23:59:59+00')
 SELECT r.sensor_id, o.property_id, count(*) AS n_24h,
        avg(o.value) FILTER (WHERE o.result_time >= anchor.t - interval '1 hour') AS mean_1h,
        avg(o.value) AS mean_24h,
        greatest(avg(o.value) FILTER (WHERE o.result_time >= anchor.t - interval '1 hour'), avg(o.value)) AS metric
-FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%rain%' AND o.value IS NOT NULL
+FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time BETWEEN anchor.t - interval '24 hours' AND anchor.t
 GROUP BY 1, 2 ORDER BY metric DESC;
 ```
@@ -90,9 +90,9 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 100 | {"R6b_rain_cum7d": 100} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%rain%' AND o.value IS NOT NULL AND o.result_time <= '2026-06-18 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-06-18 23:59:59+00')
 SELECT r.sensor_id, o.property_id, count(*) AS n, sum(o.value) AS metric
-FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%rain%' AND o.value IS NOT NULL
+FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time BETWEEN anchor.t - interval '168 hours' AND anchor.t
 GROUP BY 1, 2 ORDER BY metric DESC;
 ```
@@ -122,12 +122,12 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | None | {"R6a_rain_1h": 5, "R6a_rain_24h": 20} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%rain%' AND o.value IS NOT NULL AND o.result_time <= '2026-06-22 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-06-22 23:59:59+00')
 SELECT r.sensor_id, o.property_id, count(*) AS n_24h,
        avg(o.value) FILTER (WHERE o.result_time >= anchor.t - interval '1 hour') AS mean_1h,
        avg(o.value) AS mean_24h,
        greatest(avg(o.value) FILTER (WHERE o.result_time >= anchor.t - interval '1 hour'), avg(o.value)) AS metric
-FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%rain%' AND o.value IS NOT NULL
+FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time BETWEEN anchor.t - interval '24 hours' AND anchor.t
 GROUP BY 1, 2 ORDER BY metric DESC;
 ```
@@ -143,9 +143,9 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 100 | {"R6b_rain_cum7d": 100} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%rain%' AND o.value IS NOT NULL AND o.result_time <= '2026-06-22 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-06-22 23:59:59+00')
 SELECT r.sensor_id, o.property_id, count(*) AS n, sum(o.value) AS metric
-FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%rain%' AND o.value IS NOT NULL
+FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time BETWEEN anchor.t - interval '168 hours' AND anchor.t
 GROUP BY 1, 2 ORDER BY metric DESC;
 ```
@@ -175,9 +175,9 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'ranverso' 
 | 20 | {"R2_rain_7d_diff": 20} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'ranverso' AND lower(o.property_id) LIKE '%rain%' AND lower(o.property_id) NOT LIKE '%acc%' AND o.value IS NOT NULL AND o.result_time <= '2026-07-20 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'ranverso' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'acc') = 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-07-20 23:59:59+00')
 SELECT r.sensor_id, o.property_id, count(*) AS n, sum(o.value) AS metric
-FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'ranverso' AND lower(o.property_id) LIKE '%rain%' AND lower(o.property_id) NOT LIKE '%acc%' AND o.value IS NOT NULL
+FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'ranverso' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'acc') = 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time BETWEEN anchor.t - interval '168 hours' AND anchor.t
 GROUP BY 1, 2 ORDER BY metric DESC;
 ```
@@ -205,9 +205,9 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 20 | {"R9a_temp_lt": 20} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL AND o.result_time <= '2026-05-14 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-05-14 23:59:59+00')
 SELECT r.sensor_id, o.property_id, count(*) AS n, min(o.value), max(o.value), max(o.value) - min(o.value) AS metric
-FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL
+FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time BETWEEN anchor.t - interval '24 hours' AND anchor.t
 GROUP BY 1, 2 ORDER BY metric DESC;
 ```
@@ -239,10 +239,10 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 5 | {"R9b_temp_st": 5} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL AND o.result_time <= '2026-05-14 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-05-14 23:59:59+00')
 , w AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value,
         o.value - lag(o.value) OVER (PARTITION BY r.sensor_id, o.property_id ORDER BY o.result_time) AS diff
-      FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL
+      FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
         AND o.result_time BETWEEN anchor.t - interval '1 hours' AND anchor.t)
 SELECT sensor_id, property_id, count(*) AS n, max(abs(diff)) AS metric FROM w
 GROUP BY 1, 2 ORDER BY metric DESC NULLS LAST;
@@ -284,9 +284,9 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 20 | {"R9a_temp_lt": 20} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL AND o.result_time <= '2026-05-16 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-05-16 23:59:59+00')
 SELECT r.sensor_id, o.property_id, count(*) AS n, min(o.value), max(o.value), max(o.value) - min(o.value) AS metric
-FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL
+FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time BETWEEN anchor.t - interval '24 hours' AND anchor.t
 GROUP BY 1, 2 ORDER BY metric DESC;
 ```
@@ -318,10 +318,10 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 5 | {"R9b_temp_st": 5} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL AND o.result_time <= '2026-05-16 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-05-16 23:59:59+00')
 , w AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value,
         o.value - lag(o.value) OVER (PARTITION BY r.sensor_id, o.property_id ORDER BY o.result_time) AS diff
-      FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL
+      FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
         AND o.result_time BETWEEN anchor.t - interval '1 hours' AND anchor.t)
 SELECT sensor_id, property_id, count(*) AS n, max(abs(diff)) AS metric FROM w
 GROUP BY 1, 2 ORDER BY metric DESC NULLS LAST;
@@ -368,9 +368,9 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 20 | {"R9a_temp_lt": 20} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL AND o.result_time <= '2026-06-12 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-06-12 23:59:59+00')
 SELECT r.sensor_id, o.property_id, count(*) AS n, min(o.value), max(o.value), max(o.value) - min(o.value) AS metric
-FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL
+FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time BETWEEN anchor.t - interval '24 hours' AND anchor.t
 GROUP BY 1, 2 ORDER BY metric DESC;
 ```
@@ -403,10 +403,10 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 5 | {"R9b_temp_st": 5} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL AND o.result_time <= '2026-06-12 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-06-12 23:59:59+00')
 , w AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value,
         o.value - lag(o.value) OVER (PARTITION BY r.sensor_id, o.property_id ORDER BY o.result_time) AS diff
-      FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL
+      FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
         AND o.result_time BETWEEN anchor.t - interval '1 hours' AND anchor.t)
 SELECT sensor_id, property_id, count(*) AS n, max(abs(diff)) AS metric FROM w
 GROUP BY 1, 2 ORDER BY metric DESC NULLS LAST;
@@ -443,7 +443,7 @@ GROUP BY 1, 2 ORDER BY metric DESC NULLS LAST;
 ## A008 · verdict_on_date
 
 **Question:** According to the AD-RT expert rules, was there a temperature anomaly at Lucretili on 2026-06-28?  
-**Reference:** Yes. R9a_temp_lt: metric 26 vs threshold 20 (window ending 2026-06-28 23:55 UTC); R9b_temp_st: max 1h change 1 vs threshold 5 (ending 2026-06-28 23:55 UTC)  
+**Reference:** Yes. R9a_temp_lt: metric 26 vs threshold 20 (window ending 2026-06-28 23:56 UTC); R9b_temp_st: max 1h change 1 vs threshold 5 (ending 2026-06-28 23:56 UTC)  
 **Recomputed:** `Yes` → **MATCH**
 
 ```sql
@@ -454,31 +454,32 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 20 | {"R9a_temp_lt": 20} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL AND o.result_time <= '2026-06-28 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-06-28 23:59:59+00')
 SELECT r.sensor_id, o.property_id, count(*) AS n, min(o.value), max(o.value), max(o.value) - min(o.value) AS metric
-FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL
+FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time BETWEEN anchor.t - interval '24 hours' AND anchor.t
 GROUP BY 1, 2 ORDER BY metric DESC;
 ```
 | sensor_id | property_id | n | min | max | metric |
 |---|---|---|---|---|---|
-| 9eefebd0-8191-11f0-9283-e956b63ef652 | temperature | 289 | 15 | 41 | 26 |
+| 9eefebd0-8191-11f0-9283-e956b63ef652 | temperature | 288 | 15 | 41 | 26 |
 | 0cf22310-81be-11f0-9283-e956b63ef652 | temperature | 31 | 21 | 45 | 24 |
 | 8250dd80-8269-11f0-9283-e956b63ef652 | temperature | 31 | 21 | 45 | 24 |
 | 82508f60-8269-11f0-b6dc-556f88243956 | temperature | 31 | 21 | 45 | 24 |
-| 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 289 | 20 | 43 | 23 |
+| 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 288 | 20 | 43 | 23 |
 | 8533f470-5c02-11f0-8a4b-6bd692b5baa4 | temperature | 24 | 25.3 | 46.6 | 21.3 |
-| 37c9dd80-833f-11f0-9283-e956b63ef652 | temperature | 288 | 21.7 | 41.2 | 19.5 |
-| 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 289 | 20 | 38 | 18 |
-| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 289 | 20 | 38 | 18 |
-| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 289 | 20 | 38 | 18 |
-| b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 288 | 21 | 37 | 16 |
-| 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 288 | 22 | 38 | 16 |
-| 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 288 | 22 | 38 | 16 |
-| 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 287 | 25 | 37 | 12 |
-| c0d43040-c86c-11f0-8080-e5362df2da58 | temperature | 91 | 22 | 34 | 12 |
-| 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 288 | 28 | 39.9 | 11.9 |
-| b8184060-831e-11f0-9283-e956b63ef652 | temperature | 288 | 24 | 30 | 6 |
+| 37c9dd80-833f-11f0-9283-e956b63ef652 | temperature | 287 | 21.7 | 41.2 | 19.5 |
+| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 288 | 20 | 38 | 18 |
+| 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 288 | 20 | 38 | 18 |
+| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 288 | 20 | 38 | 18 |
+| 2CF7F1C072300286 | temp1 | 292 | 19.3 | 35.4 | 16.1 |
+| b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 287 | 21 | 37 | 16 |
+| 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 287 | 22 | 38 | 16 |
+| 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 287 | 22 | 38 | 16 |
+| 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 286 | 25 | 37 | 12 |
+| c0d43040-c86c-11f0-8080-e5362df2da58 | temperature | 90 | 22 | 34 | 12 |
+| 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 287 | 28 | 39.9 | 11.9 |
+| b8184060-831e-11f0-9283-e956b63ef652 | temperature | 287 | 24 | 30 | 6 |
 | f3058610-83ff-11f0-9a67-6d25b7d467e7 | temperature | 283 | 22.6 | 28 | 5.4 |
 
 ```sql
@@ -489,37 +490,38 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 5 | {"R9b_temp_st": 5} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL AND o.result_time <= '2026-06-28 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-06-28 23:59:59+00')
 , w AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value,
         o.value - lag(o.value) OVER (PARTITION BY r.sensor_id, o.property_id ORDER BY o.result_time) AS diff
-      FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL
+      FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
         AND o.result_time BETWEEN anchor.t - interval '1 hours' AND anchor.t)
 SELECT sensor_id, property_id, count(*) AS n, max(abs(diff)) AS metric FROM w
 GROUP BY 1, 2 ORDER BY metric DESC NULLS LAST;
 ```
 | sensor_id | property_id | n | metric |
 |---|---|---|---|
-| b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 13 | 1 |
-| 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 13 | 1 |
-| 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
-| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
-| 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
-| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
-| b8184060-831e-11f0-9283-e956b63ef652 | temperature | 13 | 1 |
-| 37c9dd80-833f-11f0-9283-e956b63ef652 | temperature | 13 | 0.4 |
-| 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 13 | 0.2 |
-| f3058610-83ff-11f0-9a67-6d25b7d467e7 | temperature | 13 | 0.2 |
-| 9eefebd0-8191-11f0-9283-e956b63ef652 | temperature | 13 | 0 |
-| 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 13 | 0 |
-| 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 13 | 0 |
-| c0d43040-c86c-11f0-8080-e5362df2da58 | temperature | 13 | 0 |
+| b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 12 | 1 |
+| 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 12 | 1 |
+| b8184060-831e-11f0-9283-e956b63ef652 | temperature | 12 | 1 |
+| 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 12 | 1 |
+| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 12 | 1 |
+| 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 12 | 1 |
+| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 12 | 1 |
+| 37c9dd80-833f-11f0-9283-e956b63ef652 | temperature | 12 | 0.4 |
+| 2CF7F1C072300286 | temp1 | 12 | 0.3 |
+| 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 12 | 0.2 |
+| f3058610-83ff-11f0-9a67-6d25b7d467e7 | temperature | 12 | 0.2 |
+| 9eefebd0-8191-11f0-9283-e956b63ef652 | temperature | 12 | 0 |
+| 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 12 | 0 |
+| 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 12 | 0 |
+| c0d43040-c86c-11f0-8080-e5362df2da58 | temperature | 12 | 0 |
 | 8533f470-5c02-11f0-8a4b-6bd692b5baa4 | temperature | 1 | None |
 
 - as_of = 2026-06-28 23:59:59+00 (windows end at the latest matching reading at or before it)
 - R9a_temp_lt: metric 26 vs threshold 20 → fires
 - R9b_temp_st: metric 1 vs threshold 5 → does not fire
-- Raw readings: [data/A008_R9a_temp_lt.csv](data/A008_R9a_temp_lt.csv) (3951 rows)
-- Raw readings: [data/A008_R9b_temp_st.csv](data/A008_R9b_temp_st.csv) (183 rows)
+- Raw readings: [data/A008_R9a_temp_lt.csv](data/A008_R9a_temp_lt.csv) (4230 rows)
+- Raw readings: [data/A008_R9b_temp_st.csv](data/A008_R9b_temp_st.csv) (181 rows)
 
 ---
 
@@ -537,31 +539,32 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 20 | {"R9a_temp_lt": 20} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL AND o.result_time <= '2026-07-20 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-07-20 23:59:59+00')
 SELECT r.sensor_id, o.property_id, count(*) AS n, min(o.value), max(o.value), max(o.value) - min(o.value) AS metric
-FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL
+FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time BETWEEN anchor.t - interval '24 hours' AND anchor.t
 GROUP BY 1, 2 ORDER BY metric DESC;
 ```
 | sensor_id | property_id | n | min | max | metric |
 |---|---|---|---|---|---|
-| 9eefebd0-8191-11f0-9283-e956b63ef652 | temperature | 289 | 17 | 41 | 24 |
-| 82508f60-8269-11f0-b6dc-556f88243956 | temperature | 21 | 22 | 44 | 22 |
+| 9eefebd0-8191-11f0-9283-e956b63ef652 | temperature | 288 | 17 | 41 | 24 |
 | 0cf22310-81be-11f0-9283-e956b63ef652 | temperature | 21 | 22 | 44 | 22 |
+| 82508f60-8269-11f0-b6dc-556f88243956 | temperature | 21 | 22 | 44 | 22 |
 | 8250dd80-8269-11f0-9283-e956b63ef652 | temperature | 21 | 22 | 44 | 22 |
-| 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 289 | 22 | 43 | 21 |
 | c0d43040-c86c-11f0-8080-e5362df2da58 | temperature | 224 | 22 | 43 | 21 |
+| 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 288 | 22 | 43 | 21 |
 | 8533f470-5c02-11f0-8a4b-6bd692b5baa4 | temperature | 24 | 25.1 | 45.9 | 20.8 |
-| 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 289 | 22 | 38 | 16 |
-| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 289 | 21 | 37 | 16 |
-| 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 289 | 21 | 37 | 16 |
-| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 289 | 21 | 37 | 16 |
-| b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 289 | 21 | 37 | 16 |
-| 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 289 | 22 | 38 | 16 |
-| 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 289 | 27.8 | 41.1 | 13.3 |
-| 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 289 | 25 | 38 | 13 |
-| b8184060-831e-11f0-9283-e956b63ef652 | temperature | 289 | 25 | 32 | 7 |
-| f3058610-83ff-11f0-9a67-6d25b7d467e7 | temperature | 280 | 23.3 | 29.2 | 5.9 |
+| 2CF7F1C072300286 | temp1 | 293 | 20.8 | 36.9 | 16.1 |
+| 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 288 | 22 | 38 | 16 |
+| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 288 | 21 | 37 | 16 |
+| 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 288 | 21 | 37 | 16 |
+| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 288 | 21 | 37 | 16 |
+| b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 288 | 21 | 37 | 16 |
+| 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 288 | 22 | 38 | 16 |
+| 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 288 | 27.8 | 41.1 | 13.3 |
+| 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 288 | 25 | 38 | 13 |
+| b8184060-831e-11f0-9283-e956b63ef652 | temperature | 288 | 25 | 32 | 7 |
+| f3058610-83ff-11f0-9a67-6d25b7d467e7 | temperature | 279 | 23.3 | 29.2 | 5.9 |
 
 ```sql
 SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili' AND rule_id = 'R9b_temp_st';
@@ -571,39 +574,40 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 5 | {"R9b_temp_st": 5} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL AND o.result_time <= '2026-07-20 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-07-20 23:59:59+00')
 , w AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value,
         o.value - lag(o.value) OVER (PARTITION BY r.sensor_id, o.property_id ORDER BY o.result_time) AS diff
-      FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL
+      FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
         AND o.result_time BETWEEN anchor.t - interval '1 hours' AND anchor.t)
 SELECT sensor_id, property_id, count(*) AS n, max(abs(diff)) AS metric FROM w
 GROUP BY 1, 2 ORDER BY metric DESC NULLS LAST;
 ```
 | sensor_id | property_id | n | metric |
 |---|---|---|---|
-| 9eefebd0-8191-11f0-9283-e956b63ef652 | temperature | 13 | 1 |
-| c0d43040-c86c-11f0-8080-e5362df2da58 | temperature | 13 | 1 |
-| b8184060-831e-11f0-9283-e956b63ef652 | temperature | 13 | 1 |
-| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
-| 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
-| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
-| 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 13 | 1 |
-| 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 13 | 1 |
-| 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
-| b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 13 | 1 |
-| f3058610-83ff-11f0-9a67-6d25b7d467e7 | temperature | 13 | 0.3 |
-| 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 13 | 0.3 |
-| 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 13 | 0 |
-| 8250dd80-8269-11f0-9283-e956b63ef652 | temperature | 1 | None |
+| 9eefebd0-8191-11f0-9283-e956b63ef652 | temperature | 12 | 1 |
+| c0d43040-c86c-11f0-8080-e5362df2da58 | temperature | 12 | 1 |
+| b8184060-831e-11f0-9283-e956b63ef652 | temperature | 12 | 1 |
+| b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 12 | 1 |
+| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 12 | 1 |
+| 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 12 | 1 |
+| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 12 | 1 |
+| 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 12 | 1 |
+| 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 12 | 1 |
+| 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 12 | 1 |
+| f3058610-83ff-11f0-9a67-6d25b7d467e7 | temperature | 12 | 0.3 |
+| 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 12 | 0.3 |
+| 2CF7F1C072300286 | temp1 | 12 | 0.1 |
+| 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 12 | 0 |
+| 8533f470-5c02-11f0-8a4b-6bd692b5baa4 | temperature | 1 | None |
 | 82508f60-8269-11f0-b6dc-556f88243956 | temperature | 1 | None |
 | 0cf22310-81be-11f0-9283-e956b63ef652 | temperature | 1 | None |
-| 8533f470-5c02-11f0-8a4b-6bd692b5baa4 | temperature | 1 | None |
+| 8250dd80-8269-11f0-9283-e956b63ef652 | temperature | 1 | None |
 
 - as_of = 2026-07-20 23:59:59+00 (windows end at the latest matching reading at or before it)
 - R9a_temp_lt: metric 24 vs threshold 20 → fires
 - R9b_temp_st: metric 1 vs threshold 5 → does not fire
-- Raw readings: [data/A009_R9a_temp_lt.csv](data/A009_R9a_temp_lt.csv) (3770 rows)
-- Raw readings: [data/A009_R9b_temp_st.csv](data/A009_R9b_temp_st.csv) (173 rows)
+- Raw readings: [data/A009_R9a_temp_lt.csv](data/A009_R9a_temp_lt.csv) (4051 rows)
+- Raw readings: [data/A009_R9b_temp_st.csv](data/A009_R9b_temp_st.csv) (172 rows)
 
 ---
 
@@ -621,7 +625,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 4.5 | {"R3_vib_zscore": 4.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (lower(o.property_id) LIKE '%pga%' OR lower(o.property_id) LIKE '%rms%') AND o.value IS NOT NULL AND o.result_time <= '2026-05-15 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (strpos(lower(o.property_id), 'pga') > 0 OR strpos(lower(o.property_id), 'rms') > 0) AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-05-15 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -639,7 +643,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 0.5 | {"R4_pga": 0.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND lower(o.property_id) LIKE '%pga%' AND o.value IS NOT NULL AND o.result_time <= '2026-05-15 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND strpos(lower(o.property_id), 'pga') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-05-15 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -669,7 +673,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 4.5 | {"R3_vib_zscore": 4.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (lower(o.property_id) LIKE '%pga%' OR lower(o.property_id) LIKE '%rms%') AND o.value IS NOT NULL AND o.result_time <= '2026-05-18 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (strpos(lower(o.property_id), 'pga') > 0 OR strpos(lower(o.property_id), 'rms') > 0) AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-05-18 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -687,7 +691,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 0.5 | {"R4_pga": 0.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND lower(o.property_id) LIKE '%pga%' AND o.value IS NOT NULL AND o.result_time <= '2026-05-18 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND strpos(lower(o.property_id), 'pga') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-05-18 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -717,7 +721,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 4.5 | {"R3_vib_zscore": 4.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (lower(o.property_id) LIKE '%pga%' OR lower(o.property_id) LIKE '%rms%') AND o.value IS NOT NULL AND o.result_time <= '2026-05-19 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (strpos(lower(o.property_id), 'pga') > 0 OR strpos(lower(o.property_id), 'rms') > 0) AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-05-19 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -735,7 +739,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 0.5 | {"R4_pga": 0.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND lower(o.property_id) LIKE '%pga%' AND o.value IS NOT NULL AND o.result_time <= '2026-05-19 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND strpos(lower(o.property_id), 'pga') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-05-19 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -765,7 +769,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 4.5 | {"R3_vib_zscore": 4.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (lower(o.property_id) LIKE '%pga%' OR lower(o.property_id) LIKE '%rms%') AND o.value IS NOT NULL AND o.result_time <= '2026-05-20 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (strpos(lower(o.property_id), 'pga') > 0 OR strpos(lower(o.property_id), 'rms') > 0) AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-05-20 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -783,7 +787,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 0.5 | {"R4_pga": 0.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND lower(o.property_id) LIKE '%pga%' AND o.value IS NOT NULL AND o.result_time <= '2026-05-20 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND strpos(lower(o.property_id), 'pga') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-05-20 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -813,7 +817,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 4.5 | {"R3_vib_zscore": 4.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (lower(o.property_id) LIKE '%pga%' OR lower(o.property_id) LIKE '%rms%') AND o.value IS NOT NULL AND o.result_time <= '2026-05-22 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (strpos(lower(o.property_id), 'pga') > 0 OR strpos(lower(o.property_id), 'rms') > 0) AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-05-22 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -837,7 +841,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 0.5 | {"R4_pga": 0.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND lower(o.property_id) LIKE '%pga%' AND o.value IS NOT NULL AND o.result_time <= '2026-05-22 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND strpos(lower(o.property_id), 'pga') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-05-22 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -874,7 +878,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 4.5 | {"R3_vib_zscore": 4.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (lower(o.property_id) LIKE '%pga%' OR lower(o.property_id) LIKE '%rms%') AND o.value IS NOT NULL AND o.result_time <= '2026-06-08 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (strpos(lower(o.property_id), 'pga') > 0 OR strpos(lower(o.property_id), 'rms') > 0) AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-06-08 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -887,18 +891,18 @@ FROM st JOIN lt USING (sensor_id, property_id) ORDER BY metric DESC NULLS LAST;
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | pgaXAxis | 83 | 0.39759 | 0.0153348 | 0.3 | 2026-06-05 12:00:00 | 6.36396 |
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | pgaYAxis | 83 | 0.4 | 0.0268866 | 0.3 | 2026-06-05 12:00:00 | 3.71932 |
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | pgaZAxis | 83 | 0.540964 | 0.0560468 | 0.4 | 2026-06-05 12:00:00 | 2.51511 |
-| 69755440-5b34-11f1-9208-83a949003bcf | rmsYAxis | 351 | 0.1 | 3.15787e-16 | 0.1 | 2026-06-08 23:30:00 | 2.0655 |
-| 69755440-5b34-11f1-9208-83a949003bcf | rmsXAxis | 351 | 0.1 | 3.15787e-16 | 0.1 | 2026-06-08 23:30:00 | 2.0655 |
 | 69755440-5b34-11f1-9208-83a949003bcf | rmsZAxis | 351 | 0.1 | 3.15787e-16 | 0.1 | 2026-06-08 23:30:00 | 2.0655 |
+| 69755440-5b34-11f1-9208-83a949003bcf | rmsXAxis | 351 | 0.1 | 3.15787e-16 | 0.1 | 2026-06-08 23:30:00 | 2.0655 |
+| 69755440-5b34-11f1-9208-83a949003bcf | rmsYAxis | 351 | 0.1 | 3.15787e-16 | 0.1 | 2026-06-08 23:30:00 | 2.0655 |
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsXAxis | 83 | 0.1 | 8.07762e-17 | 0.1 | 2026-06-05 12:00:00 | 2.06167 |
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsZAxis | 83 | 0.1 | 8.07762e-17 | 0.1 | 2026-06-05 12:00:00 | 2.06167 |
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsYAxis | 83 | 0.1 | 8.07762e-17 | 0.1 | 2026-06-05 12:00:00 | 2.06167 |
-| e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsZAxis | 517 | 0.1 | 5.178e-16 | 0.1 | 2026-06-08 23:30:00 | 1.71529 |
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsXAxis | 517 | 0.1 | 5.178e-16 | 0.1 | 2026-06-08 23:30:00 | 1.71529 |
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsYAxis | 517 | 0.1 | 5.178e-16 | 0.1 | 2026-06-08 23:30:00 | 1.71529 |
-| 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsXAxis | 530 | 0.1 | 5.30522e-16 | 0.1 | 2026-06-08 23:30:00 | 1.70032 |
-| 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsZAxis | 530 | 0.1 | 5.30522e-16 | 0.1 | 2026-06-08 23:30:00 | 1.70032 |
+| e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsZAxis | 517 | 0.1 | 5.178e-16 | 0.1 | 2026-06-08 23:30:00 | 1.71529 |
 | 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsYAxis | 530 | 0.1 | 5.30522e-16 | 0.1 | 2026-06-08 23:30:00 | 1.70032 |
+| 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsZAxis | 530 | 0.1 | 5.30522e-16 | 0.1 | 2026-06-08 23:30:00 | 1.70032 |
+| 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsXAxis | 530 | 0.1 | 5.30522e-16 | 0.1 | 2026-06-08 23:30:00 | 1.70032 |
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | pgaZAxis | 517 | 0.480658 | 0.111666 | 0.3 | 2026-06-08 23:30:00 | 1.61785 |
 | 69755440-5b34-11f1-9208-83a949003bcf | pgaZAxis | 351 | 0.554131 | 0.0977162 | 0.4 | 2026-06-08 23:30:00 | 1.57733 |
 | 69755440-5b34-11f1-9208-83a949003bcf | pgaYAxis | 351 | 0.373504 | 0.0540019 | 0.3 | 2026-06-08 23:30:00 | 1.36114 |
@@ -915,7 +919,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 0.5 | {"R4_pga": 0.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND lower(o.property_id) LIKE '%pga%' AND o.value IS NOT NULL AND o.result_time <= '2026-06-08 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND strpos(lower(o.property_id), 'pga') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-06-08 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -964,7 +968,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 4.5 | {"R3_vib_zscore": 4.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (lower(o.property_id) LIKE '%pga%' OR lower(o.property_id) LIKE '%rms%') AND o.value IS NOT NULL AND o.result_time <= '2026-06-17 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (strpos(lower(o.property_id), 'pga') > 0 OR strpos(lower(o.property_id), 'rms') > 0) AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-06-17 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -977,15 +981,15 @@ FROM st JOIN lt USING (sensor_id, property_id) ORDER BY metric DESC NULLS LAST;
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | pgaXAxis | 83 | 0.39759 | 0.0153348 | 0.3 | 2026-06-05 12:00:00 | 6.36396 |
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | pgaYAxis | 83 | 0.4 | 0.0268866 | 0.3 | 2026-06-05 12:00:00 | 3.71932 |
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | pgaZAxis | 83 | 0.540964 | 0.0560468 | 0.4 | 2026-06-05 12:00:00 | 2.51511 |
-| 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsYAxis | 83 | 0.1 | 8.07762e-17 | 0.1 | 2026-06-05 12:00:00 | 2.06167 |
-| 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsXAxis | 83 | 0.1 | 8.07762e-17 | 0.1 | 2026-06-05 12:00:00 | 2.06167 |
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsZAxis | 83 | 0.1 | 8.07762e-17 | 0.1 | 2026-06-05 12:00:00 | 2.06167 |
+| 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsXAxis | 83 | 0.1 | 8.07762e-17 | 0.1 | 2026-06-05 12:00:00 | 2.06167 |
+| 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsYAxis | 83 | 0.1 | 8.07762e-17 | 0.1 | 2026-06-05 12:00:00 | 2.06167 |
+| 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsYAxis | 960 | 0.1 | 6.48e-16 | 0.1 | 2026-06-17 23:30:00 | 1.90606 |
 | 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsXAxis | 960 | 0.1 | 6.48e-16 | 0.1 | 2026-06-17 23:30:00 | 1.90606 |
 | 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsZAxis | 960 | 0.1 | 6.48e-16 | 0.1 | 2026-06-17 23:30:00 | 1.90606 |
-| 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsYAxis | 960 | 0.1 | 6.48e-16 | 0.1 | 2026-06-17 23:30:00 | 1.90606 |
+| 69755440-5b34-11f1-9208-83a949003bcf | rmsXAxis | 530 | 0.1 | 5.30522e-16 | 0.1 | 2026-06-17 23:30:00 | 1.70032 |
 | 69755440-5b34-11f1-9208-83a949003bcf | rmsZAxis | 530 | 0.1 | 5.30522e-16 | 0.1 | 2026-06-17 23:30:00 | 1.70032 |
 | 69755440-5b34-11f1-9208-83a949003bcf | rmsYAxis | 530 | 0.1 | 5.30522e-16 | 0.1 | 2026-06-17 23:30:00 | 1.70032 |
-| 69755440-5b34-11f1-9208-83a949003bcf | rmsXAxis | 530 | 0.1 | 5.30522e-16 | 0.1 | 2026-06-17 23:30:00 | 1.70032 |
 | 69755440-5b34-11f1-9208-83a949003bcf | pgaZAxis | 530 | 0.503396 | 0.107404 | 0.4 | 2026-06-17 23:30:00 | 0.962684 |
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | pgaXAxis | 766 | 0.3453 | 0.0597873 | 0.3 | 2026-06-17 20:00:00 | 0.757691 |
 | 84d47f00-5a9d-11f1-9208-83a949003bcf | pgaZAxis | 960 | 0.47125 | 0.0966442 | 0.4 | 2026-06-17 23:30:00 | 0.73724 |
@@ -1005,7 +1009,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 0.5 | {"R4_pga": 0.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND lower(o.property_id) LIKE '%pga%' AND o.value IS NOT NULL AND o.result_time <= '2026-06-17 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND strpos(lower(o.property_id), 'pga') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-06-17 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -1054,7 +1058,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 4.5 | {"R3_vib_zscore": 4.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (lower(o.property_id) LIKE '%pga%' OR lower(o.property_id) LIKE '%rms%') AND o.value IS NOT NULL AND o.result_time <= '2026-08-03 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (strpos(lower(o.property_id), 'pga') > 0 OR strpos(lower(o.property_id), 'rms') > 0) AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-08-03 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -1065,20 +1069,20 @@ FROM st JOIN lt USING (sensor_id, property_id) ORDER BY metric DESC NULLS LAST;
 | sensor_id | property_id | n | mean | sd | latest | result_time | metric |
 |---|---|---|---|---|---|---|---|
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | pgaXAxis | 932 | 0.337661 | 0.0757516 | 0.9 | 2026-07-14 00:00:00 | 7.42346 |
-| 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsZAxis | 1171 | 0.1 | 9.23665e-16 | 0.1 | 2026-08-03 18:30:00 | 2.20863 |
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsYAxis | 1171 | 0.1 | 9.23665e-16 | 0.1 | 2026-08-03 18:30:00 | 2.20863 |
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsXAxis | 1171 | 0.1 | 9.23665e-16 | 0.1 | 2026-08-03 18:30:00 | 2.20863 |
-| 69755440-5b34-11f1-9208-83a949003bcf | rmsYAxis | 1945 | 0.1 | 1.97014e-15 | 0.1 | 2026-08-03 20:00:00 | 1.76806 |
+| 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsZAxis | 1171 | 0.1 | 9.23665e-16 | 0.1 | 2026-08-03 18:30:00 | 2.20863 |
 | 69755440-5b34-11f1-9208-83a949003bcf | rmsZAxis | 1945 | 0.1 | 1.97014e-15 | 0.1 | 2026-08-03 20:00:00 | 1.76806 |
+| 69755440-5b34-11f1-9208-83a949003bcf | rmsYAxis | 1945 | 0.1 | 1.97014e-15 | 0.1 | 2026-08-03 20:00:00 | 1.76806 |
 | 69755440-5b34-11f1-9208-83a949003bcf | rmsXAxis | 1945 | 0.1 | 1.97014e-15 | 0.1 | 2026-08-03 20:00:00 | 1.76806 |
+| e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsYAxis | 932 | 0.1 | 6.255e-16 | 0.1 | 2026-07-14 00:00:00 | 1.75275 |
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsZAxis | 932 | 0.1 | 6.255e-16 | 0.1 | 2026-07-14 00:00:00 | 1.75275 |
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsXAxis | 932 | 0.1 | 6.255e-16 | 0.1 | 2026-07-14 00:00:00 | 1.75275 |
-| e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsYAxis | 932 | 0.1 | 6.255e-16 | 0.1 | 2026-07-14 00:00:00 | 1.75275 |
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | pgaZAxis | 932 | 0.428863 | 0.110469 | 0.5 | 2026-07-14 00:00:00 | 0.643957 |
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | pgaYAxis | 932 | 0.332511 | 0.0637266 | 0.3 | 2026-07-14 00:00:00 | 0.51016 |
 | 69755440-5b34-11f1-9208-83a949003bcf | pgaZAxis | 1945 | 0.43054 | 0.0742605 | 0.4 | 2026-08-03 20:00:00 | 0.411253 |
-| 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsYAxis | 3151 | 0.1 | 2.43015e-15 | 0.1 | 2026-08-03 23:30:00 | 0.411168 |
 | 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsXAxis | 3151 | 0.1 | 2.43015e-15 | 0.1 | 2026-08-03 23:30:00 | 0.411168 |
+| 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsYAxis | 3151 | 0.1 | 2.43015e-15 | 0.1 | 2026-08-03 23:30:00 | 0.411168 |
 | 84d47f00-5a9d-11f1-9208-83a949003bcf | pgaZAxis | 3151 | 0.427991 | 0.0697076 | 0.4 | 2026-08-03 23:30:00 | 0.40155 |
 | 84d47f00-5a9d-11f1-9208-83a949003bcf | pgaXAxis | 3151 | 0.310536 | 0.0359404 | 0.3 | 2026-08-03 23:30:00 | 0.293161 |
 | 84d47f00-5a9d-11f1-9208-83a949003bcf | pgaYAxis | 3151 | 0.31006 | 0.0362958 | 0.3 | 2026-08-03 23:30:00 | 0.277175 |
@@ -1095,7 +1099,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 0.5 | {"R4_pga": 0.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND lower(o.property_id) LIKE '%pga%' AND o.value IS NOT NULL AND o.result_time <= '2026-08-03 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND strpos(lower(o.property_id), 'pga') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-08-03 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -1133,7 +1137,7 @@ FROM st JOIN lt USING (sensor_id, property_id) ORDER BY metric DESC NULLS LAST;
 ## A018 · verdict_on_date
 
 **Question:** According to the AD-RT expert rules, was there a visitor count anomaly at Lucretili on 2026-08-01?  
-**Reference:** No. R5_visitors: latest reading 0 at 2026-08-01 23:55 UTC vs threshold 3  
+**Reference:** No. R5_visitors: latest reading 0 at 2026-08-01 23:59 UTC vs threshold 3  
 **Recomputed:** `No` → **MATCH**
 
 ```sql
@@ -1144,17 +1148,18 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 3 | {"R5_visitors_peak": 3} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%counter%' AND o.value IS NOT NULL AND o.result_time <= '2026-08-01 23:59:59+00')
-SELECT r.sensor_id, o.property_id, o.result_time, o.value AS metric FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%counter%' AND o.value IS NOT NULL
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'counter') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-08-01 23:59:59+00')
+SELECT r.sensor_id, o.property_id, o.result_time, o.value AS metric FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'counter') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time = anchor.t ORDER BY metric DESC;
 ```
 | sensor_id | property_id | result_time | metric |
 |---|---|---|---|
-| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | pulse_counter | 2026-08-01 23:55:00 | 0 |
+| 24E124600E450308 | counter_out | 2026-08-01 23:59:18 | 0 |
+| 24E124600E450308 | counter_in | 2026-08-01 23:59:18 | 0 |
 
 - as_of = 2026-08-01 23:59:59+00 (windows end at the latest matching reading at or before it)
 - R5_visitors: metric 0 vs threshold 3 → does not fire
-- Raw readings: [data/A018_R5_visitors.csv](data/A018_R5_visitors.csv) (1 rows)
+- Raw readings: [data/A018_R5_visitors.csv](data/A018_R5_visitors.csv) (2 rows)
 
 ---
 
@@ -1172,9 +1177,9 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'ranverso' 
 | 20 | {"R2_rain_7d_diff": 20} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'ranverso' AND lower(o.property_id) LIKE '%rain%' AND lower(o.property_id) NOT LIKE '%acc%' AND o.value IS NOT NULL AND o.result_time <= '2026-06-24 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'ranverso' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'acc') = 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-06-24 23:59:59+00')
 SELECT r.sensor_id, o.property_id, count(*) AS n, sum(o.value) AS metric
-FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'ranverso' AND lower(o.property_id) LIKE '%rain%' AND lower(o.property_id) NOT LIKE '%acc%' AND o.value IS NOT NULL
+FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'ranverso' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'acc') = 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time BETWEEN anchor.t - interval '168 hours' AND anchor.t
 GROUP BY 1, 2 ORDER BY metric DESC;
 ```
@@ -1202,9 +1207,9 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'ranverso' 
 | 20 | {"R2_rain_7d_diff": 20} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'ranverso' AND lower(o.property_id) LIKE '%rain%' AND lower(o.property_id) NOT LIKE '%acc%' AND o.value IS NOT NULL AND o.result_time <= '2026-07-04 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'ranverso' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'acc') = 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-07-04 23:59:59+00')
 SELECT r.sensor_id, o.property_id, count(*) AS n, sum(o.value) AS metric
-FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'ranverso' AND lower(o.property_id) LIKE '%rain%' AND lower(o.property_id) NOT LIKE '%acc%' AND o.value IS NOT NULL
+FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'ranverso' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'acc') = 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time BETWEEN anchor.t - interval '168 hours' AND anchor.t
 GROUP BY 1, 2 ORDER BY metric DESC;
 ```
@@ -1232,9 +1237,9 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 20 | {"R9a_temp_lt": 20} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL AND o.result_time <= '2026-05-24 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-05-24 23:59:59+00')
 SELECT r.sensor_id, o.property_id, count(*) AS n, min(o.value), max(o.value), max(o.value) - min(o.value) AS metric
-FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL
+FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time BETWEEN anchor.t - interval '24 hours' AND anchor.t
 GROUP BY 1, 2 ORDER BY metric DESC;
 ```
@@ -1267,10 +1272,10 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 5 | {"R9b_temp_st": 5} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL AND o.result_time <= '2026-05-24 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-05-24 23:59:59+00')
 , w AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value,
         o.value - lag(o.value) OVER (PARTITION BY r.sensor_id, o.property_id ORDER BY o.result_time) AS diff
-      FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL
+      FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
         AND o.result_time BETWEEN anchor.t - interval '1 hours' AND anchor.t)
 SELECT sensor_id, property_id, count(*) AS n, max(abs(diff)) AS metric FROM w
 GROUP BY 1, 2 ORDER BY metric DESC NULLS LAST;
@@ -1317,9 +1322,9 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 20 | {"R9a_temp_lt": 20} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL AND o.result_time <= '2026-06-03 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-06-03 23:59:59+00')
 SELECT r.sensor_id, o.property_id, count(*) AS n, min(o.value), max(o.value), max(o.value) - min(o.value) AS metric
-FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL
+FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time BETWEEN anchor.t - interval '24 hours' AND anchor.t
 GROUP BY 1, 2 ORDER BY metric DESC;
 ```
@@ -1352,10 +1357,10 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 5 | {"R9b_temp_st": 5} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL AND o.result_time <= '2026-06-03 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-06-03 23:59:59+00')
 , w AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value,
         o.value - lag(o.value) OVER (PARTITION BY r.sensor_id, o.property_id ORDER BY o.result_time) AS diff
-      FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL
+      FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
         AND o.result_time BETWEEN anchor.t - interval '1 hours' AND anchor.t)
 SELECT sensor_id, property_id, count(*) AS n, max(abs(diff)) AS metric FROM w
 GROUP BY 1, 2 ORDER BY metric DESC NULLS LAST;
@@ -1403,9 +1408,9 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 20 | {"R9a_temp_lt": 20} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL AND o.result_time <= '2026-06-05 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-06-05 23:59:59+00')
 SELECT r.sensor_id, o.property_id, count(*) AS n, min(o.value), max(o.value), max(o.value) - min(o.value) AS metric
-FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL
+FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time BETWEEN anchor.t - interval '24 hours' AND anchor.t
 GROUP BY 1, 2 ORDER BY metric DESC;
 ```
@@ -1438,10 +1443,10 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 5 | {"R9b_temp_st": 5} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL AND o.result_time <= '2026-06-05 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-06-05 23:59:59+00')
 , w AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value,
         o.value - lag(o.value) OVER (PARTITION BY r.sensor_id, o.property_id ORDER BY o.result_time) AS diff
-      FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL
+      FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
         AND o.result_time BETWEEN anchor.t - interval '1 hours' AND anchor.t)
 SELECT sensor_id, property_id, count(*) AS n, max(abs(diff)) AS metric FROM w
 GROUP BY 1, 2 ORDER BY metric DESC NULLS LAST;
@@ -1474,7 +1479,7 @@ GROUP BY 1, 2 ORDER BY metric DESC NULLS LAST;
 ## A024 · verdict_on_date
 
 **Question:** Did the temperature at Lucretili exceed its AD-RT threshold on 2026-07-17?  
-**Reference:** Yes. R9a_temp_lt: metric 25 vs threshold 20 (window ending 2026-07-17 23:55 UTC); R9b_temp_st: max 1h change 1 vs threshold 5 (ending 2026-07-17 23:55 UTC)  
+**Reference:** Yes. R9a_temp_lt: metric 25 vs threshold 20 (window ending 2026-07-17 23:59 UTC); R9b_temp_st: max 1h change 1 vs threshold 5 (ending 2026-07-17 23:59 UTC)  
 **Recomputed:** `Yes` → **MATCH**
 
 ```sql
@@ -1485,32 +1490,33 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 20 | {"R9a_temp_lt": 20} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL AND o.result_time <= '2026-07-17 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-07-17 23:59:59+00')
 SELECT r.sensor_id, o.property_id, count(*) AS n, min(o.value), max(o.value), max(o.value) - min(o.value) AS metric
-FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL
+FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time BETWEEN anchor.t - interval '24 hours' AND anchor.t
 GROUP BY 1, 2 ORDER BY metric DESC;
 ```
 | sensor_id | property_id | n | min | max | metric |
 |---|---|---|---|---|---|
-| 9eefebd0-8191-11f0-9283-e956b63ef652 | temperature | 289 | 16 | 41 | 25 |
+| 9eefebd0-8191-11f0-9283-e956b63ef652 | temperature | 288 | 16 | 41 | 25 |
 | 0cf22310-81be-11f0-9283-e956b63ef652 | temperature | 34 | 22 | 44 | 22 |
 | 8250dd80-8269-11f0-9283-e956b63ef652 | temperature | 34 | 22 | 44 | 22 |
 | 82508f60-8269-11f0-b6dc-556f88243956 | temperature | 34 | 22 | 44 | 22 |
-| 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 289 | 22 | 43 | 21 |
+| 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 288 | 22 | 43 | 21 |
 | 8533f470-5c02-11f0-8a4b-6bd692b5baa4 | temperature | 24 | 26.1 | 44.5 | 18.4 |
-| 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 289 | 21 | 38 | 17 |
-| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 289 | 21 | 38 | 17 |
-| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 289 | 21 | 38 | 17 |
+| 2CF7F1C072300286 | temp1 | 294 | 20.6 | 37.8 | 17.2 |
+| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 288 | 21 | 38 | 17 |
 | c0d43040-c86c-11f0-8080-e5362df2da58 | temperature | 196 | 23 | 40 | 17 |
-| 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 282 | 23 | 38 | 15 |
-| 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 282 | 23 | 38 | 15 |
-| b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 287 | 22 | 37 | 15 |
-| 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 289 | 29.1 | 40.4 | 11.3 |
-| 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 287 | 26 | 37 | 11 |
-| b8184060-831e-11f0-9283-e956b63ef652 | temperature | 285 | 25 | 31 | 6 |
-| f3058610-83ff-11f0-9a67-6d25b7d467e7 | temperature | 279 | 24 | 29.1 | 5.1 |
-| 37c9dd80-833f-11f0-9283-e956b63ef652 | temperature | 56 | 22.8 | 23.7 | 0.9 |
+| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 288 | 21 | 38 | 17 |
+| 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 288 | 21 | 38 | 17 |
+| b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 286 | 22 | 37 | 15 |
+| 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 281 | 23 | 38 | 15 |
+| 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 281 | 23 | 38 | 15 |
+| 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 288 | 29.1 | 40.4 | 11.3 |
+| 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 286 | 26 | 37 | 11 |
+| b8184060-831e-11f0-9283-e956b63ef652 | temperature | 284 | 25 | 31 | 6 |
+| f3058610-83ff-11f0-9a67-6d25b7d467e7 | temperature | 278 | 24 | 29.1 | 5.1 |
+| 37c9dd80-833f-11f0-9283-e956b63ef652 | temperature | 55 | 22.8 | 23.7 | 0.9 |
 
 ```sql
 SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili' AND rule_id = 'R9b_temp_st';
@@ -1520,38 +1526,39 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 5 | {"R9b_temp_st": 5} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL AND o.result_time <= '2026-07-17 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-07-17 23:59:59+00')
 , w AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value,
         o.value - lag(o.value) OVER (PARTITION BY r.sensor_id, o.property_id ORDER BY o.result_time) AS diff
-      FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL
+      FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
         AND o.result_time BETWEEN anchor.t - interval '1 hours' AND anchor.t)
 SELECT sensor_id, property_id, count(*) AS n, max(abs(diff)) AS metric FROM w
 GROUP BY 1, 2 ORDER BY metric DESC NULLS LAST;
 ```
 | sensor_id | property_id | n | metric |
 |---|---|---|---|
-| b8184060-831e-11f0-9283-e956b63ef652 | temperature | 13 | 1 |
+| 9eefebd0-8191-11f0-9283-e956b63ef652 | temperature | 12 | 1 |
 | 0cf22310-81be-11f0-9283-e956b63ef652 | temperature | 2 | 1 |
-| 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 13 | 1 |
-| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
-| 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
-| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
-| 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 13 | 1 |
-| 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 13 | 1 |
-| 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
+| 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 12 | 1 |
+| c0d43040-c86c-11f0-8080-e5362df2da58 | temperature | 12 | 1 |
+| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 12 | 1 |
+| 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 12 | 1 |
+| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 12 | 1 |
+| 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 12 | 1 |
+| 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 12 | 1 |
+| 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 12 | 1 |
 | 82508f60-8269-11f0-b6dc-556f88243956 | temperature | 2 | 1 |
 | 8250dd80-8269-11f0-9283-e956b63ef652 | temperature | 2 | 1 |
-| c0d43040-c86c-11f0-8080-e5362df2da58 | temperature | 13 | 1 |
-| 9eefebd0-8191-11f0-9283-e956b63ef652 | temperature | 13 | 1 |
-| 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 13 | 0.4 |
-| f3058610-83ff-11f0-9a67-6d25b7d467e7 | temperature | 13 | 0.2 |
-| b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 13 | 0 |
+| b8184060-831e-11f0-9283-e956b63ef652 | temperature | 12 | 1 |
+| 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 12 | 0.4 |
+| f3058610-83ff-11f0-9a67-6d25b7d467e7 | temperature | 12 | 0.2 |
+| 2CF7F1C072300286 | temp1 | 13 | 0.1 |
+| b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 12 | 0 |
 | 8533f470-5c02-11f0-8a4b-6bd692b5baa4 | temperature | 1 | None |
 
 - as_of = 2026-07-17 23:59:59+00 (windows end at the latest matching reading at or before it)
 - R9a_temp_lt: metric 25 vs threshold 20 → fires
 - R9b_temp_st: metric 1 vs threshold 5 → does not fire
-- Raw readings: [data/A024_R9a_temp_lt.csv](data/A024_R9a_temp_lt.csv) (3814 rows)
+- Raw readings: [data/A024_R9a_temp_lt.csv](data/A024_R9a_temp_lt.csv) (4095 rows)
 - Raw readings: [data/A024_R9b_temp_st.csv](data/A024_R9b_temp_st.csv) (176 rows)
 
 ---
@@ -1559,7 +1566,7 @@ GROUP BY 1, 2 ORDER BY metric DESC NULLS LAST;
 ## A025 · verdict_on_date
 
 **Question:** Did the temperature at Lucretili exceed its AD-RT threshold on 2026-08-11?  
-**Reference:** Yes. R9a_temp_lt: metric 27 vs threshold 20 (window ending 2026-08-11 23:55 UTC); R9b_temp_st: max 1h change 1 vs threshold 5 (ending 2026-08-11 23:55 UTC)  
+**Reference:** Yes. R9a_temp_lt: metric 27 vs threshold 20 (window ending 2026-08-11 23:59 UTC); R9b_temp_st: max 1h change 1 vs threshold 5 (ending 2026-08-11 23:59 UTC)  
 **Recomputed:** `Yes` → **MATCH**
 
 ```sql
@@ -1570,31 +1577,32 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 20 | {"R9a_temp_lt": 20} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL AND o.result_time <= '2026-08-11 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-08-11 23:59:59+00')
 SELECT r.sensor_id, o.property_id, count(*) AS n, min(o.value), max(o.value), max(o.value) - min(o.value) AS metric
-FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL
+FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time BETWEEN anchor.t - interval '24 hours' AND anchor.t
 GROUP BY 1, 2 ORDER BY metric DESC;
 ```
 | sensor_id | property_id | n | min | max | metric |
 |---|---|---|---|---|---|
-| 9eefebd0-8191-11f0-9283-e956b63ef652 | temperature | 277 | 14 | 41 | 27 |
+| 9eefebd0-8191-11f0-9283-e956b63ef652 | temperature | 276 | 14 | 41 | 27 |
 | 0cf22310-81be-11f0-9283-e956b63ef652 | temperature | 39 | 23 | 49 | 26 |
 | 8250dd80-8269-11f0-9283-e956b63ef652 | temperature | 39 | 23 | 49 | 26 |
 | 82508f60-8269-11f0-b6dc-556f88243956 | temperature | 39 | 23 | 49 | 26 |
-| 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 277 | 19 | 42 | 23 |
+| 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 276 | 19 | 42 | 23 |
 | 8533f470-5c02-11f0-8a4b-6bd692b5baa4 | temperature | 23 | 26.1 | 48.7 | 22.6 |
-| c0d43040-c86c-11f0-8080-e5362df2da58 | temperature | 178 | 24 | 45 | 21 |
-| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 277 | 19 | 38 | 19 |
-| 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 277 | 19 | 38 | 19 |
-| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 277 | 19 | 38 | 19 |
-| 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 277 | 23 | 41 | 18 |
-| 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 277 | 23 | 41 | 18 |
-| 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 277 | 29.4 | 45.6 | 16.2 |
-| b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 277 | 23 | 39 | 16 |
-| 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 277 | 25 | 40 | 15 |
-| b8184060-831e-11f0-9283-e956b63ef652 | temperature | 277 | 26 | 33 | 7 |
-| f3058610-83ff-11f0-9a67-6d25b7d467e7 | temperature | 276 | 24.3 | 31.3 | 7 |
+| c0d43040-c86c-11f0-8080-e5362df2da58 | temperature | 177 | 24 | 45 | 21 |
+| 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 276 | 19 | 38 | 19 |
+| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 276 | 19 | 38 | 19 |
+| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 276 | 19 | 38 | 19 |
+| 2CF7F1C072300286 | temp1 | 298 | 18.5 | 37.2 | 18.7 |
+| 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 276 | 23 | 41 | 18 |
+| 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 276 | 23 | 41 | 18 |
+| 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 276 | 29.4 | 45.6 | 16.2 |
+| b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 276 | 23 | 39 | 16 |
+| 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 276 | 25 | 40 | 15 |
+| b8184060-831e-11f0-9283-e956b63ef652 | temperature | 276 | 26 | 33 | 7 |
+| f3058610-83ff-11f0-9a67-6d25b7d467e7 | temperature | 275 | 24.3 | 31.3 | 7 |
 
 ```sql
 SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili' AND rule_id = 'R9b_temp_st';
@@ -1604,39 +1612,40 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 5 | {"R9b_temp_st": 5} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL AND o.result_time <= '2026-08-11 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-08-11 23:59:59+00')
 , w AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value,
         o.value - lag(o.value) OVER (PARTITION BY r.sensor_id, o.property_id ORDER BY o.result_time) AS diff
-      FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL
+      FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
         AND o.result_time BETWEEN anchor.t - interval '1 hours' AND anchor.t)
 SELECT sensor_id, property_id, count(*) AS n, max(abs(diff)) AS metric FROM w
 GROUP BY 1, 2 ORDER BY metric DESC NULLS LAST;
 ```
 | sensor_id | property_id | n | metric |
 |---|---|---|---|
-| b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 13 | 1 |
-| c0d43040-c86c-11f0-8080-e5362df2da58 | temperature | 10 | 1 |
-| 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 13 | 1 |
-| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
-| 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
-| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
-| 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 13 | 1 |
-| 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 13 | 1 |
-| b8184060-831e-11f0-9283-e956b63ef652 | temperature | 13 | 1 |
-| 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 13 | 0.3 |
-| f3058610-83ff-11f0-9a67-6d25b7d467e7 | temperature | 13 | 0.3 |
-| 9eefebd0-8191-11f0-9283-e956b63ef652 | temperature | 13 | 0 |
-| 82508f60-8269-11f0-b6dc-556f88243956 | temperature | 2 | 0 |
-| 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 13 | 0 |
-| 0cf22310-81be-11f0-9283-e956b63ef652 | temperature | 2 | 0 |
+| b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 12 | 1 |
+| c0d43040-c86c-11f0-8080-e5362df2da58 | temperature | 9 | 1 |
+| 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 12 | 1 |
+| b8184060-831e-11f0-9283-e956b63ef652 | temperature | 12 | 1 |
+| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 12 | 1 |
+| 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 12 | 1 |
+| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 12 | 1 |
+| 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 12 | 1 |
+| 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 12 | 1 |
+| 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 12 | 0.3 |
+| f3058610-83ff-11f0-9a67-6d25b7d467e7 | temperature | 12 | 0.3 |
+| 2CF7F1C072300286 | temp1 | 14 | 0.2 |
+| 9eefebd0-8191-11f0-9283-e956b63ef652 | temperature | 12 | 0 |
 | 8250dd80-8269-11f0-9283-e956b63ef652 | temperature | 2 | 0 |
+| 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 12 | 0 |
+| 82508f60-8269-11f0-b6dc-556f88243956 | temperature | 2 | 0 |
+| 0cf22310-81be-11f0-9283-e956b63ef652 | temperature | 2 | 0 |
 | 8533f470-5c02-11f0-8a4b-6bd692b5baa4 | temperature | 1 | None |
 
 - as_of = 2026-08-11 23:59:59+00 (windows end at the latest matching reading at or before it)
 - R9a_temp_lt: metric 27 vs threshold 20 → fires
 - R9b_temp_st: metric 1 vs threshold 5 → does not fire
-- Raw readings: [data/A025_R9a_temp_lt.csv](data/A025_R9a_temp_lt.csv) (3641 rows)
-- Raw readings: [data/A025_R9b_temp_st.csv](data/A025_R9b_temp_st.csv) (173 rows)
+- Raw readings: [data/A025_R9a_temp_lt.csv](data/A025_R9a_temp_lt.csv) (3926 rows)
+- Raw readings: [data/A025_R9b_temp_st.csv](data/A025_R9b_temp_st.csv) (174 rows)
 
 ---
 
@@ -1654,7 +1663,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 4.5 | {"R3_vib_zscore": 4.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (lower(o.property_id) LIKE '%pga%' OR lower(o.property_id) LIKE '%rms%') AND o.value IS NOT NULL AND o.result_time <= '2026-05-23 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (strpos(lower(o.property_id), 'pga') > 0 OR strpos(lower(o.property_id), 'rms') > 0) AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-05-23 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -1678,7 +1687,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 0.5 | {"R4_pga": 0.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND lower(o.property_id) LIKE '%pga%' AND o.value IS NOT NULL AND o.result_time <= '2026-05-23 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND strpos(lower(o.property_id), 'pga') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-05-23 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -1715,7 +1724,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 4.5 | {"R3_vib_zscore": 4.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (lower(o.property_id) LIKE '%pga%' OR lower(o.property_id) LIKE '%rms%') AND o.value IS NOT NULL AND o.result_time <= '2026-06-24 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (strpos(lower(o.property_id), 'pga') > 0 OR strpos(lower(o.property_id), 'rms') > 0) AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-06-24 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -1730,19 +1739,19 @@ FROM st JOIN lt USING (sensor_id, property_id) ORDER BY metric DESC NULLS LAST;
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | pgaZAxis | 83 | 0.540964 | 0.0560468 | 0.4 | 2026-06-05 12:00:00 | 2.51511 |
 | 69755440-5b34-11f1-9208-83a949003bcf | pgaXAxis | 725 | 0.33131 | 0.0603353 | 0.2 | 2026-06-24 23:30:00 | 2.17634 |
 | 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsYAxis | 1289 | 0.1 | 1.10592e-15 | 0.1 | 2026-06-24 23:30:00 | 2.13327 |
-| 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsZAxis | 1289 | 0.1 | 1.10592e-15 | 0.1 | 2026-06-24 23:30:00 | 2.13327 |
 | 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsXAxis | 1289 | 0.1 | 1.10592e-15 | 0.1 | 2026-06-24 23:30:00 | 2.13327 |
+| 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsZAxis | 1289 | 0.1 | 1.10592e-15 | 0.1 | 2026-06-24 23:30:00 | 2.13327 |
+| 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsZAxis | 83 | 0.1 | 8.07762e-17 | 0.1 | 2026-06-05 12:00:00 | 2.06167 |
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsXAxis | 83 | 0.1 | 8.07762e-17 | 0.1 | 2026-06-05 12:00:00 | 2.06167 |
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsYAxis | 83 | 0.1 | 8.07762e-17 | 0.1 | 2026-06-05 12:00:00 | 2.06167 |
-| 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsZAxis | 83 | 0.1 | 8.07762e-17 | 0.1 | 2026-06-05 12:00:00 | 2.06167 |
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | pgaZAxis | 803 | 0.435866 | 0.111968 | 0.3 | 2026-06-24 20:00:00 | 1.21343 |
 | 69755440-5b34-11f1-9208-83a949003bcf | pgaZAxis | 725 | 0.47669 | 0.102493 | 0.4 | 2026-06-24 23:30:00 | 0.74824 |
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | pgaXAxis | 803 | 0.343213 | 0.0591609 | 0.3 | 2026-06-24 20:00:00 | 0.730431 |
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | pgaYAxis | 803 | 0.340473 | 0.0626781 | 0.3 | 2026-06-24 20:00:00 | 0.645732 |
 | 84d47f00-5a9d-11f1-9208-83a949003bcf | pgaZAxis | 1289 | 0.455237 | 0.0888996 | 0.4 | 2026-06-24 23:30:00 | 0.621337 |
-| e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsZAxis | 803 | 0.1 | 5.96228e-16 | 0.1 | 2026-06-24 20:00:00 | 0.605175 |
-| e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsYAxis | 803 | 0.1 | 5.96228e-16 | 0.1 | 2026-06-24 20:00:00 | 0.605175 |
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsXAxis | 803 | 0.1 | 5.96228e-16 | 0.1 | 2026-06-24 20:00:00 | 0.605175 |
+| e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsYAxis | 803 | 0.1 | 5.96228e-16 | 0.1 | 2026-06-24 20:00:00 | 0.605175 |
+| e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsZAxis | 803 | 0.1 | 5.96228e-16 | 0.1 | 2026-06-24 20:00:00 | 0.605175 |
 | 84d47f00-5a9d-11f1-9208-83a949003bcf | pgaXAxis | 1289 | 0.326687 | 0.0506127 | 0.3 | 2026-06-24 23:30:00 | 0.527286 |
 | 69755440-5b34-11f1-9208-83a949003bcf | pgaYAxis | 725 | 0.331034 | 0.0593264 | 0.3 | 2026-06-24 23:30:00 | 0.523114 |
 
@@ -1756,7 +1765,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 0.5 | {"R4_pga": 0.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND lower(o.property_id) LIKE '%pga%' AND o.value IS NOT NULL AND o.result_time <= '2026-06-24 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND strpos(lower(o.property_id), 'pga') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-06-24 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -1805,7 +1814,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 4.5 | {"R3_vib_zscore": 4.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (lower(o.property_id) LIKE '%pga%' OR lower(o.property_id) LIKE '%rms%') AND o.value IS NOT NULL AND o.result_time <= '2026-06-25 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (strpos(lower(o.property_id), 'pga') > 0 OR strpos(lower(o.property_id), 'rms') > 0) AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-06-25 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -1818,12 +1827,12 @@ FROM st JOIN lt USING (sensor_id, property_id) ORDER BY metric DESC NULLS LAST;
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | pgaXAxis | 83 | 0.39759 | 0.0153348 | 0.3 | 2026-06-05 12:00:00 | 6.36396 |
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | pgaYAxis | 83 | 0.4 | 0.0268866 | 0.3 | 2026-06-05 12:00:00 | 3.71932 |
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | pgaZAxis | 83 | 0.540964 | 0.0560468 | 0.4 | 2026-06-05 12:00:00 | 2.51511 |
+| 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsYAxis | 1337 | 0.1 | 1.17888e-15 | 0.1 | 2026-06-25 23:30:00 | 2.10719 |
 | 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsXAxis | 1337 | 0.1 | 1.17888e-15 | 0.1 | 2026-06-25 23:30:00 | 2.10719 |
 | 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsZAxis | 1337 | 0.1 | 1.17888e-15 | 0.1 | 2026-06-25 23:30:00 | 2.10719 |
-| 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsYAxis | 1337 | 0.1 | 1.17888e-15 | 0.1 | 2026-06-25 23:30:00 | 2.10719 |
+| 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsZAxis | 83 | 0.1 | 8.07762e-17 | 0.1 | 2026-06-05 12:00:00 | 2.06167 |
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsXAxis | 83 | 0.1 | 8.07762e-17 | 0.1 | 2026-06-05 12:00:00 | 2.06167 |
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsYAxis | 83 | 0.1 | 8.07762e-17 | 0.1 | 2026-06-05 12:00:00 | 2.06167 |
-| 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsZAxis | 83 | 0.1 | 8.07762e-17 | 0.1 | 2026-06-05 12:00:00 | 2.06167 |
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | pgaXAxis | 808 | 0.342946 | 0.0590749 | 0.3 | 2026-06-25 16:00:00 | 0.726968 |
 | 69755440-5b34-11f1-9208-83a949003bcf | pgaZAxis | 755 | 0.473642 | 0.101548 | 0.4 | 2026-06-25 19:30:00 | 0.725201 |
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsXAxis | 808 | 0.1 | 5.95151e-16 | 0.1 | 2026-06-25 16:00:00 | 0.676225 |
@@ -1846,7 +1855,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 0.5 | {"R4_pga": 0.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND lower(o.property_id) LIKE '%pga%' AND o.value IS NOT NULL AND o.result_time <= '2026-06-25 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND strpos(lower(o.property_id), 'pga') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-06-25 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -1895,7 +1904,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 4.5 | {"R3_vib_zscore": 4.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (lower(o.property_id) LIKE '%pga%' OR lower(o.property_id) LIKE '%rms%') AND o.value IS NOT NULL AND o.result_time <= '2026-06-27 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (strpos(lower(o.property_id), 'pga') > 0 OR strpos(lower(o.property_id), 'rms') > 0) AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-06-27 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -1908,21 +1917,21 @@ FROM st JOIN lt USING (sensor_id, property_id) ORDER BY metric DESC NULLS LAST;
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | pgaXAxis | 83 | 0.39759 | 0.0153348 | 0.3 | 2026-06-05 12:00:00 | 6.36396 |
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | pgaYAxis | 83 | 0.4 | 0.0268866 | 0.3 | 2026-06-05 12:00:00 | 3.71932 |
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | pgaZAxis | 83 | 0.540964 | 0.0560468 | 0.4 | 2026-06-05 12:00:00 | 2.51511 |
-| 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsYAxis | 83 | 0.1 | 8.07762e-17 | 0.1 | 2026-06-05 12:00:00 | 2.06167 |
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsZAxis | 83 | 0.1 | 8.07762e-17 | 0.1 | 2026-06-05 12:00:00 | 2.06167 |
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsXAxis | 83 | 0.1 | 8.07762e-17 | 0.1 | 2026-06-05 12:00:00 | 2.06167 |
+| 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsYAxis | 83 | 0.1 | 8.07762e-17 | 0.1 | 2026-06-05 12:00:00 | 2.06167 |
+| 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsZAxis | 1433 | 0.1 | 1.32156e-15 | 0.1 | 2026-06-27 23:30:00 | 2.03721 |
 | 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsXAxis | 1433 | 0.1 | 1.32156e-15 | 0.1 | 2026-06-27 23:30:00 | 2.03721 |
 | 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsYAxis | 1433 | 0.1 | 1.32156e-15 | 0.1 | 2026-06-27 23:30:00 | 2.03721 |
-| 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsZAxis | 1433 | 0.1 | 1.32156e-15 | 0.1 | 2026-06-27 23:30:00 | 2.03721 |
-| e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsZAxis | 819 | 0.1 | 5.93308e-16 | 0.1 | 2026-06-27 20:00:00 | 0.795278 |
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsXAxis | 819 | 0.1 | 5.93308e-16 | 0.1 | 2026-06-27 20:00:00 | 0.795278 |
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsYAxis | 819 | 0.1 | 5.93308e-16 | 0.1 | 2026-06-27 20:00:00 | 0.795278 |
+| e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsZAxis | 819 | 0.1 | 5.93308e-16 | 0.1 | 2026-06-27 20:00:00 | 0.795278 |
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | pgaXAxis | 819 | 0.342369 | 0.0588847 | 0.3 | 2026-06-27 20:00:00 | 0.719521 |
 | 69755440-5b34-11f1-9208-83a949003bcf | pgaZAxis | 798 | 0.469925 | 0.100114 | 0.4 | 2026-06-27 14:30:00 | 0.698452 |
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | pgaYAxis | 819 | 0.339683 | 0.0623151 | 0.3 | 2026-06-27 20:00:00 | 0.636805 |
 | 84d47f00-5a9d-11f1-9208-83a949003bcf | pgaZAxis | 1433 | 0.450244 | 0.0859348 | 0.4 | 2026-06-27 23:30:00 | 0.584678 |
-| 69755440-5b34-11f1-9208-83a949003bcf | rmsXAxis | 798 | 0.1 | 5.97445e-16 | 0.1 | 2026-06-27 14:30:00 | 0.557485 |
 | 69755440-5b34-11f1-9208-83a949003bcf | rmsYAxis | 798 | 0.1 | 5.97445e-16 | 0.1 | 2026-06-27 14:30:00 | 0.557485 |
+| 69755440-5b34-11f1-9208-83a949003bcf | rmsXAxis | 798 | 0.1 | 5.97445e-16 | 0.1 | 2026-06-27 14:30:00 | 0.557485 |
 | 69755440-5b34-11f1-9208-83a949003bcf | rmsZAxis | 798 | 0.1 | 5.97445e-16 | 0.1 | 2026-06-27 14:30:00 | 0.557485 |
 | 84d47f00-5a9d-11f1-9208-83a949003bcf | pgaXAxis | 1433 | 0.324006 | 0.0488115 | 0.3 | 2026-06-27 23:30:00 | 0.491802 |
 
@@ -1936,7 +1945,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 0.5 | {"R4_pga": 0.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND lower(o.property_id) LIKE '%pga%' AND o.value IS NOT NULL AND o.result_time <= '2026-06-27 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND strpos(lower(o.property_id), 'pga') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-06-27 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -1985,7 +1994,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 4.5 | {"R3_vib_zscore": 4.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (lower(o.property_id) LIKE '%pga%' OR lower(o.property_id) LIKE '%rms%') AND o.value IS NOT NULL AND o.result_time <= '2026-07-29 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (strpos(lower(o.property_id), 'pga') > 0 OR strpos(lower(o.property_id), 'rms') > 0) AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-07-29 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -1996,23 +2005,23 @@ FROM st JOIN lt USING (sensor_id, property_id) ORDER BY metric DESC NULLS LAST;
 | sensor_id | property_id | n | mean | sd | latest | result_time | metric |
 |---|---|---|---|---|---|---|---|
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | pgaXAxis | 932 | 0.337661 | 0.0757516 | 0.9 | 2026-07-14 00:00:00 | 7.42346 |
-| 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsZAxis | 1041 | 0.1 | 7.37463e-16 | 0.1 | 2026-07-29 23:30:00 | 2.14528 |
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsYAxis | 1041 | 0.1 | 7.37463e-16 | 0.1 | 2026-07-29 23:30:00 | 2.14528 |
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsXAxis | 1041 | 0.1 | 7.37463e-16 | 0.1 | 2026-07-29 23:30:00 | 2.14528 |
-| 69755440-5b34-11f1-9208-83a949003bcf | rmsYAxis | 1807 | 0.1 | 1.81473e-15 | 0.1 | 2026-07-29 23:30:00 | 1.82771 |
+| 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsZAxis | 1041 | 0.1 | 7.37463e-16 | 0.1 | 2026-07-29 23:30:00 | 2.14528 |
 | 69755440-5b34-11f1-9208-83a949003bcf | rmsZAxis | 1807 | 0.1 | 1.81473e-15 | 0.1 | 2026-07-29 23:30:00 | 1.82771 |
+| 69755440-5b34-11f1-9208-83a949003bcf | rmsYAxis | 1807 | 0.1 | 1.81473e-15 | 0.1 | 2026-07-29 23:30:00 | 1.82771 |
 | 69755440-5b34-11f1-9208-83a949003bcf | rmsXAxis | 1807 | 0.1 | 1.81473e-15 | 0.1 | 2026-07-29 23:30:00 | 1.82771 |
+| e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsYAxis | 932 | 0.1 | 6.255e-16 | 0.1 | 2026-07-14 00:00:00 | 1.75275 |
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsZAxis | 932 | 0.1 | 6.255e-16 | 0.1 | 2026-07-14 00:00:00 | 1.75275 |
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsXAxis | 932 | 0.1 | 6.255e-16 | 0.1 | 2026-07-14 00:00:00 | 1.75275 |
-| e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsYAxis | 932 | 0.1 | 6.255e-16 | 0.1 | 2026-07-14 00:00:00 | 1.75275 |
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | pgaZAxis | 932 | 0.428863 | 0.110469 | 0.5 | 2026-07-14 00:00:00 | 0.643957 |
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | pgaYAxis | 932 | 0.332511 | 0.0637266 | 0.3 | 2026-07-14 00:00:00 | 0.51016 |
 | 69755440-5b34-11f1-9208-83a949003bcf | pgaZAxis | 1807 | 0.432319 | 0.0759102 | 0.4 | 2026-07-29 23:30:00 | 0.42575 |
 | 84d47f00-5a9d-11f1-9208-83a949003bcf | pgaZAxis | 2921 | 0.428928 | 0.0695896 | 0.4 | 2026-07-29 23:30:00 | 0.415701 |
 | 84d47f00-5a9d-11f1-9208-83a949003bcf | pgaXAxis | 2921 | 0.311503 | 0.0369753 | 0.3 | 2026-07-29 23:30:00 | 0.311098 |
 | 84d47f00-5a9d-11f1-9208-83a949003bcf | pgaYAxis | 2921 | 0.310852 | 0.0374923 | 0.3 | 2026-07-29 23:30:00 | 0.289458 |
-| 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsXAxis | 2921 | 0.1 | 2.51981e-15 | 0.1 | 2026-07-29 23:30:00 | 0.286389 |
 | 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsYAxis | 2921 | 0.1 | 2.51981e-15 | 0.1 | 2026-07-29 23:30:00 | 0.286389 |
+| 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsXAxis | 2921 | 0.1 | 2.51981e-15 | 0.1 | 2026-07-29 23:30:00 | 0.286389 |
 | 69755440-5b34-11f1-9208-83a949003bcf | pgaYAxis | 1807 | 0.307637 | 0.0473691 | 0.3 | 2026-07-29 23:30:00 | 0.161222 |
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | pgaZAxis | 1041 | 0.407012 | 0.0497719 | 0.4 | 2026-07-29 23:30:00 | 0.140893 |
 
@@ -2026,7 +2035,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 0.5 | {"R4_pga": 0.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND lower(o.property_id) LIKE '%pga%' AND o.value IS NOT NULL AND o.result_time <= '2026-07-29 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND strpos(lower(o.property_id), 'pga') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-07-29 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -2075,12 +2084,12 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | None | {"R6a_rain_1h": 5, "R6a_rain_24h": 20} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%rain%' AND o.value IS NOT NULL AND o.result_time <= '2026-05-16 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-05-16 23:59:59+00')
 SELECT r.sensor_id, o.property_id, count(*) AS n_24h,
        avg(o.value) FILTER (WHERE o.result_time >= anchor.t - interval '1 hour') AS mean_1h,
        avg(o.value) AS mean_24h,
        greatest(avg(o.value) FILTER (WHERE o.result_time >= anchor.t - interval '1 hour'), avg(o.value)) AS metric
-FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%rain%' AND o.value IS NOT NULL
+FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time BETWEEN anchor.t - interval '24 hours' AND anchor.t
 GROUP BY 1, 2 ORDER BY metric DESC;
 ```
@@ -2096,9 +2105,9 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 100 | {"R6b_rain_cum7d": 100} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%rain%' AND o.value IS NOT NULL AND o.result_time <= '2026-05-16 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-05-16 23:59:59+00')
 SELECT r.sensor_id, o.property_id, count(*) AS n, sum(o.value) AS metric
-FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%rain%' AND o.value IS NOT NULL
+FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time BETWEEN anchor.t - interval '168 hours' AND anchor.t
 GROUP BY 1, 2 ORDER BY metric DESC;
 ```
@@ -2128,9 +2137,9 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'ranverso' 
 | 20 | {"R2_rain_7d_diff": 20} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'ranverso' AND lower(o.property_id) LIKE '%rain%' AND lower(o.property_id) NOT LIKE '%acc%' AND o.value IS NOT NULL AND o.result_time <= '2026-07-29 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'ranverso' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'acc') = 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-07-29 23:59:59+00')
 SELECT r.sensor_id, o.property_id, count(*) AS n, sum(o.value) AS metric
-FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'ranverso' AND lower(o.property_id) LIKE '%rain%' AND lower(o.property_id) NOT LIKE '%acc%' AND o.value IS NOT NULL
+FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'ranverso' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'acc') = 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time BETWEEN anchor.t - interval '168 hours' AND anchor.t
 GROUP BY 1, 2 ORDER BY metric DESC;
 ```
@@ -2158,9 +2167,9 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 20 | {"R9a_temp_lt": 20} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL AND o.result_time <= '2026-06-15 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-06-15 23:59:59+00')
 SELECT r.sensor_id, o.property_id, count(*) AS n, min(o.value), max(o.value), max(o.value) - min(o.value) AS metric
-FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL
+FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time BETWEEN anchor.t - interval '24 hours' AND anchor.t
 GROUP BY 1, 2 ORDER BY metric DESC;
 ```
@@ -2193,10 +2202,10 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 5 | {"R9b_temp_st": 5} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL AND o.result_time <= '2026-06-15 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-06-15 23:59:59+00')
 , w AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value,
         o.value - lag(o.value) OVER (PARTITION BY r.sensor_id, o.property_id ORDER BY o.result_time) AS diff
-      FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL
+      FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
         AND o.result_time BETWEEN anchor.t - interval '1 hours' AND anchor.t)
 SELECT sensor_id, property_id, count(*) AS n, max(abs(diff)) AS metric FROM w
 GROUP BY 1, 2 ORDER BY metric DESC NULLS LAST;
@@ -2233,7 +2242,7 @@ GROUP BY 1, 2 ORDER BY metric DESC NULLS LAST;
 ## A034 · verdict_on_date
 
 **Question:** Was the temperature at Lucretili anomalous on 2026-07-02 according to its AD-RT rules?  
-**Reference:** No. R9a_temp_lt: metric 18 vs threshold 20 (window ending 2026-07-02 23:55 UTC); R9b_temp_st: max 1h change 1 vs threshold 5 (ending 2026-07-02 23:55 UTC)  
+**Reference:** No. R9a_temp_lt: metric 18 vs threshold 20 (window ending 2026-07-02 23:56 UTC); R9b_temp_st: max 1h change 1 vs threshold 5 (ending 2026-07-02 23:56 UTC)  
 **Recomputed:** `No` → **MATCH**
 
 ```sql
@@ -2244,32 +2253,33 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 20 | {"R9a_temp_lt": 20} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL AND o.result_time <= '2026-07-02 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-07-02 23:59:59+00')
 SELECT r.sensor_id, o.property_id, count(*) AS n, min(o.value), max(o.value), max(o.value) - min(o.value) AS metric
-FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL
+FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time BETWEEN anchor.t - interval '24 hours' AND anchor.t
 GROUP BY 1, 2 ORDER BY metric DESC;
 ```
 | sensor_id | property_id | n | min | max | metric |
 |---|---|---|---|---|---|
-| 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 267 | 16 | 34 | 18 |
-| 9eefebd0-8191-11f0-9283-e956b63ef652 | temperature | 267 | 13 | 31 | 18 |
-| 37c9dd80-833f-11f0-9283-e956b63ef652 | temperature | 288 | 12.7 | 30.5 | 17.8 |
+| 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 266 | 16 | 34 | 18 |
+| 9eefebd0-8191-11f0-9283-e956b63ef652 | temperature | 266 | 13 | 31 | 18 |
+| 37c9dd80-833f-11f0-9283-e956b63ef652 | temperature | 287 | 12.7 | 30.5 | 17.8 |
 | 8533f470-5c02-11f0-8a4b-6bd692b5baa4 | temperature | 24 | 16.6 | 32.8 | 16.2 |
-| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 268 | 17 | 31 | 14 |
-| 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 268 | 17 | 31 | 14 |
-| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 268 | 17 | 31 | 14 |
-| 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 269 | 14 | 27 | 13 |
-| 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 269 | 14 | 27 | 13 |
-| b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 287 | 14 | 26 | 12 |
-| 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 284 | 15 | 27 | 12 |
-| c0d43040-c86c-11f0-8080-e5362df2da58 | temperature | 181 | 12 | 24 | 12 |
-| 82508f60-8269-11f0-b6dc-556f88243956 | temperature | 28 | 13 | 24 | 11 |
-| 0cf22310-81be-11f0-9283-e956b63ef652 | temperature | 28 | 13 | 24 | 11 |
+| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 267 | 17 | 31 | 14 |
+| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 267 | 17 | 31 | 14 |
+| 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 267 | 17 | 31 | 14 |
+| 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 268 | 14 | 27 | 13 |
+| 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 268 | 14 | 27 | 13 |
+| b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 286 | 14 | 26 | 12 |
+| 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 283 | 15 | 27 | 12 |
+| c0d43040-c86c-11f0-8080-e5362df2da58 | temperature | 180 | 12 | 24 | 12 |
 | 8250dd80-8269-11f0-9283-e956b63ef652 | temperature | 28 | 13 | 24 | 11 |
-| 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 286 | 19 | 27.7 | 8.7 |
-| f3058610-83ff-11f0-9a67-6d25b7d467e7 | temperature | 242 | 15.6 | 21.7 | 6.1 |
-| b8184060-831e-11f0-9283-e956b63ef652 | temperature | 242 | 19 | 24 | 5 |
+| 0cf22310-81be-11f0-9283-e956b63ef652 | temperature | 28 | 13 | 24 | 11 |
+| 82508f60-8269-11f0-b6dc-556f88243956 | temperature | 28 | 13 | 24 | 11 |
+| 2CF7F1C072300286 | temp1 | 285 | 16.2 | 26.3 | 10.1 |
+| 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 285 | 19 | 27.7 | 8.7 |
+| f3058610-83ff-11f0-9a67-6d25b7d467e7 | temperature | 241 | 15.6 | 21.7 | 6.1 |
+| b8184060-831e-11f0-9283-e956b63ef652 | temperature | 241 | 19 | 24 | 5 |
 
 ```sql
 SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili' AND rule_id = 'R9b_temp_st';
@@ -2279,47 +2289,48 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 5 | {"R9b_temp_st": 5} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL AND o.result_time <= '2026-07-02 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-07-02 23:59:59+00')
 , w AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value,
         o.value - lag(o.value) OVER (PARTITION BY r.sensor_id, o.property_id ORDER BY o.result_time) AS diff
-      FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL
+      FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
         AND o.result_time BETWEEN anchor.t - interval '1 hours' AND anchor.t)
 SELECT sensor_id, property_id, count(*) AS n, max(abs(diff)) AS metric FROM w
 GROUP BY 1, 2 ORDER BY metric DESC NULLS LAST;
 ```
 | sensor_id | property_id | n | metric |
 |---|---|---|---|
-| 9eefebd0-8191-11f0-9283-e956b63ef652 | temperature | 13 | 1 |
-| b8184060-831e-11f0-9283-e956b63ef652 | temperature | 13 | 1 |
-| 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 13 | 1 |
-| b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 13 | 1 |
-| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
-| 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
-| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
-| 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 12 | 1 |
-| 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 12 | 1 |
-| 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
-| 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 13 | 0.2 |
-| 37c9dd80-833f-11f0-9283-e956b63ef652 | temperature | 13 | 0.2 |
-| f3058610-83ff-11f0-9a67-6d25b7d467e7 | temperature | 11 | 0.1 |
+| 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 12 | 1 |
+| b8184060-831e-11f0-9283-e956b63ef652 | temperature | 12 | 1 |
+| 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 12 | 1 |
+| 9eefebd0-8191-11f0-9283-e956b63ef652 | temperature | 12 | 1 |
+| b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 12 | 1 |
+| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 12 | 1 |
+| 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 12 | 1 |
+| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 12 | 1 |
+| 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 11 | 1 |
+| 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 11 | 1 |
+| 2CF7F1C072300286 | temp1 | 15 | 0.3 |
+| 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 12 | 0.2 |
+| 37c9dd80-833f-11f0-9283-e956b63ef652 | temperature | 12 | 0.2 |
+| f3058610-83ff-11f0-9a67-6d25b7d467e7 | temperature | 10 | 0.1 |
 | 82508f60-8269-11f0-b6dc-556f88243956 | temperature | 2 | 0 |
 | 8250dd80-8269-11f0-9283-e956b63ef652 | temperature | 2 | 0 |
 | 0cf22310-81be-11f0-9283-e956b63ef652 | temperature | 2 | 0 |
-| c0d43040-c86c-11f0-8080-e5362df2da58 | temperature | 13 | 0 |
+| c0d43040-c86c-11f0-8080-e5362df2da58 | temperature | 12 | 0 |
 | 8533f470-5c02-11f0-8a4b-6bd692b5baa4 | temperature | 1 | None |
 
 - as_of = 2026-07-02 23:59:59+00 (windows end at the latest matching reading at or before it)
 - R9a_temp_lt: metric 18 vs threshold 20 → does not fire
 - R9b_temp_st: metric 1 vs threshold 5 → does not fire
-- Raw readings: [data/A034_R9a_temp_lt.csv](data/A034_R9a_temp_lt.csv) (3794 rows)
-- Raw readings: [data/A034_R9b_temp_st.csv](data/A034_R9b_temp_st.csv) (185 rows)
+- Raw readings: [data/A034_R9a_temp_lt.csv](data/A034_R9a_temp_lt.csv) (4065 rows)
+- Raw readings: [data/A034_R9b_temp_st.csv](data/A034_R9b_temp_st.csv) (186 rows)
 
 ---
 
 ## A035 · verdict_on_date
 
 **Question:** Was the temperature at Lucretili anomalous on 2026-07-03 according to its AD-RT rules?  
-**Reference:** Yes. R9a_temp_lt: metric 25 vs threshold 20 (window ending 2026-07-03 23:55 UTC); R9b_temp_st: max 1h change 1 vs threshold 5 (ending 2026-07-03 23:55 UTC)  
+**Reference:** Yes. R9a_temp_lt: metric 25 vs threshold 20 (window ending 2026-07-03 23:56 UTC); R9b_temp_st: max 1h change 1 vs threshold 5 (ending 2026-07-03 23:56 UTC)  
 **Recomputed:** `Yes` → **MATCH**
 
 ```sql
@@ -2330,32 +2341,33 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 20 | {"R9a_temp_lt": 20} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL AND o.result_time <= '2026-07-03 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-07-03 23:59:59+00')
 SELECT r.sensor_id, o.property_id, count(*) AS n, min(o.value), max(o.value), max(o.value) - min(o.value) AS metric
-FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL
+FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time BETWEEN anchor.t - interval '24 hours' AND anchor.t
 GROUP BY 1, 2 ORDER BY metric DESC;
 ```
 | sensor_id | property_id | n | min | max | metric |
 |---|---|---|---|---|---|
-| 8250dd80-8269-11f0-9283-e956b63ef652 | temperature | 31 | 16 | 41 | 25 |
 | 0cf22310-81be-11f0-9283-e956b63ef652 | temperature | 31 | 16 | 41 | 25 |
+| 8250dd80-8269-11f0-9283-e956b63ef652 | temperature | 31 | 16 | 41 | 25 |
 | 82508f60-8269-11f0-b6dc-556f88243956 | temperature | 31 | 16 | 41 | 25 |
-| 9eefebd0-8191-11f0-9283-e956b63ef652 | temperature | 286 | 14 | 37 | 23 |
-| c0d43040-c86c-11f0-8080-e5362df2da58 | temperature | 223 | 16 | 37 | 21 |
-| 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 285 | 17 | 37 | 20 |
-| 37c9dd80-833f-11f0-9283-e956b63ef652 | temperature | 288 | 16.7 | 36.2 | 19.5 |
+| 9eefebd0-8191-11f0-9283-e956b63ef652 | temperature | 285 | 14 | 37 | 23 |
+| c0d43040-c86c-11f0-8080-e5362df2da58 | temperature | 222 | 16 | 37 | 21 |
+| 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 284 | 17 | 37 | 20 |
+| 37c9dd80-833f-11f0-9283-e956b63ef652 | temperature | 287 | 16.7 | 36.2 | 19.5 |
 | 8533f470-5c02-11f0-8a4b-6bd692b5baa4 | temperature | 24 | 19.7 | 38.6 | 18.9 |
-| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 286 | 18 | 36 | 18 |
-| 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 286 | 18 | 36 | 18 |
-| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 286 | 18 | 36 | 18 |
-| b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 288 | 16 | 32 | 16 |
-| 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 259 | 17 | 33 | 16 |
-| 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 259 | 17 | 33 | 16 |
-| 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 284 | 19 | 32 | 13 |
-| 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 285 | 22.6 | 35.1 | 12.5 |
+| 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 285 | 18 | 36 | 18 |
+| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 285 | 18 | 36 | 18 |
+| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 285 | 18 | 36 | 18 |
+| b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 287 | 16 | 32 | 16 |
+| 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 258 | 17 | 33 | 16 |
+| 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 258 | 17 | 33 | 16 |
+| 2CF7F1C072300286 | temp1 | 293 | 18.5 | 32.1 | 13.6 |
+| 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 283 | 19 | 32 | 13 |
+| 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 284 | 22.6 | 35.1 | 12.5 |
 | f3058610-83ff-11f0-9a67-6d25b7d467e7 | temperature | 239 | 18.1 | 24 | 5.9 |
-| b8184060-831e-11f0-9283-e956b63ef652 | temperature | 234 | 20 | 25 | 5 |
+| b8184060-831e-11f0-9283-e956b63ef652 | temperature | 233 | 20 | 25 | 5 |
 
 ```sql
 SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili' AND rule_id = 'R9b_temp_st';
@@ -2365,39 +2377,40 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 5 | {"R9b_temp_st": 5} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL AND o.result_time <= '2026-07-03 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-07-03 23:59:59+00')
 , w AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value,
         o.value - lag(o.value) OVER (PARTITION BY r.sensor_id, o.property_id ORDER BY o.result_time) AS diff
-      FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL
+      FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
         AND o.result_time BETWEEN anchor.t - interval '1 hours' AND anchor.t)
 SELECT sensor_id, property_id, count(*) AS n, max(abs(diff)) AS metric FROM w
 GROUP BY 1, 2 ORDER BY metric DESC NULLS LAST;
 ```
 | sensor_id | property_id | n | metric |
 |---|---|---|---|
-| 9eefebd0-8191-11f0-9283-e956b63ef652 | temperature | 13 | 1 |
-| c0d43040-c86c-11f0-8080-e5362df2da58 | temperature | 11 | 1 |
-| b8184060-831e-11f0-9283-e956b63ef652 | temperature | 9 | 1 |
-| b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 13 | 1 |
-| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
-| 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
-| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
+| 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 12 | 1 |
+| c0d43040-c86c-11f0-8080-e5362df2da58 | temperature | 10 | 1 |
+| b8184060-831e-11f0-9283-e956b63ef652 | temperature | 8 | 1 |
+| 9eefebd0-8191-11f0-9283-e956b63ef652 | temperature | 12 | 1 |
+| b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 12 | 1 |
+| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 12 | 1 |
+| 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 12 | 1 |
+| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 12 | 1 |
 | 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 12 | 1 |
 | 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 12 | 1 |
-| 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
-| 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 13 | 0.3 |
-| 37c9dd80-833f-11f0-9283-e956b63ef652 | temperature | 13 | 0.2 |
-| f3058610-83ff-11f0-9a67-6d25b7d467e7 | temperature | 10 | 0.1 |
+| 2CF7F1C072300286 | temp1 | 12 | 0.6 |
+| 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 12 | 0.3 |
+| 37c9dd80-833f-11f0-9283-e956b63ef652 | temperature | 12 | 0.2 |
+| f3058610-83ff-11f0-9a67-6d25b7d467e7 | temperature | 9 | 0.1 |
 | 82508f60-8269-11f0-b6dc-556f88243956 | temperature | 2 | 0 |
 | 8250dd80-8269-11f0-9283-e956b63ef652 | temperature | 2 | 0 |
-| 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 13 | 0 |
+| 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 12 | 0 |
 | 0cf22310-81be-11f0-9283-e956b63ef652 | temperature | 2 | 0 |
 | 8533f470-5c02-11f0-8a4b-6bd692b5baa4 | temperature | 1 | None |
 
 - as_of = 2026-07-03 23:59:59+00 (windows end at the latest matching reading at or before it)
 - R9a_temp_lt: metric 25 vs threshold 20 → fires
 - R9b_temp_st: metric 1 vs threshold 5 → does not fire
-- Raw readings: [data/A035_R9a_temp_lt.csv](data/A035_R9a_temp_lt.csv) (3905 rows)
+- Raw readings: [data/A035_R9a_temp_lt.csv](data/A035_R9a_temp_lt.csv) (4185 rows)
 - Raw readings: [data/A035_R9b_temp_st.csv](data/A035_R9b_temp_st.csv) (178 rows)
 
 ---
@@ -2405,7 +2418,7 @@ GROUP BY 1, 2 ORDER BY metric DESC NULLS LAST;
 ## A036 · verdict_on_date
 
 **Question:** Was the temperature at Lucretili anomalous on 2026-07-09 according to its AD-RT rules?  
-**Reference:** Yes. R9a_temp_lt: metric 27 vs threshold 20 (window ending 2026-07-09 23:55 UTC); R9b_temp_st: max 1h change 1 vs threshold 5 (ending 2026-07-09 23:55 UTC)  
+**Reference:** Yes. R9a_temp_lt: metric 27 vs threshold 20 (window ending 2026-07-09 23:57 UTC); R9b_temp_st: max 1h change 1 vs threshold 5 (ending 2026-07-09 23:57 UTC)  
 **Recomputed:** `Yes` → **MATCH**
 
 ```sql
@@ -2416,32 +2429,33 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 20 | {"R9a_temp_lt": 20} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL AND o.result_time <= '2026-07-09 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-07-09 23:59:59+00')
 SELECT r.sensor_id, o.property_id, count(*) AS n, min(o.value), max(o.value), max(o.value) - min(o.value) AS metric
-FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL
+FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time BETWEEN anchor.t - interval '24 hours' AND anchor.t
 GROUP BY 1, 2 ORDER BY metric DESC;
 ```
 | sensor_id | property_id | n | min | max | metric |
 |---|---|---|---|---|---|
-| 9eefebd0-8191-11f0-9283-e956b63ef652 | temperature | 289 | 12 | 39 | 27 |
-| 82508f60-8269-11f0-b6dc-556f88243956 | temperature | 31 | 18 | 43 | 25 |
+| 9eefebd0-8191-11f0-9283-e956b63ef652 | temperature | 288 | 12 | 39 | 27 |
 | 8250dd80-8269-11f0-9283-e956b63ef652 | temperature | 31 | 18 | 43 | 25 |
+| 82508f60-8269-11f0-b6dc-556f88243956 | temperature | 31 | 18 | 43 | 25 |
 | 0cf22310-81be-11f0-9283-e956b63ef652 | temperature | 31 | 18 | 43 | 25 |
-| 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 289 | 17 | 36 | 19 |
-| c0d43040-c86c-11f0-8080-e5362df2da58 | temperature | 122 | 19 | 38 | 19 |
+| 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 288 | 17 | 36 | 19 |
+| c0d43040-c86c-11f0-8080-e5362df2da58 | temperature | 121 | 19 | 38 | 19 |
 | 8533f470-5c02-11f0-8a4b-6bd692b5baa4 | temperature | 24 | 21.3 | 39.8 | 18.5 |
-| 37c9dd80-833f-11f0-9283-e956b63ef652 | temperature | 289 | 18.1 | 36 | 17.9 |
-| 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 270 | 18 | 34 | 16 |
-| 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 270 | 18 | 34 | 16 |
-| b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 288 | 18 | 33 | 15 |
-| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 289 | 17 | 32 | 15 |
-| 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 289 | 17 | 32 | 15 |
-| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 289 | 17 | 32 | 15 |
-| 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 287 | 24.1 | 35.4 | 11.3 |
-| 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 286 | 21 | 32 | 11 |
-| b8184060-831e-11f0-9283-e956b63ef652 | temperature | 285 | 21 | 27 | 6 |
-| f3058610-83ff-11f0-9a67-6d25b7d467e7 | temperature | 259 | 19.5 | 24.8 | 5.3 |
+| 2CF7F1C072300286 | temp1 | 295 | 15.9 | 34.2 | 18.3 |
+| 37c9dd80-833f-11f0-9283-e956b63ef652 | temperature | 288 | 18.1 | 36 | 17.9 |
+| 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 269 | 18 | 34 | 16 |
+| 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 269 | 18 | 34 | 16 |
+| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 288 | 17 | 32 | 15 |
+| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 288 | 17 | 32 | 15 |
+| 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 288 | 17 | 32 | 15 |
+| b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 287 | 18 | 33 | 15 |
+| 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 286 | 24.1 | 35.4 | 11.3 |
+| 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 285 | 21 | 32 | 11 |
+| b8184060-831e-11f0-9283-e956b63ef652 | temperature | 284 | 21 | 27 | 6 |
+| f3058610-83ff-11f0-9a67-6d25b7d467e7 | temperature | 258 | 19.5 | 24.8 | 5.3 |
 
 ```sql
 SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili' AND rule_id = 'R9b_temp_st';
@@ -2451,40 +2465,41 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 5 | {"R9b_temp_st": 5} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL AND o.result_time <= '2026-07-09 23:59:59+00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-07-09 23:59:59+00')
 , w AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value,
         o.value - lag(o.value) OVER (PARTITION BY r.sensor_id, o.property_id ORDER BY o.result_time) AS diff
-      FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL
+      FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
         AND o.result_time BETWEEN anchor.t - interval '1 hours' AND anchor.t)
 SELECT sensor_id, property_id, count(*) AS n, max(abs(diff)) AS metric FROM w
 GROUP BY 1, 2 ORDER BY metric DESC NULLS LAST;
 ```
 | sensor_id | property_id | n | metric |
 |---|---|---|---|
-| 9eefebd0-8191-11f0-9283-e956b63ef652 | temperature | 13 | 1 |
-| c0d43040-c86c-11f0-8080-e5362df2da58 | temperature | 7 | 1 |
-| 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 12 | 1 |
-| b8184060-831e-11f0-9283-e956b63ef652 | temperature | 13 | 1 |
-| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
-| 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
-| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
-| 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 9 | 1 |
-| 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 9 | 1 |
-| 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
-| b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 12 | 1 |
-| f3058610-83ff-11f0-9a67-6d25b7d467e7 | temperature | 11 | 0.4 |
-| 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 12 | 0.3 |
-| 37c9dd80-833f-11f0-9283-e956b63ef652 | temperature | 13 | 0.2 |
-| 8250dd80-8269-11f0-9283-e956b63ef652 | temperature | 2 | 0 |
+| 9eefebd0-8191-11f0-9283-e956b63ef652 | temperature | 12 | 1 |
+| c0d43040-c86c-11f0-8080-e5362df2da58 | temperature | 6 | 1 |
+| 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 11 | 1 |
+| b8184060-831e-11f0-9283-e956b63ef652 | temperature | 12 | 1 |
+| b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 11 | 1 |
+| 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 12 | 1 |
+| 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 12 | 1 |
+| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 12 | 1 |
+| 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 8 | 1 |
+| 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 8 | 1 |
+| 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 12 | 1 |
+| f3058610-83ff-11f0-9a67-6d25b7d467e7 | temperature | 10 | 0.4 |
+| 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 11 | 0.3 |
+| 37c9dd80-833f-11f0-9283-e956b63ef652 | temperature | 12 | 0.2 |
+| 2CF7F1C072300286 | temp1 | 12 | 0.1 |
 | 82508f60-8269-11f0-b6dc-556f88243956 | temperature | 2 | 0 |
+| 8250dd80-8269-11f0-9283-e956b63ef652 | temperature | 2 | 0 |
 | 0cf22310-81be-11f0-9283-e956b63ef652 | temperature | 2 | 0 |
 | 8533f470-5c02-11f0-8a4b-6bd692b5baa4 | temperature | 1 | None |
 
 - as_of = 2026-07-09 23:59:59+00 (windows end at the latest matching reading at or before it)
 - R9a_temp_lt: metric 27 vs threshold 20 → fires
 - R9b_temp_st: metric 1 vs threshold 5 → does not fire
-- Raw readings: [data/A036_R9a_temp_lt.csv](data/A036_R9a_temp_lt.csv) (3918 rows)
-- Raw readings: [data/A036_R9b_temp_st.csv](data/A036_R9b_temp_st.csv) (170 rows)
+- Raw readings: [data/A036_R9a_temp_lt.csv](data/A036_R9a_temp_lt.csv) (4199 rows)
+- Raw readings: [data/A036_R9b_temp_st.csv](data/A036_R9b_temp_st.csv) (168 rows)
 
 ---
 
@@ -2502,7 +2517,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 4.5 | {"R3_vib_zscore": 4.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (lower(o.property_id) LIKE '%pga%' OR lower(o.property_id) LIKE '%rms%') AND o.value IS NOT NULL AND o.result_time <= '2026-05-14 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (strpos(lower(o.property_id), 'pga') > 0 OR strpos(lower(o.property_id), 'rms') > 0) AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-05-14 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -2520,7 +2535,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 0.5 | {"R4_pga": 0.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND lower(o.property_id) LIKE '%pga%' AND o.value IS NOT NULL AND o.result_time <= '2026-05-14 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND strpos(lower(o.property_id), 'pga') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-05-14 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -2550,7 +2565,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 4.5 | {"R3_vib_zscore": 4.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (lower(o.property_id) LIKE '%pga%' OR lower(o.property_id) LIKE '%rms%') AND o.value IS NOT NULL AND o.result_time <= '2026-05-24 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (strpos(lower(o.property_id), 'pga') > 0 OR strpos(lower(o.property_id), 'rms') > 0) AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-05-24 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -2574,7 +2589,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 0.5 | {"R4_pga": 0.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND lower(o.property_id) LIKE '%pga%' AND o.value IS NOT NULL AND o.result_time <= '2026-05-24 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND strpos(lower(o.property_id), 'pga') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-05-24 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -2611,7 +2626,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 4.5 | {"R3_vib_zscore": 4.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (lower(o.property_id) LIKE '%pga%' OR lower(o.property_id) LIKE '%rms%') AND o.value IS NOT NULL AND o.result_time <= '2026-05-27 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (strpos(lower(o.property_id), 'pga') > 0 OR strpos(lower(o.property_id), 'rms') > 0) AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-05-27 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -2635,7 +2650,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 0.5 | {"R4_pga": 0.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND lower(o.property_id) LIKE '%pga%' AND o.value IS NOT NULL AND o.result_time <= '2026-05-27 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND strpos(lower(o.property_id), 'pga') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-05-27 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -2672,7 +2687,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 4.5 | {"R3_vib_zscore": 4.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (lower(o.property_id) LIKE '%pga%' OR lower(o.property_id) LIKE '%rms%') AND o.value IS NOT NULL AND o.result_time <= '2026-06-05 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (strpos(lower(o.property_id), 'pga') > 0 OR strpos(lower(o.property_id), 'rms') > 0) AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-06-05 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -2689,17 +2704,17 @@ FROM st JOIN lt USING (sensor_id, property_id) ORDER BY metric DESC NULLS LAST;
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | pgaZAxis | 83 | 0.540964 | 0.0560468 | 0.4 | 2026-06-05 12:00:00 | 2.51511 |
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | pgaYAxis | 397 | 0.392947 | 0.0382308 | 0.3 | 2026-06-05 23:30:00 | 2.43121 |
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | pgaZAxis | 397 | 0.516877 | 0.0990754 | 0.3 | 2026-06-05 23:30:00 | 2.18901 |
-| 69755440-5b34-11f1-9208-83a949003bcf | rmsXAxis | 315 | 0.1 | 2.62461e-16 | 0.1 | 2026-06-05 12:00:00 | 2.11503 |
-| 69755440-5b34-11f1-9208-83a949003bcf | rmsZAxis | 315 | 0.1 | 2.62461e-16 | 0.1 | 2026-06-05 12:00:00 | 2.11503 |
 | 69755440-5b34-11f1-9208-83a949003bcf | rmsYAxis | 315 | 0.1 | 2.62461e-16 | 0.1 | 2026-06-05 12:00:00 | 2.11503 |
+| 69755440-5b34-11f1-9208-83a949003bcf | rmsZAxis | 315 | 0.1 | 2.62461e-16 | 0.1 | 2026-06-05 12:00:00 | 2.11503 |
+| 69755440-5b34-11f1-9208-83a949003bcf | rmsXAxis | 315 | 0.1 | 2.62461e-16 | 0.1 | 2026-06-05 12:00:00 | 2.11503 |
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsZAxis | 83 | 0.1 | 8.07762e-17 | 0.1 | 2026-06-05 12:00:00 | 2.06167 |
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsXAxis | 83 | 0.1 | 8.07762e-17 | 0.1 | 2026-06-05 12:00:00 | 2.06167 |
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsYAxis | 83 | 0.1 | 8.07762e-17 | 0.1 | 2026-06-05 12:00:00 | 2.06167 |
 | 84d47f00-5a9d-11f1-9208-83a949003bcf | pgaZAxis | 398 | 0.564573 | 0.0831309 | 0.4 | 2026-06-05 23:30:00 | 1.97968 |
 | 69755440-5b34-11f1-9208-83a949003bcf | pgaZAxis | 315 | 0.571111 | 0.0881397 | 0.4 | 2026-06-05 12:00:00 | 1.94136 |
+| e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsYAxis | 397 | 0.1 | 3.79758e-16 | 0.1 | 2026-06-05 23:30:00 | 1.93682 |
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsZAxis | 397 | 0.1 | 3.79758e-16 | 0.1 | 2026-06-05 23:30:00 | 1.93682 |
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsXAxis | 397 | 0.1 | 3.79758e-16 | 0.1 | 2026-06-05 23:30:00 | 1.93682 |
-| e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsYAxis | 397 | 0.1 | 3.79758e-16 | 0.1 | 2026-06-05 23:30:00 | 1.93682 |
 | 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsZAxis | 398 | 0.1 | 3.81055e-16 | 0.1 | 2026-06-05 23:30:00 | 1.93023 |
 | 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsXAxis | 398 | 0.1 | 3.81055e-16 | 0.1 | 2026-06-05 23:30:00 | 1.93023 |
 
@@ -2713,7 +2728,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 0.5 | {"R4_pga": 0.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND lower(o.property_id) LIKE '%pga%' AND o.value IS NOT NULL AND o.result_time <= '2026-06-05 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND strpos(lower(o.property_id), 'pga') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-06-05 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -2762,7 +2777,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 4.5 | {"R3_vib_zscore": 4.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (lower(o.property_id) LIKE '%pga%' OR lower(o.property_id) LIKE '%rms%') AND o.value IS NOT NULL AND o.result_time <= '2026-06-28 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (strpos(lower(o.property_id), 'pga') > 0 OR strpos(lower(o.property_id), 'rms') > 0) AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-06-28 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -2776,20 +2791,20 @@ FROM st JOIN lt USING (sensor_id, property_id) ORDER BY metric DESC NULLS LAST;
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | pgaYAxis | 83 | 0.4 | 0.0268866 | 0.3 | 2026-06-05 12:00:00 | 3.71932 |
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | pgaZAxis | 83 | 0.540964 | 0.0560468 | 0.4 | 2026-06-05 12:00:00 | 2.51511 |
 | 69755440-5b34-11f1-9208-83a949003bcf | pgaXAxis | 801 | 0.327965 | 0.0586317 | 0.2 | 2026-06-28 22:00:00 | 2.18252 |
-| 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsYAxis | 83 | 0.1 | 8.07762e-17 | 0.1 | 2026-06-05 12:00:00 | 2.06167 |
-| 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsXAxis | 83 | 0.1 | 8.07762e-17 | 0.1 | 2026-06-05 12:00:00 | 2.06167 |
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsZAxis | 83 | 0.1 | 8.07762e-17 | 0.1 | 2026-06-05 12:00:00 | 2.06167 |
+| 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsXAxis | 83 | 0.1 | 8.07762e-17 | 0.1 | 2026-06-05 12:00:00 | 2.06167 |
+| 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsYAxis | 83 | 0.1 | 8.07762e-17 | 0.1 | 2026-06-05 12:00:00 | 2.06167 |
 | 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsXAxis | 1480 | 0.1 | 1.38927e-15 | 0.1 | 2026-06-28 23:30:00 | 2.00784 |
-| 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsZAxis | 1480 | 0.1 | 1.38927e-15 | 0.1 | 2026-06-28 23:30:00 | 2.00784 |
 | 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsYAxis | 1480 | 0.1 | 1.38927e-15 | 0.1 | 2026-06-28 23:30:00 | 2.00784 |
-| e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsZAxis | 825 | 0.1 | 5.92621e-16 | 0.1 | 2026-06-28 20:00:00 | 0.843035 |
-| e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsXAxis | 825 | 0.1 | 5.92621e-16 | 0.1 | 2026-06-28 20:00:00 | 0.843035 |
+| 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsZAxis | 1480 | 0.1 | 1.38927e-15 | 0.1 | 2026-06-28 23:30:00 | 2.00784 |
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsYAxis | 825 | 0.1 | 5.92621e-16 | 0.1 | 2026-06-28 20:00:00 | 0.843035 |
+| e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsXAxis | 825 | 0.1 | 5.92621e-16 | 0.1 | 2026-06-28 20:00:00 | 0.843035 |
+| e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsZAxis | 825 | 0.1 | 5.92621e-16 | 0.1 | 2026-06-28 20:00:00 | 0.843035 |
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | pgaXAxis | 825 | 0.342303 | 0.0590185 | 0.3 | 2026-06-28 20:00:00 | 0.716776 |
 | 69755440-5b34-11f1-9208-83a949003bcf | pgaZAxis | 801 | 0.469663 | 0.100018 | 0.4 | 2026-06-28 22:00:00 | 0.696507 |
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | pgaYAxis | 825 | 0.339394 | 0.0621796 | 0.3 | 2026-06-28 20:00:00 | 0.633551 |
-| 69755440-5b34-11f1-9208-83a949003bcf | rmsXAxis | 801 | 0.1 | 5.96696e-16 | 0.1 | 2026-06-28 22:00:00 | 0.581443 |
 | 69755440-5b34-11f1-9208-83a949003bcf | rmsYAxis | 801 | 0.1 | 5.96696e-16 | 0.1 | 2026-06-28 22:00:00 | 0.581443 |
+| 69755440-5b34-11f1-9208-83a949003bcf | rmsXAxis | 801 | 0.1 | 5.96696e-16 | 0.1 | 2026-06-28 22:00:00 | 0.581443 |
 | 69755440-5b34-11f1-9208-83a949003bcf | rmsZAxis | 801 | 0.1 | 5.96696e-16 | 0.1 | 2026-06-28 22:00:00 | 0.581443 |
 | 84d47f00-5a9d-11f1-9208-83a949003bcf | pgaZAxis | 1480 | 0.449054 | 0.0850226 | 0.4 | 2026-06-28 23:30:00 | 0.576953 |
 
@@ -2803,7 +2818,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 0.5 | {"R4_pga": 0.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND lower(o.property_id) LIKE '%pga%' AND o.value IS NOT NULL AND o.result_time <= '2026-06-28 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND strpos(lower(o.property_id), 'pga') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-06-28 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -2852,7 +2867,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 4.5 | {"R3_vib_zscore": 4.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (lower(o.property_id) LIKE '%pga%' OR lower(o.property_id) LIKE '%rms%') AND o.value IS NOT NULL AND o.result_time <= '2026-07-17 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (strpos(lower(o.property_id), 'pga') > 0 OR strpos(lower(o.property_id), 'rms') > 0) AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-07-17 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -2893,7 +2908,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 0.5 | {"R4_pga": 0.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND lower(o.property_id) LIKE '%pga%' AND o.value IS NOT NULL AND o.result_time <= '2026-07-17 23:59:59+00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND strpos(lower(o.property_id), 'pga') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-07-17 23:59:59+00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -2942,8 +2957,8 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 3 | {"R5_visitors_peak": 3} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%counter%' AND o.value IS NOT NULL AND o.result_time <= '2026-05-19 23:59:59+00')
-SELECT r.sensor_id, o.property_id, o.result_time, o.value AS metric FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%counter%' AND o.value IS NOT NULL
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'counter') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-05-19 23:59:59+00')
+SELECT r.sensor_id, o.property_id, o.result_time, o.value AS metric FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'counter') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time = anchor.t ORDER BY metric DESC;
 ```
 | sensor_id | property_id | result_time | metric |
@@ -2970,8 +2985,8 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 3 | {"R5_visitors_peak": 3} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%counter%' AND o.value IS NOT NULL AND o.result_time <= '2026-06-03 23:59:59+00')
-SELECT r.sensor_id, o.property_id, o.result_time, o.value AS metric FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%counter%' AND o.value IS NOT NULL
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'counter') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-06-03 23:59:59+00')
+SELECT r.sensor_id, o.property_id, o.result_time, o.value AS metric FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'counter') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time = anchor.t ORDER BY metric DESC;
 ```
 | sensor_id | property_id | result_time | metric |
@@ -2998,8 +3013,8 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 3 | {"R5_visitors_peak": 3} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%counter%' AND o.value IS NOT NULL AND o.result_time <= '2026-06-23 23:59:59+00')
-SELECT r.sensor_id, o.property_id, o.result_time, o.value AS metric FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%counter%' AND o.value IS NOT NULL
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'counter') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-06-23 23:59:59+00')
+SELECT r.sensor_id, o.property_id, o.result_time, o.value AS metric FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'counter') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time = anchor.t ORDER BY metric DESC;
 ```
 | sensor_id | property_id | result_time | metric |
@@ -3026,12 +3041,12 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | None | {"R6a_rain_1h": 5, "R6a_rain_24h": 20} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%rain%' AND o.value IS NOT NULL AND o.result_time <= '2026-08-12T09:15:00+00:00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-08-12T09:15:00+00:00')
 SELECT r.sensor_id, o.property_id, count(*) AS n_24h,
        avg(o.value) FILTER (WHERE o.result_time >= anchor.t - interval '1 hour') AS mean_1h,
        avg(o.value) AS mean_24h,
        greatest(avg(o.value) FILTER (WHERE o.result_time >= anchor.t - interval '1 hour'), avg(o.value)) AS metric
-FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%rain%' AND o.value IS NOT NULL
+FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time BETWEEN anchor.t - interval '24 hours' AND anchor.t
 GROUP BY 1, 2 ORDER BY metric DESC;
 ```
@@ -3047,9 +3062,9 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 100 | {"R6b_rain_cum7d": 100} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%rain%' AND o.value IS NOT NULL AND o.result_time <= '2026-08-12T09:15:00+00:00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-08-12T09:15:00+00:00')
 SELECT r.sensor_id, o.property_id, count(*) AS n, sum(o.value) AS metric
-FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%rain%' AND o.value IS NOT NULL
+FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time BETWEEN anchor.t - interval '168 hours' AND anchor.t
 GROUP BY 1, 2 ORDER BY metric DESC;
 ```
@@ -3079,9 +3094,9 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'ranverso' 
 | 20 | {"R2_rain_7d_diff": 20} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'ranverso' AND lower(o.property_id) LIKE '%rain%' AND lower(o.property_id) NOT LIKE '%acc%' AND o.value IS NOT NULL AND o.result_time <= '2026-08-12T09:15:00+00:00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'ranverso' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'acc') = 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-08-12T09:15:00+00:00')
 SELECT r.sensor_id, o.property_id, count(*) AS n, sum(o.value) AS metric
-FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'ranverso' AND lower(o.property_id) LIKE '%rain%' AND lower(o.property_id) NOT LIKE '%acc%' AND o.value IS NOT NULL
+FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'ranverso' AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'acc') = 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time BETWEEN anchor.t - interval '168 hours' AND anchor.t
 GROUP BY 1, 2 ORDER BY metric DESC;
 ```
@@ -3109,9 +3124,9 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 20 | {"R9a_temp_lt": 20} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL AND o.result_time <= '2026-08-12T09:15:00+00:00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-08-12T09:15:00+00:00')
 SELECT r.sensor_id, o.property_id, count(*) AS n, min(o.value), max(o.value), max(o.value) - min(o.value) AS metric
-FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL
+FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time BETWEEN anchor.t - interval '24 hours' AND anchor.t
 GROUP BY 1, 2 ORDER BY metric DESC;
 ```
@@ -3124,9 +3139,10 @@ GROUP BY 1, 2 ORDER BY metric DESC;
 | 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 277 | 19 | 42 | 23 |
 | 8533f470-5c02-11f0-8a4b-6bd692b5baa4 | temperature | 23 | 27.2 | 48.7 | 21.5 |
 | c0d43040-c86c-11f0-8080-e5362df2da58 | temperature | 182 | 24 | 45 | 21 |
-| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 277 | 19 | 38 | 19 |
 | 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 277 | 19 | 38 | 19 |
+| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 277 | 19 | 38 | 19 |
 | 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 277 | 19 | 38 | 19 |
+| 2CF7F1C072300286 | temp1 | 298 | 18.6 | 37.2 | 18.6 |
 | 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 277 | 25 | 41 | 16 |
 | 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 277 | 25 | 41 | 16 |
 | 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 277 | 30.5 | 45.6 | 15.1 |
@@ -3143,10 +3159,10 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 5 | {"R9b_temp_st": 5} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL AND o.result_time <= '2026-08-12T09:15:00+00:00')
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-08-12T09:15:00+00:00')
 , w AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value,
         o.value - lag(o.value) OVER (PARTITION BY r.sensor_id, o.property_id ORDER BY o.result_time) AS diff
-      FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%temp%' AND o.value IS NOT NULL
+      FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
         AND o.result_time BETWEEN anchor.t - interval '1 hours' AND anchor.t)
 SELECT sensor_id, property_id, count(*) AS n, max(abs(diff)) AS metric FROM w
 GROUP BY 1, 2 ORDER BY metric DESC NULLS LAST;
@@ -3157,12 +3173,13 @@ GROUP BY 1, 2 ORDER BY metric DESC NULLS LAST;
 | 277491c0-833d-11f0-9283-e956b63ef652 | temperature | 13 | 1 |
 | 56fa0d20-819a-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
 | 5711b3d0-819a-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
-| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
 | b52772f0-8327-11f0-9283-e956b63ef652 | temperature | 12 | 1 |
+| 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 13 | 1 |
 | 6d46d0f0-d103-11f0-8484-ad77d9ec8692 | temperature | 13 | 1 |
 | 7c201440-8196-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
 | b8184060-831e-11f0-9283-e956b63ef652 | temperature | 13 | 1 |
-| 6d408f60-d103-11f0-9e79-07375f067697 | temperature | 13 | 1 |
+| 5716e3f0-819a-11f0-9a67-6d25b7d467e7 | temperature | 13 | 1 |
+| 2CF7F1C072300286 | temp1 | 12 | 0.4 |
 | 0866de30-8335-11f0-9283-e956b63ef652 | temperature | 13 | 0.3 |
 | f3058610-83ff-11f0-9a67-6d25b7d467e7 | temperature | 13 | 0.2 |
 | 8533f470-5c02-11f0-8a4b-6bd692b5baa4 | temperature | 1 | None |
@@ -3170,8 +3187,8 @@ GROUP BY 1, 2 ORDER BY metric DESC NULLS LAST;
 - as_of = 2026-08-12T09:15:00+00:00 (windows end at the latest matching reading at or before it)
 - R9a_temp_lt: metric 27 vs threshold 20 → fires
 - R9b_temp_st: metric 2 vs threshold 5 → does not fire
-- Raw readings: [data/A048_R9a_temp_lt.csv](data/A048_R9a_temp_lt.csv) (3647 rows)
-- Raw readings: [data/A048_R9b_temp_st.csv](data/A048_R9b_temp_st.csv) (156 rows)
+- Raw readings: [data/A048_R9a_temp_lt.csv](data/A048_R9a_temp_lt.csv) (3945 rows)
+- Raw readings: [data/A048_R9b_temp_st.csv](data/A048_R9b_temp_st.csv) (168 rows)
 
 ---
 
@@ -3189,7 +3206,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 4.5 | {"R3_vib_zscore": 4.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (lower(o.property_id) LIKE '%pga%' OR lower(o.property_id) LIKE '%rms%') AND o.value IS NOT NULL AND o.result_time <= '2026-08-12T09:15:00+00:00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND (strpos(lower(o.property_id), 'pga') > 0 OR strpos(lower(o.property_id), 'rms') > 0) AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-08-12T09:15:00+00:00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -3202,14 +3219,14 @@ FROM st JOIN lt USING (sensor_id, property_id) ORDER BY metric DESC NULLS LAST;
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | pgaXAxis | 932 | 0.337661 | 0.0757516 | 0.9 | 2026-07-14 00:00:00 | 7.42346 |
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | pgaZAxis | 1312 | 0.404649 | 0.0460451 | 0.3 | 2026-08-12 08:00:00 | 2.27276 |
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsZAxis | 1312 | 0.1 | 1.14097e-15 | 0.1 | 2026-08-12 08:00:00 | 2.11639 |
-| 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsYAxis | 1312 | 0.1 | 1.14097e-15 | 0.1 | 2026-08-12 08:00:00 | 2.11639 |
 | 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsXAxis | 1312 | 0.1 | 1.14097e-15 | 0.1 | 2026-08-12 08:00:00 | 2.11639 |
-| e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsYAxis | 932 | 0.1 | 6.255e-16 | 0.1 | 2026-07-14 00:00:00 | 1.75275 |
+| 47a10ff0-5e48-11f1-9808-31317bce3c36 | rmsYAxis | 1312 | 0.1 | 1.14097e-15 | 0.1 | 2026-08-12 08:00:00 | 2.11639 |
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsXAxis | 932 | 0.1 | 6.255e-16 | 0.1 | 2026-07-14 00:00:00 | 1.75275 |
+| e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsYAxis | 932 | 0.1 | 6.255e-16 | 0.1 | 2026-07-14 00:00:00 | 1.75275 |
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | rmsZAxis | 932 | 0.1 | 6.255e-16 | 0.1 | 2026-07-14 00:00:00 | 1.75275 |
 | 69755440-5b34-11f1-9208-83a949003bcf | rmsXAxis | 2088 | 0.1 | 2.11774e-15 | 0.1 | 2026-08-12 08:00:00 | 1.71691 |
-| 69755440-5b34-11f1-9208-83a949003bcf | rmsYAxis | 2088 | 0.1 | 2.11774e-15 | 0.1 | 2026-08-12 08:00:00 | 1.71691 |
 | 69755440-5b34-11f1-9208-83a949003bcf | rmsZAxis | 2088 | 0.1 | 2.11774e-15 | 0.1 | 2026-08-12 08:00:00 | 1.71691 |
+| 69755440-5b34-11f1-9208-83a949003bcf | rmsYAxis | 2088 | 0.1 | 2.11774e-15 | 0.1 | 2026-08-12 08:00:00 | 1.71691 |
 | 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsYAxis | 3540 | 0.1 | 2.42045e-15 | 0.1 | 2026-08-12 09:00:00 | 1.39899 |
 | 84d47f00-5a9d-11f1-9208-83a949003bcf | rmsXAxis | 3540 | 0.1 | 2.42045e-15 | 0.1 | 2026-08-12 09:00:00 | 1.39899 |
 | e1a16c90-5a8c-11f1-9808-31317bce3c36 | pgaZAxis | 932 | 0.428863 | 0.110469 | 0.5 | 2026-07-14 00:00:00 | 0.643957 |
@@ -3230,7 +3247,7 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenbe
 | 0.5 | {"R4_pga": 0.5} |
 
 ```sql
-WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND lower(o.property_id) LIKE '%pga%' AND o.value IS NOT NULL AND o.result_time <= '2026-08-12T09:15:00+00:00'),
+WITH s AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'schenkenberg' AND strpos(lower(o.property_id), 'pga') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-08-12T09:15:00+00:00'),
 st AS (SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean, stddev_pop(value) AS sd FROM s GROUP BY 1, 2),
 lt AS (SELECT DISTINCT ON (sensor_id, property_id) sensor_id, property_id, value AS latest, result_time
        FROM s ORDER BY sensor_id, property_id, result_time DESC)
@@ -3279,8 +3296,8 @@ SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili'
 | 3 | {"R5_visitors_peak": 3} |
 
 ```sql
-WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%counter%' AND o.value IS NOT NULL AND o.result_time <= '2026-08-12T09:15:00+00:00')
-SELECT r.sensor_id, o.property_id, o.result_time, o.value AS metric FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND lower(o.property_id) LIKE '%counter%' AND o.value IS NOT NULL
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'counter') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-08-12T09:15:00+00:00')
+SELECT r.sensor_id, o.property_id, o.result_time, o.value AS metric FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'counter') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
   AND o.result_time = anchor.t ORDER BY metric DESC;
 ```
 | sensor_id | property_id | result_time | metric |
@@ -3293,42 +3310,65 @@ SELECT r.sensor_id, o.property_id, o.result_time, o.value AS metric FROM anchor,
 
 ---
 
-## A051 · verdict_no_data
+## A051 · verdict_on_date
 
 **Question:** According to the AD-RT expert rules, was there a combined low temperature and high humidity anomaly at Schenkenberg on 2026-06-24?  
-**Reference:** Cannot be determined: the snapshot has no combined low temperature and high humidity readings at Schenkenberg for its AD-RT rule(s).  
-**Recomputed:** `Cannot be determined` → **MATCH**
+**Reference:** No. R1_temp_hum: latest temperature 25.9 at 2026-06-24 23:59 UTC (fires below 0), latest humidity 44 at 2026-06-24 23:58 UTC (fires above 90)  
+**Recomputed:** `No` → **MATCH**
 
 ```sql
-SELECT DISTINCT o.property_id FROM observations o JOIN readings r USING (reading_id)
-WHERE r.site_id = 'schenkenberg' AND (lower(o.property_id) LIKE '%hum%');
+SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'schenkenberg' AND rule_id = 'R1_temp_hum';
 ```
-_(no rows)_
+| threshold_value | threshold_json |
+|---|---|
+| None | {"R1_hum_high": 90, "R1_temp_low": 0} |
 
 ```sql
-SELECT rule_id, label, threshold_value, threshold_json FROM policies
-WHERE site_id = 'schenkenberg' AND left(label, 5) = 'AD-RT' ORDER BY rule_id;
+SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id)
+WHERE r.site_id = 'schenkenberg' AND strpos(lower(o.property_id), 'temp') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-06-24 23:59:59+00'
+ORDER BY o.result_time DESC, o.value ASC LIMIT 3;
 ```
-| rule_id | label | threshold_value | threshold_json |
+| sensor_id | property_id | result_time | value |
 |---|---|---|---|
-| R1_temp_hum | AD-RT Schenkenberg policy - low temperature and high humidity | None | {"R1_hum_high": 90, "R1_temp_low": 0} |
-| R2_crack_step | AD-RT Schenkenberg policy - crack step | 0.1 | {"R2_crack_step": 0.1} |
-| R3_vib_zscore | AD-RT Schenkenberg policy - vibration z-score | 4.5 | {"R3_vib_zscore": 4.5} |
-| R4_pga | AD-RT Schenkenberg policy - PGA | 0.5 | {"R4_pga": 0.5} |
+| 2CF7F1C072600345 | temp1 | 2026-06-24 23:59:37 | 25.9 |
+| 2CF7F1C072600345 | temp1 | 2026-06-24 23:58:59 | 25.9 |
+| 2CF7F1C072300226 | temp1 | 2026-06-24 23:58:03 | 26 |
 
-- Expected: first query returns no rows (no combined low temperature and high humidity readings). Second query: the site's AD-RT rules — check which concern combined low temperature and high humidity.
+```sql
+SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o JOIN readings r USING (reading_id)
+WHERE r.site_id = 'schenkenberg' AND strpos(lower(o.property_id), 'hum') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-06-24 23:59:59+00'
+ORDER BY o.result_time DESC, o.value DESC LIMIT 3;
+```
+| sensor_id | property_id | result_time | value |
+|---|---|---|---|
+| 2CF7F1C072300226 | hum1 | 2026-06-24 23:58:03 | 44 |
+| 2CF7F1C072300226 | hum1 | 2026-06-24 23:53:00 | 43 |
+| 2CF7F1C072300226 | hum1 | 2026-06-24 23:47:58 | 44 |
+
+- as_of = 2026-06-24 23:59:59+00 (windows end at the latest matching reading at or before it)
+- R1_temp_hum: latest 25.9 (fires below 0) and 44 (fires above 90) → does not fire
 
 ---
 
 ## A052 · verdict_no_data
 
 **Question:** According to the AD-RT expert rules, was there a rainfall anomaly at Delos on 2026-06-01?  
-**Reference:** Cannot be determined: the snapshot has no rainfall readings at Delos for its AD-RT rule(s).  
+**Reference:** Cannot be determined: Delos's rainfall rule(s) (R1a_rain_1h, R1b_rain_3h) take rainfall amounts in mm per window; the snapshot's only rain readings at Delos are the weather station's rainfall intensity (rain_1, mm/h) and its running total since installation (rain_acc), neither of which is a rule's quantity.  
 **Recomputed:** `Cannot be determined` → **MATCH**
 
 ```sql
-SELECT DISTINCT o.property_id FROM observations o JOIN readings r USING (reading_id)
-WHERE r.site_id = 'delos' AND (lower(o.property_id) LIKE '%rain%');
+-- quantities matching R1a_rain_1h
+SELECT o.property_id, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
+WHERE r.site_id = 'delos' AND o.value IS NOT NULL AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'acc') = 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0
+GROUP BY 1;
+```
+_(no rows)_
+
+```sql
+-- quantities matching R1b_rain_3h
+SELECT o.property_id, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
+WHERE r.site_id = 'delos' AND o.value IS NOT NULL AND strpos(lower(o.property_id), 'rain') > 0 AND strpos(lower(o.property_id), 'acc') = 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0
+GROUP BY 1;
 ```
 _(no rows)_
 
@@ -3343,35 +3383,55 @@ WHERE site_id = 'delos' AND left(label, 5) = 'AD-RT' ORDER BY rule_id;
 | R2_wind | AD-RT Delos policy - wind | 12 | {"R2_wind": 12} |
 | R3_hum_cross | AD-RT Delos policy - humidity crossings | None | {"R3_cross": 9, "R3_hum_th": 75} |
 
-- Expected: first query returns no rows (no rainfall readings). Second query: the site's AD-RT rules — check which concern rainfall.
+- R1a_rain_1h: no matching readings.
+- R1b_rain_3h: no matching readings.
+- Last query: the site's AD-RT rules — check that R1a_rain_1h, R1b_rain_3h are the ones about rainfall.
 
 ---
 
-## A053 · verdict_no_data
+## A053 · verdict_on_date
 
 **Question:** According to the AD-RT expert rules, was there a soil moisture anomaly at Ranverso on 2026-06-21?  
-**Reference:** Cannot be determined: the snapshot has no soil moisture readings at Ranverso for its AD-RT rule(s).  
-**Recomputed:** `Cannot be determined` → **MATCH**
+**Reference:** Yes. R4a_soil_high: latest reading 2.471 at 2026-06-21 23:58 UTC vs threshold 60; R4b_soil_low: latest reading 2.471 at 2026-06-21 23:58 UTC vs threshold 5 (fires below)  
+**Recomputed:** `Yes` → **MATCH**
 
 ```sql
-SELECT DISTINCT o.property_id FROM observations o JOIN readings r USING (reading_id)
-WHERE r.site_id = 'ranverso' AND (lower(o.property_id) LIKE '%moisture%');
+SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'ranverso' AND rule_id = 'R4a_soil_high';
 ```
-_(no rows)_
+| threshold_value | threshold_json |
+|---|---|
+| 60 | {"R4a_soil_high": 60} |
 
 ```sql
-SELECT rule_id, label, threshold_value, threshold_json FROM policies
-WHERE site_id = 'ranverso' AND left(label, 5) = 'AD-RT' ORDER BY rule_id;
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'ranverso' AND strpos(lower(o.property_id), 'moisture') > 0 AND strpos(lower(o.property_id), 'temp') = 0 AND strpos(lower(o.property_id), 'hum') = 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-06-21 23:59:59+00')
+SELECT r.sensor_id, o.property_id, o.result_time, o.value AS metric FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'ranverso' AND strpos(lower(o.property_id), 'moisture') > 0 AND strpos(lower(o.property_id), 'temp') = 0 AND strpos(lower(o.property_id), 'hum') = 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
+  AND o.result_time = anchor.t ORDER BY metric DESC;
 ```
-| rule_id | label | threshold_value | threshold_json |
+| sensor_id | property_id | result_time | metric |
 |---|---|---|---|
-| R1_hum_inside | AD-RT Ranverso policy - indoor humidity | 80 | {"R1_hum_inside": 80} |
-| R2_rain_7d | AD-RT Ranverso policy - rainfall 7d | 20 | {"R2_rain_7d_diff": 20} |
-| R3_temp_nodiff | AD-RT Ranverso policy - soil and air temperature coupling | 2 | {"R3_temp_nodiff": 2} |
-| R4a_soil_high | AD-RT Ranverso policy - soil moisture high | 60 | {"R4a_soil_high": 60} |
-| R4b_soil_low | AD-RT Ranverso policy - soil moisture low | 5 | {"R4b_soil_low": 5} |
+| A8610A333526680F | moisture | 2026-06-21 23:58:23 | 2.47097 |
 
-- Expected: first query returns no rows (no soil moisture readings). Second query: the site's AD-RT rules — check which concern soil moisture.
+```sql
+SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'ranverso' AND rule_id = 'R4b_soil_low';
+```
+| threshold_value | threshold_json |
+|---|---|
+| 5 | {"R4b_soil_low": 5} |
+
+```sql
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'ranverso' AND strpos(lower(o.property_id), 'moisture') > 0 AND strpos(lower(o.property_id), 'temp') = 0 AND strpos(lower(o.property_id), 'hum') = 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-06-21 23:59:59+00')
+SELECT r.sensor_id, o.property_id, o.result_time, o.value AS metric FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'ranverso' AND strpos(lower(o.property_id), 'moisture') > 0 AND strpos(lower(o.property_id), 'temp') = 0 AND strpos(lower(o.property_id), 'hum') = 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
+  AND o.result_time = anchor.t ORDER BY metric DESC;
+```
+| sensor_id | property_id | result_time | metric |
+|---|---|---|---|
+| A8610A333526680F | moisture | 2026-06-21 23:58:23 | 2.47097 |
+
+- as_of = 2026-06-21 23:59:59+00 (windows end at the latest matching reading at or before it)
+- R4a_soil_high: metric 2.47097 vs threshold 60 → does not fire
+- R4b_soil_low: metric 2.47097 vs threshold 5 (fires below) → fires
+- Raw readings: [data/A053_R4a_soil_high.csv](data/A053_R4a_soil_high.csv) (1 rows)
+- Raw readings: [data/A053_R4b_soil_low.csv](data/A053_R4b_soil_low.csv) (1 rows)
 
 ---
 
@@ -3382,8 +3442,10 @@ WHERE site_id = 'ranverso' AND left(label, 5) = 'AD-RT' ORDER BY rule_id;
 **Recomputed:** `Cannot be determined` → **MATCH**
 
 ```sql
-SELECT DISTINCT o.property_id FROM observations o JOIN readings r USING (reading_id)
-WHERE r.site_id = 'baltanas' AND (lower(o.property_id) LIKE '%ppv%');
+-- quantities matching R1_ppv
+SELECT o.property_id, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
+WHERE r.site_id = 'baltanas' AND o.value IS NOT NULL AND strpos(lower(o.property_id), 'acc_int_ppv') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0
+GROUP BY 1;
 ```
 _(no rows)_
 
@@ -3402,38 +3464,54 @@ WHERE site_id = 'baltanas' AND left(label, 5) = 'AD-RT' ORDER BY rule_id;
 | R5b_airflow_range | AD-RT Baltanas policy - airflow range | 0.35 | {"R5b_airflow_range": 0.35} |
 | R6_rain_1h | AD-RT Baltanas policy - rainfall 1h | 10 | {"R6_rain_1h": 10} |
 
-- Expected: first query returns no rows (no vibration (PPV) readings). Second query: the site's AD-RT rules — check which concern vibration (PPV).
+- R1_ppv: no matching readings.
+- Last query: the site's AD-RT rules — check that R1_ppv are the ones about vibration (PPV).
 
 ---
 
-## A055 · verdict_no_data
+## A055 · verdict_on_date
 
 **Question:** Did the airflow at Baltanas exceed its AD-RT threshold on 2026-05-23?  
-**Reference:** Cannot be determined: the snapshot has no airflow readings at Baltanas for its AD-RT rule(s).  
+**Reference:** Cannot be determined. R5a_airflow_const: no readings; R5b_airflow_range: no readings  
 **Recomputed:** `Cannot be determined` → **MATCH**
 
 ```sql
-SELECT DISTINCT o.property_id FROM observations o JOIN readings r USING (reading_id)
-WHERE r.site_id = 'baltanas' AND (lower(o.property_id) LIKE '%airflow%' OR lower(o.property_id) LIKE '%air_flow%');
+SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'baltanas' AND rule_id = 'R5a_airflow_const';
+```
+| threshold_value | threshold_json |
+|---|---|
+| 0.05 | {"R5a_airflow_const": 0.05} |
+
+```sql
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'baltanas' AND strpos(lower(o.property_id), 'airflow') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-05-23 23:59:59+00')
+, w AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value,
+        o.value - lag(o.value) OVER (PARTITION BY r.sensor_id, o.property_id ORDER BY o.result_time) AS diff
+      FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'baltanas' AND strpos(lower(o.property_id), 'airflow') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
+        AND o.result_time BETWEEN anchor.t - interval '24 hours' AND anchor.t)
+SELECT sensor_id, property_id, count(*) AS n, max(abs(diff)) AS metric FROM w
+GROUP BY 1, 2 ORDER BY metric DESC NULLS LAST;
 ```
 _(no rows)_
 
 ```sql
-SELECT rule_id, label, threshold_value, threshold_json FROM policies
-WHERE site_id = 'baltanas' AND left(label, 5) = 'AD-RT' ORDER BY rule_id;
+SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'baltanas' AND rule_id = 'R5b_airflow_range';
 ```
-| rule_id | label | threshold_value | threshold_json |
-|---|---|---|---|
-| R1_ppv | AD-RT Baltanas policy - vibration PPV | 0.25 | {"R1_ppv": 0.25} |
-| R2_hum_daily_range | AD-RT Baltanas policy - humidity daily range | 10 | {"R2_hum_daily_range": 10} |
-| R3_gnss_change | AD-RT Baltanas policy - GNSS drift | 3 | {"R3_gnss_change": 3} |
-| R4a_soil_high | AD-RT Baltanas policy - soil moisture high | 70 | {"R4a_soil_high": 70} |
-| R4b_soil_range | AD-RT Baltanas policy - soil moisture daily range | 3 | {"R4b_soil_daily_range": 3} |
-| R5a_airflow_const | AD-RT Baltanas policy - airflow constancy | 0.05 | {"R5a_airflow_const": 0.05} |
-| R5b_airflow_range | AD-RT Baltanas policy - airflow range | 0.35 | {"R5b_airflow_range": 0.35} |
-| R6_rain_1h | AD-RT Baltanas policy - rainfall 1h | 10 | {"R6_rain_1h": 10} |
+| threshold_value | threshold_json |
+|---|---|
+| 0.35 | {"R5b_airflow_range": 0.35} |
 
-- Expected: first query returns no rows (no airflow readings). Second query: the site's AD-RT rules — check which concern airflow.
+```sql
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'baltanas' AND strpos(lower(o.property_id), 'airflow') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-05-23 23:59:59+00')
+SELECT r.sensor_id, o.property_id, count(*) AS n, min(o.value), max(o.value), max(o.value) - min(o.value) AS metric
+FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'baltanas' AND strpos(lower(o.property_id), 'airflow') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
+  AND o.result_time BETWEEN anchor.t - interval '24 hours' AND anchor.t
+GROUP BY 1, 2 ORDER BY metric DESC;
+```
+_(no rows)_
+
+- as_of = 2026-05-23 23:59:59+00 (windows end at the latest matching reading at or before it)
+- R5a_airflow_const: no readings (or no series with enough data) — not evaluated
+- R5b_airflow_range: no readings (or no series with enough data) — not evaluated
 
 ---
 
@@ -3444,8 +3522,10 @@ WHERE site_id = 'baltanas' AND left(label, 5) = 'AD-RT' ORDER BY rule_id;
 **Recomputed:** `Cannot be determined` → **MATCH**
 
 ```sql
-SELECT DISTINCT o.property_id FROM observations o JOIN readings r USING (reading_id)
-WHERE r.site_id = 'schenkenberg' AND (lower(o.property_id) LIKE '%crack%');
+-- quantities matching R2_crack_step
+SELECT o.property_id, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
+WHERE r.site_id = 'schenkenberg' AND o.value IS NOT NULL AND strpos(lower(o.property_id), 'crack') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0
+GROUP BY 1;
 ```
 _(no rows)_
 
@@ -3460,21 +3540,26 @@ WHERE site_id = 'schenkenberg' AND left(label, 5) = 'AD-RT' ORDER BY rule_id;
 | R3_vib_zscore | AD-RT Schenkenberg policy - vibration z-score | 4.5 | {"R3_vib_zscore": 4.5} |
 | R4_pga | AD-RT Schenkenberg policy - PGA | 0.5 | {"R4_pga": 0.5} |
 
-- Expected: first query returns no rows (no crack width readings). Second query: the site's AD-RT rules — check which concern crack width.
+- R2_crack_step: no matching readings.
+- Last query: the site's AD-RT rules — check that R2_crack_step are the ones about crack width.
 
 ---
 
 ## A057 · verdict_no_data
 
 **Question:** Did the humidity at Delos exceed its AD-RT threshold on 2026-05-29?  
-**Reference:** Cannot be determined: the snapshot has no humidity readings at Delos for its AD-RT rule(s).  
-**Recomputed:** `Cannot be determined` → **MATCH**
+**Reference:** Cannot be determined: Delos's humidity rule, R3_hum_cross, counts threshold crossings of a humidity series smoothed twice over AD-RT's fixed sampling interval (a 12-hour then a 3-sample rolling mean, 3-day window); the snapshot's humidity readings are irregular, so the rule is not evaluated.  
+**Recomputed:** `Cannot be determined` → **MANUAL**
 
 ```sql
-SELECT DISTINCT o.property_id FROM observations o JOIN readings r USING (reading_id)
-WHERE r.site_id = 'delos' AND (lower(o.property_id) LIKE '%hum%');
+-- quantities matching R3_hum_cross
+SELECT o.property_id, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
+WHERE r.site_id = 'delos' AND o.value IS NOT NULL AND strpos(lower(o.property_id), 'hum') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0
+GROUP BY 1;
 ```
-_(no rows)_
+| property_id | n |
+|---|---|
+| hum1 | 32423 |
 
 ```sql
 SELECT rule_id, label, threshold_value, threshold_json FROM policies
@@ -3487,7 +3572,8 @@ WHERE site_id = 'delos' AND left(label, 5) = 'AD-RT' ORDER BY rule_id;
 | R2_wind | AD-RT Delos policy - wind | 12 | {"R2_wind": 12} |
 | R3_hum_cross | AD-RT Delos policy - humidity crossings | None | {"R3_cross": 9, "R3_hum_th": 75} |
 
-- Expected: first query returns no rows (no humidity readings). Second query: the site's AD-RT rules — check which concern humidity.
+- R3_hum_cross: matching readings exist, but the rule is not evaluated — check the reference gives that reason.
+- Last query: the site's AD-RT rules — check that R3_hum_cross are the ones about humidity.
 
 ---
 
@@ -3498,8 +3584,18 @@ WHERE site_id = 'delos' AND left(label, 5) = 'AD-RT' ORDER BY rule_id;
 **Recomputed:** `Cannot be determined` → **MATCH**
 
 ```sql
-SELECT DISTINCT o.property_id FROM observations o JOIN readings r USING (reading_id)
-WHERE r.site_id = 'baltanas' AND (lower(o.property_id) LIKE '%moisture%');
+-- quantities matching R4a_soil_high
+SELECT o.property_id, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
+WHERE r.site_id = 'baltanas' AND o.value IS NOT NULL AND strpos(lower(o.property_id), 'soil_moisture') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0
+GROUP BY 1;
+```
+_(no rows)_
+
+```sql
+-- quantities matching R4b_soil_range
+SELECT o.property_id, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
+WHERE r.site_id = 'baltanas' AND o.value IS NOT NULL AND strpos(lower(o.property_id), 'soil_moisture') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0
+GROUP BY 1;
 ```
 _(no rows)_
 
@@ -3518,7 +3614,9 @@ WHERE site_id = 'baltanas' AND left(label, 5) = 'AD-RT' ORDER BY rule_id;
 | R5b_airflow_range | AD-RT Baltanas policy - airflow range | 0.35 | {"R5b_airflow_range": 0.35} |
 | R6_rain_1h | AD-RT Baltanas policy - rainfall 1h | 10 | {"R6_rain_1h": 10} |
 
-- Expected: first query returns no rows (no soil moisture readings). Second query: the site's AD-RT rules — check which concern soil moisture.
+- R4a_soil_high: no matching readings.
+- R4b_soil_range: no matching readings.
+- Last query: the site's AD-RT rules — check that R4a_soil_high, R4b_soil_range are the ones about soil moisture.
 
 ---
 
@@ -3529,8 +3627,18 @@ WHERE site_id = 'baltanas' AND left(label, 5) = 'AD-RT' ORDER BY rule_id;
 **Recomputed:** `Cannot be determined` → **MATCH**
 
 ```sql
-SELECT DISTINCT o.property_id FROM observations o JOIN readings r USING (reading_id)
-WHERE r.site_id = 'lucretili' AND (lower(o.property_id) LIKE '%tilt%');
+-- quantities matching R2a_tilt_step
+SELECT o.property_id, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
+WHERE r.site_id = 'lucretili' AND o.value IS NOT NULL AND strpos(lower(o.property_id), 'tilt') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0
+GROUP BY 1;
+```
+_(no rows)_
+
+```sql
+-- quantities matching R2b_tilt_offset
+SELECT o.property_id, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
+WHERE r.site_id = 'lucretili' AND o.value IS NOT NULL AND strpos(lower(o.property_id), 'tilt') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0
+GROUP BY 1;
 ```
 _(no rows)_
 
@@ -3557,112 +3665,94 @@ WHERE site_id = 'lucretili' AND left(label, 5) = 'AD-RT' ORDER BY rule_id;
 | R9a_temp_lt | AD-RT Lucretili policy - daily temperature range | 20 | {"R9a_temp_lt": 20} |
 | R9b_temp_st | AD-RT Lucretili policy - rapid temperature change | 5 | {"R9b_temp_st": 5} |
 
-- Expected: first query returns no rows (no tilt readings). Second query: the site's AD-RT rules — check which concern tilt.
+- R2a_tilt_step: no matching readings.
+- R2b_tilt_offset: no matching readings.
+- Last query: the site's AD-RT rules — check that R2a_tilt_step, R2b_tilt_offset are the ones about tilt.
 
 ---
 
-## A060 · verdict_no_data
+## A060 · verdict_on_date
 
 **Question:** Did the wind speed at Delos exceed its AD-RT threshold on 2026-08-09?  
-**Reference:** Cannot be determined: the snapshot has no wind speed readings at Delos for its AD-RT rule(s).  
-**Recomputed:** `Cannot be determined` → **MATCH**
+**Reference:** No. R2_wind: latest reading 6.2 at 2026-08-09 23:59 UTC vs threshold 12  
+**Recomputed:** `No` → **MATCH**
 
 ```sql
-SELECT DISTINCT o.property_id FROM observations o JOIN readings r USING (reading_id)
-WHERE r.site_id = 'delos' AND (lower(o.property_id) LIKE '%wind%');
+SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'delos' AND rule_id = 'R2_wind';
 ```
-_(no rows)_
+| threshold_value | threshold_json |
+|---|---|
+| 12 | {"R2_wind": 12} |
 
 ```sql
-SELECT rule_id, label, threshold_value, threshold_json FROM policies
-WHERE site_id = 'delos' AND left(label, 5) = 'AD-RT' ORDER BY rule_id;
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'delos' AND strpos(lower(o.property_id), 'wind_speed') > 0 AND strpos(lower(o.property_id), 'dir') = 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-08-09 23:59:59+00')
+SELECT r.sensor_id, o.property_id, o.result_time, o.value AS metric FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'delos' AND strpos(lower(o.property_id), 'wind_speed') > 0 AND strpos(lower(o.property_id), 'dir') = 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
+  AND o.result_time = anchor.t ORDER BY metric DESC;
 ```
-| rule_id | label | threshold_value | threshold_json |
+| sensor_id | property_id | result_time | metric |
 |---|---|---|---|
-| R1a_rain_1h | AD-RT Delos policy - rainfall 1h | 10 | {"R1a_rain_1h": 10} |
-| R1b_rain_3h | AD-RT Delos policy - rainfall 3h | 20 | {"R1b_rain_3h": 20} |
-| R2_wind | AD-RT Delos policy - wind | 12 | {"R2_wind": 12} |
-| R3_hum_cross | AD-RT Delos policy - humidity crossings | None | {"R3_cross": 9, "R3_hum_th": 75} |
+| 2CF7F1C061300548 | wind_speed_1 | 2026-08-09 23:59:02 | 6.2 |
 
-- Expected: first query returns no rows (no wind speed readings). Second query: the site's AD-RT rules — check which concern wind speed.
+- as_of = 2026-08-09 23:59:59+00 (windows end at the latest matching reading at or before it)
+- R2_wind: metric 6.2 vs threshold 12 → does not fire
+- Raw readings: [data/A060_R2_wind.csv](data/A060_R2_wind.csv) (1 rows)
 
 ---
 
-## A061 · verdict_no_data
+## A061 · verdict_on_date
 
 **Question:** Did the wind speed at Lucretili exceed its AD-RT threshold on 2026-05-24?  
-**Reference:** Cannot be determined: the snapshot has no wind speed readings at Lucretili for its AD-RT rule(s).  
+**Reference:** Cannot be determined. R7_wind: no readings  
 **Recomputed:** `Cannot be determined` → **MATCH**
 
 ```sql
-SELECT DISTINCT o.property_id FROM observations o JOIN readings r USING (reading_id)
-WHERE r.site_id = 'lucretili' AND (lower(o.property_id) LIKE '%wind%');
+SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili' AND rule_id = 'R7_wind';
+```
+| threshold_value | threshold_json |
+|---|---|
+| 6 | {"R7a_wind_peak_ratio": 6} |
+
+```sql
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'wind') > 0 AND strpos(lower(o.property_id), 'dir') = 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-05-24 23:59:59+00')
+, w AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value
+      FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'wind') > 0 AND strpos(lower(o.property_id), 'dir') = 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
+        AND o.result_time BETWEEN anchor.t - interval '24 hours' AND anchor.t)
+SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean,
+       (array_agg(value ORDER BY result_time DESC))[1] AS latest,
+       (array_agg(value ORDER BY result_time DESC))[1] / (avg(value) + 1e-9) AS metric
+FROM w GROUP BY 1, 2 ORDER BY metric DESC;
 ```
 _(no rows)_
 
-```sql
-SELECT rule_id, label, threshold_value, threshold_json FROM policies
-WHERE site_id = 'lucretili' AND left(label, 5) = 'AD-RT' ORDER BY rule_id;
-```
-| rule_id | label | threshold_value | threshold_json |
-|---|---|---|---|
-| R10_solar_zscore | AD-RT Lucretili policy - GNSS z-score | 1 | {"R10_solar_zscore": 1.0} |
-| R1a_crack_step | AD-RT Lucretili policy - crack step | 0.7 | {"R1a_crack_step": 0.7} |
-| R1b_crack_offset | AD-RT Lucretili policy - crack offset | 0.9 | {"R1b_crack_offset": 0.9} |
-| R2a_tilt_step | AD-RT Lucretili policy - tilt step | 0.7 | {"R2a_tilt_step": 0.7} |
-| R2b_tilt_offset | AD-RT Lucretili policy - tilt offset | 0.9 | {"R2b_tilt_offset": 0.9} |
-| R3_vib_zscore | AD-RT Lucretili policy - vibration z-score | 7 | {"R3_vib_zscore": 7} |
-| R4a_hum_spike_6h | AD-RT Lucretili policy - humidity spike | 98 | {"R4a_hum_spike_6h": 98} |
-| R4b_hum_persist_7d | AD-RT Lucretili policy - humidity persistence | 90 | {"R4b_hum_persist_7d": 90} |
-| R4c_hum_rapid_1h | AD-RT Lucretili policy - humidity rapid change | 20 | {"R4c_hum_rapid_1h": 20} |
-| R5_visitors | AD-RT Lucretili policy - visitor peak | 3 | {"R5_visitors_peak": 3} |
-| R6a_rain | AD-RT Lucretili policy - rainfall short window | None | {"R6a_rain_1h": 5, "R6a_rain_24h": 20} |
-| R6b_rain_cum7d | AD-RT Lucretili policy - rainfall 7d | 100 | {"R6b_rain_cum7d": 100} |
-| R7_wind | AD-RT Lucretili policy - wind peak ratio | 6 | {"R7a_wind_peak_ratio": 6} |
-| R8_baro | AD-RT Lucretili policy - barometer range | 300 | {"R8_baro_range": 300} |
-| R9a_temp_lt | AD-RT Lucretili policy - daily temperature range | 20 | {"R9a_temp_lt": 20} |
-| R9b_temp_st | AD-RT Lucretili policy - rapid temperature change | 5 | {"R9b_temp_st": 5} |
-
-- Expected: first query returns no rows (no wind speed readings). Second query: the site's AD-RT rules — check which concern wind speed.
+- as_of = 2026-05-24 23:59:59+00 (windows end at the latest matching reading at or before it)
+- R7_wind: no readings (or no series with enough data) — not evaluated
 
 ---
 
-## A062 · verdict_no_data
+## A062 · verdict_on_date
 
 **Question:** Was the barometric pressure at Lucretili anomalous on 2026-06-06 according to its AD-RT rules?  
-**Reference:** Cannot be determined: the snapshot has no barometric pressure readings at Lucretili for its AD-RT rule(s).  
+**Reference:** Cannot be determined. R8_baro: no readings  
 **Recomputed:** `Cannot be determined` → **MATCH**
 
 ```sql
-SELECT DISTINCT o.property_id FROM observations o JOIN readings r USING (reading_id)
-WHERE r.site_id = 'lucretili' AND (lower(o.property_id) LIKE '%baro%' OR lower(o.property_id) LIKE '%pressure%');
+SELECT threshold_value, threshold_json FROM policies WHERE site_id = 'lucretili' AND rule_id = 'R8_baro';
+```
+| threshold_value | threshold_json |
+|---|---|
+| 300 | {"R8_baro_range": 300} |
+
+```sql
+WITH anchor AS (SELECT max(o.result_time) AS t FROM observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'baro') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL AND o.result_time <= '2026-06-06 23:59:59+00')
+SELECT r.sensor_id, o.property_id, count(*) AS n, min(o.value), max(o.value), max(o.value) - min(o.value) AS metric
+FROM anchor, observations o JOIN readings r USING (reading_id) WHERE r.site_id = 'lucretili' AND strpos(lower(o.property_id), 'baro') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0 AND o.value IS NOT NULL
+  AND o.result_time BETWEEN anchor.t - interval '6 hours' AND anchor.t
+GROUP BY 1, 2 ORDER BY metric DESC;
 ```
 _(no rows)_
 
-```sql
-SELECT rule_id, label, threshold_value, threshold_json FROM policies
-WHERE site_id = 'lucretili' AND left(label, 5) = 'AD-RT' ORDER BY rule_id;
-```
-| rule_id | label | threshold_value | threshold_json |
-|---|---|---|---|
-| R10_solar_zscore | AD-RT Lucretili policy - GNSS z-score | 1 | {"R10_solar_zscore": 1.0} |
-| R1a_crack_step | AD-RT Lucretili policy - crack step | 0.7 | {"R1a_crack_step": 0.7} |
-| R1b_crack_offset | AD-RT Lucretili policy - crack offset | 0.9 | {"R1b_crack_offset": 0.9} |
-| R2a_tilt_step | AD-RT Lucretili policy - tilt step | 0.7 | {"R2a_tilt_step": 0.7} |
-| R2b_tilt_offset | AD-RT Lucretili policy - tilt offset | 0.9 | {"R2b_tilt_offset": 0.9} |
-| R3_vib_zscore | AD-RT Lucretili policy - vibration z-score | 7 | {"R3_vib_zscore": 7} |
-| R4a_hum_spike_6h | AD-RT Lucretili policy - humidity spike | 98 | {"R4a_hum_spike_6h": 98} |
-| R4b_hum_persist_7d | AD-RT Lucretili policy - humidity persistence | 90 | {"R4b_hum_persist_7d": 90} |
-| R4c_hum_rapid_1h | AD-RT Lucretili policy - humidity rapid change | 20 | {"R4c_hum_rapid_1h": 20} |
-| R5_visitors | AD-RT Lucretili policy - visitor peak | 3 | {"R5_visitors_peak": 3} |
-| R6a_rain | AD-RT Lucretili policy - rainfall short window | None | {"R6a_rain_1h": 5, "R6a_rain_24h": 20} |
-| R6b_rain_cum7d | AD-RT Lucretili policy - rainfall 7d | 100 | {"R6b_rain_cum7d": 100} |
-| R7_wind | AD-RT Lucretili policy - wind peak ratio | 6 | {"R7a_wind_peak_ratio": 6} |
-| R8_baro | AD-RT Lucretili policy - barometer range | 300 | {"R8_baro_range": 300} |
-| R9a_temp_lt | AD-RT Lucretili policy - daily temperature range | 20 | {"R9a_temp_lt": 20} |
-| R9b_temp_st | AD-RT Lucretili policy - rapid temperature change | 5 | {"R9b_temp_st": 5} |
-
-- Expected: first query returns no rows (no barometric pressure readings). Second query: the site's AD-RT rules — check which concern barometric pressure.
+- as_of = 2026-06-06 23:59:59+00 (windows end at the latest matching reading at or before it)
+- R8_baro: no readings (or no series with enough data) — not evaluated
 
 ---
 
@@ -3673,8 +3763,18 @@ WHERE site_id = 'lucretili' AND left(label, 5) = 'AD-RT' ORDER BY rule_id;
 **Recomputed:** `Cannot be determined` → **MATCH**
 
 ```sql
-SELECT DISTINCT o.property_id FROM observations o JOIN readings r USING (reading_id)
-WHERE r.site_id = 'lucretili' AND (lower(o.property_id) LIKE '%crack%');
+-- quantities matching R1a_crack_step
+SELECT o.property_id, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
+WHERE r.site_id = 'lucretili' AND o.value IS NOT NULL AND strpos(lower(o.property_id), 'crack') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0
+GROUP BY 1;
+```
+_(no rows)_
+
+```sql
+-- quantities matching R1b_crack_offset
+SELECT o.property_id, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
+WHERE r.site_id = 'lucretili' AND o.value IS NOT NULL AND strpos(lower(o.property_id), 'crack') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0
+GROUP BY 1;
 ```
 _(no rows)_
 
@@ -3701,19 +3801,23 @@ WHERE site_id = 'lucretili' AND left(label, 5) = 'AD-RT' ORDER BY rule_id;
 | R9a_temp_lt | AD-RT Lucretili policy - daily temperature range | 20 | {"R9a_temp_lt": 20} |
 | R9b_temp_st | AD-RT Lucretili policy - rapid temperature change | 5 | {"R9b_temp_st": 5} |
 
-- Expected: first query returns no rows (no crack width readings). Second query: the site's AD-RT rules — check which concern crack width.
+- R1a_crack_step: no matching readings.
+- R1b_crack_offset: no matching readings.
+- Last query: the site's AD-RT rules — check that R1a_crack_step, R1b_crack_offset are the ones about crack width.
 
 ---
 
 ## A064 · verdict_no_data
 
 **Question:** Was the humidity at Baltanas anomalous on 2026-07-28 according to its AD-RT rules?  
-**Reference:** Cannot be determined: the snapshot has no humidity readings at Baltanas for its AD-RT rule(s).  
+**Reference:** Cannot be determined: Baltanas's humidity rule, R2_hum_daily_range, excludes the hum1 and ee3 channels, and the snapshot has no other humidity readings at Baltanas.  
 **Recomputed:** `Cannot be determined` → **MATCH**
 
 ```sql
-SELECT DISTINCT o.property_id FROM observations o JOIN readings r USING (reading_id)
-WHERE r.site_id = 'baltanas' AND (lower(o.property_id) LIKE '%hum%');
+-- quantities matching R2_hum_daily_range
+SELECT o.property_id, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
+WHERE r.site_id = 'baltanas' AND o.value IS NOT NULL AND strpos(lower(o.property_id), 'hum') > 0 AND strpos(lower(o.property_id), 'ee3') = 0 AND strpos(lower(o.property_id), 'hum1') = 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0
+GROUP BY 1;
 ```
 _(no rows)_
 
@@ -3732,19 +3836,22 @@ WHERE site_id = 'baltanas' AND left(label, 5) = 'AD-RT' ORDER BY rule_id;
 | R5b_airflow_range | AD-RT Baltanas policy - airflow range | 0.35 | {"R5b_airflow_range": 0.35} |
 | R6_rain_1h | AD-RT Baltanas policy - rainfall 1h | 10 | {"R6_rain_1h": 10} |
 
-- Expected: first query returns no rows (no humidity readings). Second query: the site's AD-RT rules — check which concern humidity.
+- R2_hum_daily_range: no matching readings.
+- Last query: the site's AD-RT rules — check that R2_hum_daily_range are the ones about humidity.
 
 ---
 
 ## A065 · verdict_no_data
 
 **Question:** Was the humidity at Ranverso anomalous on 2026-08-04 according to its AD-RT rules?  
-**Reference:** Cannot be determined: the snapshot has no humidity readings at Ranverso for its AD-RT rule(s).  
+**Reference:** Cannot be determined: Ranverso's humidity rule, R1_hum_inside, concerns indoor humidity (quantities labelled with both 'hum' and 'in'); the snapshot has no such readings at Ranverso.  
 **Recomputed:** `Cannot be determined` → **MATCH**
 
 ```sql
-SELECT DISTINCT o.property_id FROM observations o JOIN readings r USING (reading_id)
-WHERE r.site_id = 'ranverso' AND (lower(o.property_id) LIKE '%hum%');
+-- quantities matching R1_hum_inside
+SELECT o.property_id, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
+WHERE r.site_id = 'ranverso' AND o.value IS NOT NULL AND strpos(lower(o.property_id), 'hum') > 0 AND strpos(lower(o.property_id), 'in') > 0 AND strpos(lower(o.property_id), 'rain_acc') = 0 AND strpos(lower(o.property_id), 'counter_acc') = 0 AND strpos(lower(o.property_id), 'rain_1') = 0
+GROUP BY 1;
 ```
 _(no rows)_
 
@@ -3760,7 +3867,8 @@ WHERE site_id = 'ranverso' AND left(label, 5) = 'AD-RT' ORDER BY rule_id;
 | R4a_soil_high | AD-RT Ranverso policy - soil moisture high | 60 | {"R4a_soil_high": 60} |
 | R4b_soil_low | AD-RT Ranverso policy - soil moisture low | 5 | {"R4b_soil_low": 5} |
 
-- Expected: first query returns no rows (no humidity readings). Second query: the site's AD-RT rules — check which concern humidity.
+- R1_hum_inside: no matching readings.
+- Last query: the site's AD-RT rules — check that R1_hum_inside are the ones about humidity.
 
 ---
 
@@ -3854,13 +3962,6 @@ WHERE site_id = 'ranverso' AND left(label, 5) = 'AD-RT' ORDER BY rule_id;
 | R4b_soil_low | AD-RT Ranverso policy - soil moisture low | 5 | {"R4b_soil_low": 5} |
 
 - Check that none of these rules is about temperature.
-
-**Partner review (2026-10-20):** R3_temp_nodiff concerns temperature (soil vs. outdoor air temperature,
-threshold 2, confirmed in the partner database and NB5.3 Table 1 of ARGUS D5.3), so the explanation was
-revised to tell it apart from a threshold on the temperature itself. The verdict stays *Cannot be
-determined*: no rule thresholds the temperature value, and R3_temp_nodiff cannot be evaluated, as the
-snapshot's only temperature quantity at Ranverso is `temperature` (18,924 observations) and it has no
-soil-temperature series (`soilmoisture_temp`) to pair it with. `reference_value` is unchanged, so no score changes.
 
 ---
 

@@ -30,7 +30,7 @@ from pathlib import Path
 
 import psycopg
 
-from build_benchmark import DATA_GROUPS, QNAME, SITES
+from build_benchmark import DATA_GROUPS, NO_DATA_GROUPS, QNAME, SITES
 
 DSN = os.environ.get("ARGUS_SNAPSHOT_DSN", "postgresql://argus:argus@localhost:5432/argus_snapshot")
 MATERIAL = Path(__file__).resolve().parent.parent / "material"
@@ -40,6 +40,7 @@ PROP_OF = {v: k for k, v in QNAME.items()}
 MONTH = {"May": 5, "June": 6, "July": 7, "August": 8, "September": 9, "April": 4}
 OBS = "observations o JOIN readings r USING (reading_id)"
 GROUP_RULES = {(s, p): rules for s, p, rules in DATA_GROUPS}
+NO_DATA_RULES = {(s, p): rules for s, p, rules in NO_DATA_GROUPS}
 
 # keyword(s) a question's quantity maps to, for showing that data is absent
 ABSENT_KEYS = {
@@ -49,18 +50,87 @@ ABSENT_KEYS = {
     "crack width": ["crack"], "tilt": ["tilt"], "combined low temperature and high humidity": ["hum"],
 }
 
-# AD-RT rules that have data in the snapshot: SQL matcher, metric, windows (hours) and threshold keys.
+def has(x) -> str:
+    return f"strpos(lower(o.property_id), '{x}') > 0"
+
+
+def hasnt(x) -> str:
+    return f"strpos(lower(o.property_id), '{x}') = 0"
+
+
+# LoRaWAN channels that are never a rule's quantity: running totals (rain_acc, counter_acc_*) and the
+# rainfall intensity rain_1 (mm/h; the rainfall thresholds are amounts in mm)
+NON_RULE = " AND ".join(hasnt(x) for x in ("rain_acc", "counter_acc", "rain_1"))
+
+# Every AD-RT rule's quantity matcher (on the property id), with NON_RULE applied
+_MATCH = {
+    ("baltanas", "R1_ppv"): has("acc_int_ppv"),
+    ("baltanas", "R2_hum_daily_range"): f"{has('hum')} AND {hasnt('ee3')} AND {hasnt('hum1')}",
+    ("baltanas", "R3_gnss_change"): has("long_term"),
+    ("baltanas", "R4a_soil_high"): has("soil_moisture"),
+    ("baltanas", "R4b_soil_range"): has("soil_moisture"),
+    ("baltanas", "R5a_airflow_const"): has("airflow"),
+    ("baltanas", "R5b_airflow_range"): has("airflow"),
+    ("baltanas", "R6_rain_1h"): f"{has('rain')} AND {hasnt('acc')}",
+    ("delos", "R1a_rain_1h"): f"{has('rain')} AND {hasnt('acc')}",
+    ("delos", "R1b_rain_3h"): f"{has('rain')} AND {hasnt('acc')}",
+    ("delos", "R2_wind"): f"{has('wind_speed')} AND {hasnt('dir')}",
+    ("delos", "R3_hum_cross"): has("hum"),
+    ("lucretili", "R1a_crack_step"): has("crack"),
+    ("lucretili", "R1b_crack_offset"): has("crack"),
+    ("lucretili", "R2a_tilt_step"): has("tilt"),
+    ("lucretili", "R2b_tilt_offset"): has("tilt"),
+    ("lucretili", "R3_vib_zscore"): has("acc"),
+    ("lucretili", "R4a_hum_spike_6h"): has("hum"),
+    ("lucretili", "R4b_hum_persist_7d"): has("hum"),
+    ("lucretili", "R4c_hum_rapid_1h"): has("hum"),
+    ("lucretili", "R5_visitors"): has("counter"),
+    ("lucretili", "R6a_rain"): has("rain"),
+    ("lucretili", "R6b_rain_cum7d"): has("rain"),
+    ("lucretili", "R7_wind"): f"{has('wind')} AND {hasnt('dir')}",
+    ("lucretili", "R8_baro"): has("baro"),
+    ("lucretili", "R9a_temp_lt"): has("temp"),
+    ("lucretili", "R9b_temp_st"): has("temp"),
+    ("lucretili", "R10_solar_zscore"): has("gnss"),
+    ("ranverso", "R1_hum_inside"): f"{has('hum')} AND {has('in')}",
+    ("ranverso", "R2_rain_7d"): f"{has('rain')} AND {hasnt('acc')}",
+    ("ranverso", "R3_temp_nodiff"): has("soilmoisture_temp"),
+    ("ranverso", "R4a_soil_high"): f"{has('moisture')} AND {hasnt('temp')} AND {hasnt('hum')}",
+    ("ranverso", "R4b_soil_low"): f"{has('moisture')} AND {hasnt('temp')} AND {hasnt('hum')}",
+    ("schenkenberg", "R1_temp_hum"): has("temp"),
+    ("schenkenberg", "R2_crack_step"): has("crack"),
+    ("schenkenberg", "R3_vib_zscore"): f"({has('pga')} OR {has('rms')})",
+    ("schenkenberg", "R4_pga"): has("pga"),
+}
+MATCH = {k: f"{v} AND {NON_RULE}" for k, v in _MATCH.items()}
+# the second quantity of the two-quantity rules
+MATCH2 = {("schenkenberg", "R1_temp_hum"): f"{has('hum')} AND {NON_RULE}"}
+# rules with data that are not evaluated (computation not reproducible on irregular readings)
+NOT_EVALUATED = {("delos", "R3_hum_cross"), ("lucretili", "R10_solar_zscore")}
+
+# AD-RT rules that have data in the snapshot: metric, windows (hours) and threshold keys
+# (fires: "above" the largest threshold unless "below").
 RULE_SQL = {
-    "R9a_temp_lt": dict(match="lower(o.property_id) LIKE '%temp%'", kind="range", hours=24, keys=["R9a_temp_lt"]),
-    "R9b_temp_st": dict(match="lower(o.property_id) LIKE '%temp%'", kind="max_abs_diff", hours=1, keys=["R9b_temp_st"]),
-    "R6a_rain": dict(match="lower(o.property_id) LIKE '%rain%'", kind="mean_1h_24h", hours=24, keys=["R6a_rain_1h", "R6a_rain_24h"]),
-    "R6b_rain_cum7d": dict(match="lower(o.property_id) LIKE '%rain%'", kind="sum", hours=168, keys=["R6b_rain_cum7d"]),
-    "R5_visitors": dict(match="lower(o.property_id) LIKE '%counter%'", kind="direct", hours=0, keys=["R5_visitors_peak"]),
-    "R2_rain_7d": dict(match="lower(o.property_id) LIKE '%rain%' AND lower(o.property_id) NOT LIKE '%acc%'", kind="sum",
-                       hours=168, keys=["R2_rain_7d_diff"]),
-    "R3_vib_zscore": dict(match="(lower(o.property_id) LIKE '%pga%' OR lower(o.property_id) LIKE '%rms%')", kind="zscore",
-                          hours=None, keys=["R3_vib_zscore"]),
-    "R4_pga": dict(match="lower(o.property_id) LIKE '%pga%'", kind="zscore", hours=None, keys=["R4_pga"]),
+    ("lucretili", "R9a_temp_lt"): dict(kind="range", hours=24, keys=["R9a_temp_lt"]),
+    ("lucretili", "R9b_temp_st"): dict(kind="max_abs_diff", hours=1, keys=["R9b_temp_st"]),
+    ("lucretili", "R6a_rain"): dict(kind="mean_1h_24h", hours=24, keys=["R6a_rain_1h", "R6a_rain_24h"]),
+    ("lucretili", "R6b_rain_cum7d"): dict(kind="sum", hours=168, keys=["R6b_rain_cum7d"]),
+    ("lucretili", "R5_visitors"): dict(kind="direct", hours=0, keys=["R5_visitors_peak"]),
+    ("ranverso", "R2_rain_7d"): dict(kind="sum", hours=168, keys=["R2_rain_7d_diff"]),
+    ("schenkenberg", "R3_vib_zscore"): dict(kind="zscore", hours=None, keys=["R3_vib_zscore"]),
+    ("schenkenberg", "R4_pga"): dict(kind="zscore", hours=None, keys=["R4_pga"]),
+    # snapshot v2 (LoRaWAN)
+    ("delos", "R2_wind"): dict(kind="direct", hours=0, keys=["R2_wind"]),
+    ("baltanas", "R5a_airflow_const"): dict(kind="airflow_const", hours=24, keys=["R5a_airflow_const"]),
+    ("baltanas", "R5b_airflow_range"): dict(kind="range", hours=24, keys=["R5b_airflow_range"]),
+    ("lucretili", "R4a_hum_spike_6h"): dict(kind="mean", hours=6, keys=["R4a_hum_spike_6h"]),
+    ("lucretili", "R4b_hum_persist_7d"): dict(kind="mean", hours=168, keys=["R4b_hum_persist_7d"]),
+    ("lucretili", "R4c_hum_rapid_1h"): dict(kind="max_abs_diff", hours=1, keys=["R4c_hum_rapid_1h"]),
+    ("lucretili", "R7_wind"): dict(kind="peak_ratio", hours=24, keys=["R7a_wind_peak_ratio"]),
+    ("lucretili", "R8_baro"): dict(kind="range", hours=6, keys=["R8_baro_range"]),
+    ("ranverso", "R4a_soil_high"): dict(kind="direct", hours=0, keys=["R4a_soil_high"]),
+    ("ranverso", "R4b_soil_low"): dict(kind="direct", hours=0, keys=["R4b_soil_low"], fires="below"),
+    ("schenkenberg", "R1_temp_hum"): dict(kind="composite", hours=None, keys=["R1_temp_low", "R1_hum_high"]),
 }
 
 
@@ -71,6 +141,11 @@ def lit(s) -> str:
 def hav(a, b) -> str:
     return (f"2*6371000*asin(sqrt(power(sin(radians({b}.lat-{a}.lat)/2),2)"
             f"+cos(radians({a}.lat))*cos(radians({b}.lat))*power(sin(radians({b}.lon-{a}.lon)/2),2)))")
+
+
+def line(a, b) -> str:
+    """Distance with the altitude difference: the haversine distance combined with it."""
+    return f"sqrt(power({hav(a, b)},2)+power({b}.alt-{a}.alt,2))"
 
 
 def nodes_cte(site) -> str:
@@ -120,6 +195,8 @@ def resolve(q: str, prev: dict | None = None) -> dict:
             y, mo = (prev["year"], prev["month"] + 1) if prev["month"] < 12 else (prev["year"] + 1, 1)
             return {**prev, "year": y, "month": mo}
         if x := m(r"^And the (.+)\?$"):
+            if x[1] in PROP_OF:
+                return {"kind": "stat", "site": prev["site"], "prop": PROP_OF[x[1]], "agg": "avg"}
             return {"kind": "absent", "site": prev["site"], "what": x[1]}
 
     if x := m(r"^How many sensor nodes are installed at (\w+)\?$"):
@@ -191,6 +268,8 @@ def resolve(q: str, prev: dict | None = None) -> dict:
     if x := m(r"^What was the temperature at (\w+) in (\w+) (\d{4})\?$"):
         return {"kind": "out_of_range", "site": SITE_OF[x[1]]}
     if x := m(r"^What was the (.+) at (\w+) on (\d{4}-\d\d-\d\d)\?$"):
+        if x[1] in PROP_OF:   # no aggregate named: the day's average (the reference also gives the range)
+            return {"kind": "daily", "site": SITE_OF[x[2]], "prop": PROP_OF[x[1]], "agg": "avg", "day": date.fromisoformat(x[3])}
         return {"kind": "absent", "site": SITE_OF[x[2]], "what": x[1]}
 
     verdict_pats = [r"^Was the (.+) at (\w+) anomalous on (\d{4}-\d\d-\d\d) according to its AD-RT rules\?$",
@@ -201,7 +280,7 @@ def resolve(q: str, prev: dict | None = None) -> dict:
             site, phrase = SITE_OF[x[2]], x[1]
             if (site, phrase) in GROUP_RULES:
                 return {"kind": "verdict", "site": site, "phrase": phrase, "day": date.fromisoformat(x[3])}
-            return {"kind": "verdict_no_data", "site": site, "phrase": phrase}
+            return {"kind": "verdict_no_data", "site": site, "phrase": phrase, "rules": NO_DATA_RULES[(site, phrase)]}
     if x := m(r"^Based on the latest data, is there a (.+) anomaly at (\w+) according to its AD-RT rules\?$"):
         return {"kind": "verdict", "site": SITE_OF[x[2]], "phrase": x[1], "day": None}
     if x := m(r"^Has the (.+) at (\w+) exceeded its AD-RT threshold\?$"):
@@ -255,6 +334,8 @@ class V:
         sql = (f"SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n, max(o.unit) AS unit\n"
                f"FROM {OBS}\nWHERE r.site_id = {lit(p['site'])} AND o.property_id = {lit(p['prop'])} AND o.value IS NOT NULL;")
         cols, rows = self.run(sql)
+        if not rows[0][cols.index("n")]:   # a quantity measured elsewhere but not at this site
+            return self.v_absent({"site": p["site"], "what": QNAME[p["prop"]]})
         return dict(blocks=[(sql, cols, rows)], value=float(rows[0][cols.index(p["agg"])]))
 
     def v_obs_count(self, p, *_):
@@ -301,7 +382,10 @@ class V:
         sql = (nodes_cte(p["site"]) + f"SELECT a.label AS node_a, b.label AS node_b, {hav('a', 'b')} AS meters\n"
                f"FROM n a JOIN n b ON a.node_id < b.node_id ORDER BY meters DESC LIMIT 5;")
         cols, rows = self.run(sql)
-        return dict(blocks=[(sql, cols, rows)], value=round(rows[0][2], 1))
+        sql3 = sql.replace(hav("a", "b"), line("a", "b"))
+        cols3, rows3 = self.run(sql3)
+        return dict(blocks=[(sql, cols, rows), (sql3, cols3, rows3)], value=round(rows[0][2], 1),
+                    value_alt=round(rows3[0][2], 1))
 
     def v_centroid(self, p, *_):
         sql = nodes_cte(p["site"]) + "SELECT avg(lat) AS lat, avg(lon) AS lon, count(*) AS nodes FROM n;"
@@ -332,25 +416,30 @@ class V:
         return dict(blocks=[(sql, cols, rows)], value=round(rows[0][0], 2))
 
     def v_pair_distance(self, p, *_):
-        sql = (nodes_cte(p["site"]) + f"SELECT a.label AS node_a, b.label AS node_b, {hav('a', 'b')} AS meters\n"
+        sql = (nodes_cte(p["site"]) + f"SELECT a.label AS node_a, b.label AS node_b, {hav('a', 'b')} AS meters,\n"
+               f"       {line('a', 'b')} AS meters_with_alt\n"
                f"FROM n a, n b WHERE a.label = {lit(p['a'])} AND b.label = {lit(p['b'])};")
         cols, rows = self.run(sql)
         notes = [f"{len(rows)} node pairs match these labels — duplicate labels?"] if len(rows) != 1 else []
-        return dict(blocks=[(sql, cols, rows)], value=round(rows[0][2], 1) if rows else None, notes=notes)
+        return dict(blocks=[(sql, cols, rows)], value=round(rows[0][2], 1) if rows else None,
+                    value_alt=round(rows[0][3], 1) if rows else None, notes=notes)
 
     def v_nearest_node(self, p, *_):
         sql = (nodes_cte(p["site"]) + f"SELECT b.label AS node, {hav('a', 'b')} AS meters\n"
                f"FROM n a JOIN n b ON a.node_id <> b.node_id WHERE a.label = {lit(p['a'])} ORDER BY meters LIMIT 5;")
         cols, rows = self.run(sql)
-        return dict(blocks=[(sql, cols, rows)], value=rows[0][0])
+        sql3 = sql.replace(hav("a", "b"), line("a", "b"))
+        cols3, rows3 = self.run(sql3)
+        return dict(blocks=[(sql, cols, rows), (sql3, cols3, rows3)], value=rows[0][0], value_alt=rows3[0][0])
 
     def v_within_radius(self, p, *_):
-        sql = (nodes_cte(p["site"]) + f"SELECT b.label AS node, {hav('a', 'b')} AS meters\n"
+        sql = (nodes_cte(p["site"]) + f"SELECT b.label AS node, {hav('a', 'b')} AS meters, {line('a', 'b')} AS meters_with_alt\n"
                f"FROM n a JOIN n b ON a.node_id <> b.node_id WHERE a.label = {lit(p['a'])} ORDER BY meters;")
         cols, rows = self.run(sql)
         within = sum(1 for r in rows if r[1] <= p["radius"])
-        return dict(blocks=[(sql, cols, rows)], value=within,
-                    notes=[f"Rows with meters <= {p['radius']}: {within}."])
+        within3 = sum(1 for r in rows if r[2] <= p["radius"])
+        return dict(blocks=[(sql, cols, rows)], value=within, value_alt=within3,
+                    notes=[f"Rows with meters <= {p['radius']}: {within}; with meters_with_alt <= {p['radius']}: {within3}."])
 
     def v_site_distance(self, p, *_):
         a, b = p["site"], p["site2"]
@@ -457,27 +546,40 @@ class V:
                     notes=[f"Check that none of these rules is about {p['phrase']}."])
 
     def v_verdict_no_data(self, p, *_):
-        keys = ABSENT_KEYS.get(p["phrase"], [p["phrase"].split()[-1].lower()])
-        cond = " OR ".join(f"lower(o.property_id) LIKE {lit('%' + k + '%')}" for k in keys)
-        sql = f"SELECT DISTINCT o.property_id FROM {OBS}\nWHERE r.site_id = {lit(p['site'])} AND ({cond});"
-        cols, rows = self.run(sql)
-        s2, c2, r2 = self._rules_at(p["site"])
-        return dict(blocks=[(sql, cols, rows), (s2, c2, r2)], value="Cannot be determined",
-                    status="MATCH" if not rows else "MISMATCH",
-                    notes=[f"Expected: first query returns no rows (no {p['phrase']} readings). Second query: the site's "
-                           f"AD-RT rules — check which concern {p['phrase']}."])
+        blocks, notes, status = [], [], "MATCH"
+        for rule in p["rules"]:
+            sql = (f"-- quantities matching {rule}\nSELECT o.property_id, count(*) AS n FROM {OBS}\n"
+                   f"WHERE r.site_id = {lit(p['site'])} AND o.value IS NOT NULL AND {MATCH[(p['site'], rule)]}\nGROUP BY 1;")
+            cols, rows = self.run(sql)
+            blocks.append((sql, cols, rows))
+            if (p["site"], rule) in NOT_EVALUATED:
+                status = "MANUAL"
+                notes.append(f"{rule}: matching readings exist, but the rule is not evaluated — check the reference "
+                             f"gives that reason.")
+            elif rows:
+                status = "MISMATCH"
+                notes.append(f"{rule}: matching readings exist — the verdict should be computed.")
+            else:
+                notes.append(f"{rule}: no matching readings.")
+        sql, cols, rows = self._rules_at(p["site"])
+        blocks.append((sql, cols, rows))
+        notes.append(f"Last query: the site's AD-RT rules — check that {', '.join(p['rules'])} are the ones about "
+                     f"{p['phrase']}.")
+        return dict(blocks=blocks, value="Cannot be determined", status=status, notes=notes)
 
     def _rule(self, site, rule, as_of, ident):
-        spec = RULE_SQL[rule]
-        base = f"FROM {OBS} WHERE r.site_id = {lit(site)} AND {spec['match']} AND o.value IS NOT NULL"
+        spec = RULE_SQL[(site, rule)]
+        base = f"FROM {OBS} WHERE r.site_id = {lit(site)} AND {MATCH[(site, rule)]} AND o.value IS NOT NULL"
         cut = lit(as_of)
         anchor = f"WITH anchor AS (SELECT max(o.result_time) AS t {base} AND o.result_time <= {cut})\n"
         thr_sql = f"SELECT threshold_value, threshold_json FROM policies WHERE site_id = {lit(site)} AND rule_id = {lit(rule)};"
         _, tr = self.run(thr_sql)
         tv, tj = tr[0]
         tj = json.loads(tj) if tj else {}
-        thr = max(float(tj.get(k, tv)) for k in spec["keys"])
         blocks, files = [(thr_sql, ["threshold_value", "threshold_json"], tr)], []
+        if spec["kind"] == "composite":
+            return self._composite(site, rule, spec, tj, cut, blocks)
+        thr = max(float(tj.get(k, tv)) for k in spec["keys"])
         win = lambda h: f"o.result_time BETWEEN anchor.t - interval '{h} hours' AND anchor.t"
 
         if spec["kind"] == "zscore":
@@ -506,12 +608,21 @@ class V:
                        f"       avg(o.value) AS mean_24h,\n"
                        f"       greatest(avg(o.value) FILTER (WHERE o.result_time >= anchor.t - interval '1 hour'), avg(o.value)) AS metric\n"
                        f"{b2}\n  AND {win(24)}\nGROUP BY 1, 2 ORDER BY metric DESC;")
-            elif spec["kind"] == "max_abs_diff":
+            elif spec["kind"] == "mean":
+                sql = anchor + f"SELECT r.sensor_id, o.property_id, count(*) AS n, avg(o.value) AS metric\n{b2}\n  AND {win(spec['hours'])}\nGROUP BY 1, 2 ORDER BY metric DESC;"
+            elif spec["kind"] in ("max_abs_diff", "airflow_const"):
                 sql = (anchor + f", w AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value,\n"
                        f"        o.value - lag(o.value) OVER (PARTITION BY r.sensor_id, o.property_id ORDER BY o.result_time) AS diff\n"
                        f"      {b2}\n        AND {win(spec['hours'])})\n"
                        f"SELECT sensor_id, property_id, count(*) AS n, max(abs(diff)) AS metric FROM w\n"
                        f"GROUP BY 1, 2 ORDER BY metric DESC NULLS LAST;")
+            elif spec["kind"] == "peak_ratio":
+                sql = (anchor + f", w AS (SELECT r.sensor_id, o.property_id, o.result_time, o.value\n"
+                       f"      {b2}\n        AND {win(spec['hours'])})\n"
+                       f"SELECT sensor_id, property_id, count(*) AS n, avg(value) AS mean,\n"
+                       f"       (array_agg(value ORDER BY result_time DESC))[1] AS latest,\n"
+                       f"       (array_agg(value ORDER BY result_time DESC))[1] / (avg(value) + 1e-9) AS metric\n"
+                       f"FROM w GROUP BY 1, 2 ORDER BY metric DESC;")
             raw = anchor + f"SELECT r.sensor_id, o.property_id, o.result_time, o.value {b2}\n  AND {win(spec['hours'])} ORDER BY 3;"
         cols, rows = self.run(sql)
         blocks.append((sql, cols, rows))
@@ -527,8 +638,37 @@ class V:
         metrics = [float(r[cols.index("metric")]) for r in rows if r[cols.index("metric")] is not None]
         if not metrics:
             return blocks, files, None, f"{rule}: no readings (or no series with enough data) — not evaluated"
+        if spec["kind"] == "airflow_const":
+            # suspiciously constant: the steadiest series' largest step below half the threshold
+            m = min(metrics)
+            fired = m < thr / 2
+            return blocks, files, fired, (f"{rule}: smallest per-series max step {m:.6g} vs threshold/2 {thr / 2:g} "
+                                          f"→ {'fires' if fired else 'does not fire'}")
+        if spec.get("fires") == "below":
+            m = min(metrics)
+            fired = m < thr
+            return blocks, files, fired, (f"{rule}: metric {m:.6g} vs threshold {thr:g} (fires below) "
+                                          f"→ {'fires' if fired else 'does not fire'}")
         m = max(metrics)
         return blocks, files, m > thr, f"{rule}: metric {m:.6g} vs threshold {thr:g} → {'fires' if m > thr else 'does not fire'}"
+
+    def _composite(self, site, rule, spec, tj, cut, blocks):
+        """Latest reading of each quantity at or before the cut (the most anomalous if several share that time):
+        fires when the first is below its threshold and the second above its own."""
+        t_thr, h_thr = (float(tj[k]) for k in spec["keys"])
+        vals = []
+        for match, order in ((MATCH[(site, rule)], "ASC"), (MATCH2[(site, rule)], "DESC")):
+            sql = (f"SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM {OBS}\n"
+                   f"WHERE r.site_id = {lit(site)} AND {match} AND o.value IS NOT NULL AND o.result_time <= {cut}\n"
+                   f"ORDER BY o.result_time DESC, o.value {order} LIMIT 3;")
+            cols, rows = self.run(sql)
+            blocks.append((sql, cols, rows))
+            vals.append(float(rows[0][3]) if rows else None)
+        if None in vals:
+            return blocks, [], None, f"{rule}: no readings of one of the two quantities — not evaluated"
+        fired = vals[0] < t_thr and vals[1] > h_thr
+        return blocks, [], fired, (f"{rule}: latest {vals[0]:g} (fires below {t_thr:g}) and {vals[1]:g} (fires above "
+                                   f"{h_thr:g}) → {'fires' if fired else 'does not fire'}")
 
     def v_verdict(self, p, item, ident):
         as_of = eod(p["day"]) if p["day"] else self.end.isoformat()
@@ -539,8 +679,9 @@ class V:
             files += f
             notes.append(note)
             fired.append(res)
-        ev = [x for x in fired if x is not None]
-        value = "Yes" if any(ev) else "No" if ev else "Cannot be determined"
+        # Yes if any rule fires, No only if every applicable rule was evaluated and none fired
+        value = "Yes" if any(x is True for x in fired) else "No" if fired and all(x is False for x in fired) \
+            else "Cannot be determined"
         return dict(blocks=blocks, value=value, notes=notes, files=files)
 
 
@@ -598,8 +739,11 @@ def section(v: V, item) -> tuple[str, str]:
         status = "MANUAL"  # e.g. a month outside the snapshot: the count is 0, the question should be declined
     else:
         status = "MATCH" if same(res["value"], item["reference_value"]) else "MISMATCH"
+        if "reference_value_alt" in item and not same(res.get("value_alt"), item["reference_value_alt"]):
+            status = "MISMATCH"
+    alt = f" (with the altitude difference: `{res['value_alt']}`)" if "value_alt" in res else ""
     out.append(f"**Question:** {item['question']}  \n**Reference:** {item['reference']}  \n"
-               f"**Recomputed:** `{res['value']}` → **{status}**\n")
+               f"**Recomputed:** `{res['value']}`{alt} → **{status}**\n")
     for sql, cols, rows in res["blocks"]:
         out.append(f"```sql\n{sql}\n```\n" + md_table(cols, rows))
     for n in res.get("notes") or []:

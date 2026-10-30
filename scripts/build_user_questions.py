@@ -15,12 +15,14 @@ Selection (103 questions routed to the KG, deduplicated by normalised text; 80 k
     measurements), to make 80.
 Conventions (as in the benchmark):
   - "latest", "live", "most recent": the latest data in the snapshot (it ends 2026-08-12 09:15 UTC);
-  - "per site", "all ARGUS sites": the five pilot sites (not the partner pseudo-sites eurecat and
-    lorawan); a total over the whole KG accepts the five-site figure too;
+  - "per site", "all ARGUS sites": the five pilot sites (snapshot v2 holds every reading at its pilot
+    site, the LoRaWAN and Eurecat channels included);
   - sensors / nodes at a site: those with readings there; a quantity is an observed property;
   - anomaly checks: the AD-RT rule evaluation of build_benchmark.py (RuleEngine), latest data;
-  - data the snapshot does not hold (wind, humidity, soil moisture, rainfall at Delos/Baltanas — the
-    LoRaWAN channels, see the partner correspondence) has the reference "no such data".
+  - wind, humidity, pressure, rain at the LoRaWAN weather stations: their channels (wind_speed_1,
+    wind_direction_1, wind_peak_1, hum1, baro, rain_1 = rainfall intensity in mm/h, rain_acc = running
+    total in mm); a question about "rainfall" amounts there is judged by hand;
+  - data the snapshot does not hold has the reference "no such data".
 Each item carries `must` (values an answer has to state: numbers, "YYYY-MM-DD HH:MM" timestamps,
 labels) and `score_mode`: all | any | verdict | negative (an answer saying the data/thing does not
 exist) | decline (unanswerable) | manual (a list too long or a question needing interpretation:
@@ -91,13 +93,14 @@ ITEMS = [
     (30, "give me live temperature data from all ARGUS sites", "latest_per_site", {"prop": "temperature"}),
     (31, "give me the latest temperature data from Delos", "latest_site", {"site": "delos", "prop": "temperature"},
      None, "latest-delos-temperature"),
-    (32, "latest wind dir from baltanas", "no_data", {"what": "wind direction", "site": "baltanas"},
+    (32, "latest wind dir from baltanas", "latest_props", {"site": "baltanas", "props": ["wind_direction_1"]},
      None, "baltanas-wind-direction"),
-    (33, "give me live wind data from all ARGUS sites", "no_data", {"what": "wind"}, None, "wind-all-sites"),
+    (33, "give me live wind data from all ARGUS sites", "latest_per_site", {"prop": "wind_speed_1"}, None,
+     "wind-all-sites"),
     (34, "Show live temperature statistics per site", "per_site_stats", {"prop": "temperature"}),
     (35, "Do you have any crack displacement measurements at Ranverso?", "no_data",
      {"what": "crack displacement", "site": "ranverso"}, None, "ranverso-crack"),
-    (36, "give me latest rainfall data from Baltanas", "no_data", {"what": "rainfall", "site": "baltanas"}),
+    (36, "give me latest rainfall data from Baltanas", "latest_props", {"site": "baltanas", "props": ["rain_1", "rain_acc"]}),
     (38, "Which sensors are available at the baltanas site?", "list_sensors", {"site": "baltanas"}, None,
      "baltanas-sensors"),
     (39, "Where are the sensor nodes at the baltanas site?", "node_locations", {"site": "baltanas"}),
@@ -106,8 +109,8 @@ ITEMS = [
     (41, "Has the temperature range at lucretili exceeded its threshold?", "verdict",
      {"site": "lucretili", "rules": ["R9a_temp_lt"]}),
     (42, "How does the rainfall range at Delos compare to Baltanas?", "range_compare",
-     {"prop": "rainfall", "sites": ["delos", "baltanas"]}),
-    (43, "Which instruments measure wind direction?", "no_data", {"what": "wind direction"}),
+     {"prop": ["rain_1", "rain_acc"], "sites": ["delos", "baltanas"]}),
+    (43, "Which instruments measure wind direction?", "list_sensors_q", {"prop": "wind_direction_1"}),
     (45, "Which instruments are installed in Room 214?", "unanswerable",
      {"reason": "rooms are not modelled in the knowledge graph"}),
     (46, "Which device types exist in the live ARGUS KG?", "device_types", {}),
@@ -115,9 +118,10 @@ ITEMS = [
      {"reason": "measurement protocols are not modelled in the knowledge graph"}),
     (54, "Check wind anomaly at Schenkenberg using the wind policy.", "no_rule",
      {"site": "schenkenberg", "what": "wind"}),
-    (56, "5. Give me the latest wind direction from Baltanas.", "no_data", {"what": "wind direction", "site": "baltanas"},
-     None, "baltanas-wind-direction"),
-    (57, "6. What are the latest humidity readings from Ranverso?", "no_data", {"what": "humidity", "site": "ranverso"}),
+    (56, "5. Give me the latest wind direction from Baltanas.", "latest_props",
+     {"site": "baltanas", "props": ["wind_direction_1"]}, None, "baltanas-wind-direction"),
+    (57, "6. What are the latest humidity readings from Ranverso?", "latest_props",
+     {"site": "ranverso", "props": ["hum1", "hum2"]}),
     (58, "7. Show me the latest soil moisture data from Delos.", "no_data", {"what": "soil moisture", "site": "delos"}),
     (59, "8. How many observations are available in the live ARGUS KG?", "total", {"metric": "observations"}),
     (60, "9. How many readings are available for Delos Island?", "count_readings", {"site": "delos"}),
@@ -127,33 +131,35 @@ ITEMS = [
     (76, "Where is crack displacement measured?", "crack", {"ask": "where"}, None, "crack-exists"),
     (77, "Compare the temperature range between Delos and Schenkenberg.", "range_compare",
      {"prop": "temperature", "sites": ["delos", "schenkenberg"]}),
-    (78, "What is the humidity range at Ranverso?", "no_data", {"what": "humidity", "site": "ranverso"}),
-    (79, "What is the average rainfall at Baltanas?", "no_data", {"what": "rainfall", "site": "baltanas"}),
+    (78, "What is the humidity range at Ranverso?", "range_compare", {"prop": ["hum1", "hum2"], "sites": ["ranverso"]}),
+    (79, "What is the average rainfall at Baltanas?", "rain_summary", {"site": "baltanas"}),
     (80, "Which site has the most observations?", "argmax_site", {"metric": "observations"}),
     (81, "How many observations are available per measurement?", "per_quantity", {}),
     (82, "Which measurements have the most readings?", "top_quantity", {}),
-    (83, "How many wind observations are available per site?", "no_data", {"what": "wind"}, None, "wind-all-sites"),
+    (83, "How many wind observations are available per site?", "per_site_count",
+     {"props": ["wind_speed_1", "wind_direction_1", "wind_peak_1"]}, None, "wind-all-sites"),
     (84, "What is the latest value for each measurement at Delos?", "latest_each_quantity", {"site": "delos"}),
     (85, "Which instruments measure air temperature?", "list_sensors_q", {"prop": "temperature"}),
     (86, "Which instruments measure rainfall?", "list_sensors_q", {"prop": "rainfall"}),
-    (87, "Which instruments measure soil moisture?", "no_data", {"what": "soil moisture"}),
+    (87, "Which instruments measure soil moisture?", "list_sensors_q", {"prop": "moisture"}),
     (88, "Which instruments measure crack displacement?", "crack", {"ask": "instruments"}),
     (89, "Which instruments are installed at the House of Masks?", "nodes", {"site": "delos", "masks": True}),
     (90, "Which sensors are available at Baltanas?", "list_sensors", {"site": "baltanas"}, None, "baltanas-sensors"),
     (91, "Which sensors are available at Delos?", "list_sensors", {"site": "delos"}),
-    (92, "Which installed instruments are associated with Weather Stations?", "no_data", {"what": "weather station"},
+    (92, "Which installed instruments are associated with Weather Stations?", "weather_stations", {},
      None, "weather-stations"),
-    (93, "What physical quantities are monitored by weather stations?", "no_data", {"what": "weather station"},
+    (93, "What physical quantities are monitored by weather stations?", "weather_station_quantities", {},
      None, "weather-stations"),
-    (94, "Which sites have wind sensors?", "no_data", {"what": "wind"}, None, "wind-all-sites"),
+    (94, "Which sites have wind sensors?", "sites_with", {"prop": "wind_speed_1"}, None, "wind-all-sites"),
     (95, "Is there a rainfall anomaly at Baltanas?", "verdict", {"site": "baltanas", "rules": ["R6_rain_1h"]},
      None, "baltanas-rain-anomaly"),
     (96, "Is the latest wind speed at Delos anomalous?", "verdict", {"site": "delos", "rules": ["R2_wind"]},
      None, "delos-wind-anomaly"),
     (97, "Which AD-RT policies are available for Baltanas?", "policies", {"site": "baltanas"}),
     (98, "Which policy applies to rainfall at Baltanas?", "policy_for", {"site": "baltanas", "rule": "R6_rain_1h"}),
-    (100, "Which policies are defined for Delos?", "policies", {"site": "delos"}),
-    (101, "Compare wind speed readings across ARGUS sites.", "no_data", {"what": "wind speed"}, None, "wind-all-sites"),
+    (100, "Which policies are defined for Delos?", "policies", {"site": "delos", "adrt": False}),
+    (101, "Compare wind speed readings across ARGUS sites.", "per_site_stats", {"prop": "wind_speed_1"}, None,
+     "wind-all-sites"),
     (102, "how many sensors are there in delos pilot?", "count_sensors", {"site": "delos"}, None, "delos-sensors"),
     (103, "how many sensors are in delos site", "count_sensors", {"site": "delos"}, None, "delos-sensors"),
     # two questions the router did not send to the KG (route "fallback") but that ask about the sensor data,
@@ -244,7 +250,7 @@ class Builder:
                            WHERE o.property_id = %s AND o.value IS NOT NULL AND r.site_id = ANY(%s)
                            GROUP BY 1 ORDER BY 1""", prop, SITES)
         return ("; ".join(f"{SITE[s]} {fnum(float(a))}" for s, a in res) + ".",
-                [round(float(a), 3) for _, a in res], "all", None)
+                [round(float(a), 6) for _, a in res], "all", None)
 
     def per_site_stats(self, prop):
         res = self.rows("""SELECT r.site_id, count(*), min(o.value), avg(o.value), max(o.value)
@@ -253,7 +259,8 @@ class Builder:
                            GROUP BY 1 ORDER BY 1""", prop, SITES)
         text = "; ".join(f"{SITE[s]}: {n:,} observations, min {fnum(float(mn))}, mean {fnum(float(a))}, "
                          f"max {fnum(float(mx))}" for s, n, mn, a, mx in res)
-        return (text + ".", [round(float(a), 3) for _, _, _, a, _ in res], "manual",
+        return (text + ". (\"Statistics\" is open: any of these per-site statistics, correctly stated for every site, "
+                "answers the question.)", [round(float(a), 6) for _, _, _, a, _ in res], "manual",
                 "\"statistics\" is open: the reference gives count, min, mean and max per site; judged by hand")
 
     def _where(self, site, prop, masks, values=True):
@@ -289,7 +296,8 @@ class Builder:
         res = self.rows("""SELECT r.site_id, max(o.result_time) FROM observations o JOIN readings r USING (reading_id)
                            WHERE o.property_id = %s AND o.value IS NOT NULL AND r.site_id = ANY(%s)
                            GROUP BY 1 ORDER BY 1""", prop, SITES)
-        return ("Latest " + prop + " per site: " + "; ".join(f"{SITE[s]} {ts(t)} UTC" for s, t in res) + ".",
+        also = " (the same readings carry wind_direction_1 and wind_peak_1)" if prop.startswith("wind") else ""
+        return ("Latest " + prop + " per site" + also + ": " + "; ".join(f"{SITE[s]} {ts(t)} UTC" for s, t in res) + ".",
                 [ts(t) for _, t in res], "all", "the values at those times are in the SQL result")
 
     def latest_overall(self, n):
@@ -303,7 +311,9 @@ class Builder:
     def latest_time(self):
         t = self.rows("SELECT max(result_time) FROM observations")[0][0]
         t2 = self.rows("SELECT max(result_time) FROM readings")[0][0]
-        return (f"{ts(t)} UTC (latest observation; the latest reading record, a LoRaWAN reading without values, "
+        if t2 == t:
+            return f"{ts(t)} UTC.", [ts(t)], "all", None
+        return (f"{ts(t)} UTC (latest observation; the latest reading record, a reading without values, "
                 f"is {ts(t2)} UTC).", [ts(t), ts(t2)], "any", None)
 
     def count_sensors_q(self, site, prop, masks=False):
@@ -363,7 +373,7 @@ class Builder:
                            FROM nodes n JOIN readings r USING (node_id) WHERE r.site_id = ANY(%s) GROUP BY 1 ORDER BY 1""",
                         SITES)
         return ("; ".join(f"{SITE[s]} ({k}): {lbls}" for s, k, lbls in res) + ".", [k for _, k, _ in res], "manual",
-                "58 node names: judged by hand (must lists the node count per site)")
+                f"{sum(k for _, k, _ in res)} node names: judged by hand (must lists the node count per site)")
 
     def node_locations(self, site):
         res = self.rows("""SELECT DISTINCT n.label, n.latitude, n.longitude, n.altitude FROM nodes n
@@ -377,8 +387,11 @@ class Builder:
     def per_quantity(self):
         res = self.rows("""SELECT o.property_id, count(*) FROM observations o JOIN readings r USING (reading_id)
                            WHERE r.site_id = ANY(%s) GROUP BY 1 ORDER BY 2 DESC""", SITES)
+        n_all = self.rows("SELECT count(DISTINCT property_id) FROM observations")[0][0]
         top = "; ".join(f"{p} {n:,}" for p, n in res[:10])
-        return (f"{len(res)} quantities; the most frequent: {top} … (full list in the SQL result).",
+        whole = "" if n_all == len(res) else f" ({n_all} in the whole knowledge graph; either count is right)"
+        return (f"{len(res)} quantities at the five pilot sites{whole}; the most frequent: {top} … "
+                f"(full list in the SQL result).",
                 [p for p, _ in res[:3]], "manual", f"{len(res)} quantities: judged by hand")
 
     def top_quantity(self):
@@ -390,33 +403,108 @@ class Builder:
     def latest_each_quantity(self, site):
         res = self.rows("""SELECT DISTINCT ON (o.property_id) o.property_id, o.result_time, o.value
                            FROM observations o JOIN readings r USING (reading_id)
-                           WHERE r.site_id = %s AND o.value IS NOT NULL ORDER BY o.property_id, o.result_time DESC""",
+                           WHERE r.site_id = %s AND o.value IS NOT NULL
+                           ORDER BY o.property_id, o.result_time DESC, r.sensor_id""",
                         site)
         return ("; ".join(f"{p} {fnum(float(v))} at {ts(t)}" for p, t, v in res) + " (UTC).", [p for p, *_ in res],
                 "manual", f"{len(res)} quantities (several sensors each): judged by hand")
 
     def range_compare(self, prop, sites):
-        res = {s: (mn, mx) for s, mn, mx in self.rows(
-            """SELECT r.site_id, min(o.value), max(o.value) FROM observations o JOIN readings r USING (reading_id)
-               WHERE o.property_id = %s AND o.value IS NOT NULL AND r.site_id = ANY(%s) GROUP BY 1""", prop, sites)}
+        """prop: one quantity, or several (each one's range per site; a rain question gets the station's
+        intensity rain_1 and running total rain_acc, which are not comparable amounts: judged by hand)."""
+        props = [prop] if isinstance(prop, str) else prop
+        res = {(s, p): (mn, mx, u) for s, p, mn, mx, u in self.rows(
+            """SELECT r.site_id, o.property_id, min(o.value), max(o.value), max(o.unit) FROM observations o
+               JOIN readings r USING (reading_id)
+               WHERE o.property_id = ANY(%s) AND o.value IS NOT NULL AND r.site_id = ANY(%s) GROUP BY 1, 2""",
+            props, sites)}
         parts, must = [], []
         for s in sites:
-            if s in res:
-                mn, mx = (float(x) for x in res[s])
-                parts.append(f"{SITE[s]} {fnum(mn)} to {fnum(mx)}")
-                must += [round(mn, 3), round(mx, 3)]
-            else:
-                parts.append(f"{SITE[s]}: no {prop} data in the snapshot")
-        mode = "all" if must else "negative"
-        return ("; ".join(parts) + ".", must, mode, None if must else "neither site has data")
+            for p in props:
+                label = "" if len(props) == 1 else f"{p} "
+                if (s, p) in res:
+                    mn, mx, u = res[(s, p)]
+                    parts.append(f"{SITE[s]} {label}{fnum(float(mn))} to {fnum(float(mx))}" + (f" {u}" if u else ""))
+                    must += [round(float(mn), 6), round(float(mx), 6)]
+                else:
+                    parts.append(f"{SITE[s]}: no {p} data in the snapshot")
+        rain = any(p.startswith("rain_") for p in props)
+        note = (" (rain_1 is the weather station's rainfall intensity in mm/h, rain_acc its running total since "
+                "installation; neither is a rainfall amount per interval)" if rain else "")
+        mode = "manual" if rain else "all" if must else "negative"
+        return ("; ".join(parts) + "." + note, must, mode,
+                "rain intensity and running total, not rainfall amounts: judged by hand" if rain
+                else None if must else "neither site has data")
 
-    LORAWAN = ("wind", "humidity", "rainfall", "soil moisture", "weather station")
+    def latest_props(self, site, props):
+        """Each sensor's latest reading of each quantity at the site (an answer giving any of them is right)."""
+        res = self.rows("""SELECT DISTINCT ON (o.property_id, r.sensor_id) o.property_id, n.label, n.name, o.result_time,
+                                  o.value, o.unit
+                           FROM observations o JOIN readings r USING (reading_id) JOIN nodes n USING (node_id)
+                           WHERE r.site_id = %s AND o.property_id = ANY(%s) AND o.value IS NOT NULL
+                           ORDER BY o.property_id, r.sensor_id, o.result_time DESC""", site, props)
+        parts = [f"{p} {fnum(float(v))}" + (f" {u}" if u else "") + f" at {ts(t)} UTC ({lbl}" + (f", {nm}" if nm else "") + ")"
+                 for p, lbl, nm, t, v, u in res]
+        must = sorted({ts(t) for *_, t, _, _ in res}, reverse=True)
+        return (f"Latest at {SITE[site]}, per sensor: " + "; ".join(parts) + ".", must,
+                "all" if len(must) == 1 else "any", None)
+
+    def rain_summary(self, site):
+        res = self.rows("""SELECT o.property_id, avg(o.value), min(o.value), max(o.value), count(*),
+                                  min(o.result_time), max(o.result_time)
+                           FROM observations o JOIN readings r USING (reading_id)
+                           WHERE r.site_id = %s AND o.property_id = ANY(%s) AND o.value IS NOT NULL GROUP BY 1 ORDER BY 1""",
+                        site, ["rainfall", "rain_1", "rain_acc"])
+        st = {p: rest for p, *rest in res}
+        parts = []
+        if "rainfall" in st:
+            parts.append(f"rainfall (per-interval amount) averages {fnum(float(st['rainfall'][0]))} mm")
+        if "rain_1" in st:
+            a, _, mx, n, t0, t1 = st["rain_1"]
+            parts.append(f"the weather station's rainfall intensity rain_1 averages {fnum(float(a))} mm/h "
+                         f"(max {fnum(float(mx))} mm/h, {n:,} observations, {ts(t0)} to {ts(t1)} UTC)")
+        if "rain_acc" in st:
+            _, mn, mx, *_ = st["rain_acc"]
+            parts.append(f"its running total rain_acc rose from {fnum(float(mn))} to {fnum(float(mx))} mm, i.e. "
+                         f"{fnum(float(mx) - float(mn))} mm of rain over that period")
+        return (f"{SITE[site]} has no per-interval rainfall amounts; " + "; ".join(parts) + ".",
+                [round(float(st["rain_1"][0]), 6)] if "rain_1" in st else [], "manual",
+                "\"average rainfall\" over an intensity and a running total: judged by hand")
+
+    def per_site_count(self, props):
+        res = self.rows("""SELECT r.site_id, o.property_id, count(*) FROM observations o JOIN readings r USING (reading_id)
+                           WHERE o.property_id = ANY(%s) AND r.site_id = ANY(%s) GROUP BY 1, 2 ORDER BY 1, 2""",
+                        props, SITES)
+        by = {}
+        for s, p, n in res:
+            by.setdefault(s, {})[p] = n
+        text = "; ".join(f"{SITE[s]}: " + ", ".join(f"{p} {n:,}" for p, n in sorted(c.items())) for s, c in by.items())
+        return (text + ". (Each reading of a weather station carries the three wind quantities, so a per-site count "
+                "of any of them, or their sum, answers the question.)",
+                [by[s].get(props[0]) for s in by], "manual", "per-quantity or summed counts: judged by hand")
+
+    def weather_stations(self):
+        res = self.rows("""SELECT DISTINCT r.site_id, n.label FROM nodes n JOIN readings r USING (node_id)
+                           WHERE n.name = 'Weather station' ORDER BY 1, 2""")
+        return (f"{len(res)} weather stations (LoRaWAN nodes named \"Weather station\"): "
+                + ", ".join(f"{lbl} ({SITE[s]})" for s, lbl in res) + ".", [lbl for _, lbl in res], "all", None)
+
+    def weather_station_quantities(self):
+        res = self.rows("""SELECT o.property_id, max(o.unit), count(*) FROM observations o JOIN readings r USING (reading_id)
+                           JOIN nodes n USING (node_id) WHERE n.name = 'Weather station' GROUP BY 1 ORDER BY 1""")
+        return (f"{len(res)} quantities: " + ", ".join(p + (f" ({u})" if u else "") for p, u, _ in res) + ".",
+                [p for p, *_ in res], "all" if len(res) <= MAX_LISTED else "manual",
+                None if len(res) <= MAX_LISTED else f"{len(res)} quantities: judged by hand")
+
+    def sites_with(self, prop):
+        res = self.rows("""SELECT r.site_id, count(DISTINCT r.sensor_id) FROM observations o JOIN readings r USING (reading_id)
+                           WHERE o.property_id = %s AND r.site_id = ANY(%s) GROUP BY 1 ORDER BY 1""", prop, SITES)
+        return (f"{len(res)} sites: " + ", ".join(f"{SITE[s]} ({n} sensor{'s' if n > 1 else ''})" for s, n in res)
+                + f" ({prop}, from the LoRaWAN weather stations).", [SITE[s] for s, _ in res], "all", None)
 
     def no_data(self, what, site=None):
         where = f" at {SITE[site]}" if site else ""
-        why = (" (these channels come from LoRaWAN devices whose values were not ingested)"
-               if any(what.startswith(k) for k in self.LORAWAN) else "")
-        return (f"No {what} data{where} in the snapshot{why}.", [], "negative", None)
+        return (f"No {what} data{where} in the snapshot.", [], "negative", None)
 
     def no_rule(self, site, what):
         rules = self.rows("SELECT rule_id FROM policies WHERE site_id = %s AND left(label, 5) = 'AD-RT' ORDER BY 1",
@@ -427,16 +515,27 @@ class Builder:
     def verdict(self, site, rules):
         self.sql.append(f"-- AD-RT rule evaluation (build_benchmark.RuleEngine) at {SITE[site]}, rules {rules}, "
                         f"latest data (windows ending {ts(self.end)} UTC); see verify/anomaly.md for the rule SQL")
-        from build_benchmark import EVALUABLE
+        from build_benchmark import EVALUABLE, NO_DATA_GROUPS, NO_DATA_REFERENCE
         evaluable = [r for r in rules if (site, r) in EVALUABLE]
-        missing = [f"{r}: no readings in the snapshot" for r in rules if (site, r) not in EVALUABLE]
+        # a rule without data: the benchmark's reason for its group if it gives one (rain intensity, …)
+        why = {r: NO_DATA_REFERENCE[(s, ph)].removeprefix("Cannot be determined: ")
+               for s, ph, rs in NO_DATA_GROUPS for r in rs if s == site and (s, ph) in NO_DATA_REFERENCE}
+        missing = [f"{r}: {why.get(r, 'no readings in the snapshot')}" for r in rules if (site, r) not in EVALUABLE]
         if evaluable:
             v, det = self.eng.verdict(site, evaluable, None)
         else:   # as the benchmark's verdict_no_data questions
             v, det = "Cannot be determined", []
+        if v == "No" and missing:   # No only if every applicable rule was evaluated
+            v = "Cannot be determined"
         return (f"{v}. " + "; ".join(det + missing), [v], "verdict", None)
 
-    def policies(self, site):
+    def policies(self, site, adrt=True):
+        if not adrt:   # every policy of the site: the AD-RT expert rules and the IRA threat/fusion policies
+            res = self.rows("""SELECT split_part(label, ' ', 1), count(*) FROM policies WHERE site_id = %s
+                               GROUP BY 1 ORDER BY 1""", site)
+            n = sum(k for _, k in res)
+            return (f"{n} policies: " + ", ".join(f"{k} {kind}" for kind, k in res) + " (the AD-RT ones: "
+                    + self.policies(site)[0] + ")", [n], "manual", f"{n} policies: judged by hand")
         res = self.rows("""SELECT rule_id, label, threshold_value, threshold_json FROM policies
                            WHERE site_id = %s AND left(label, 5) = 'AD-RT' ORDER BY 1""", site)
         return (f"{len(res)} AD-RT policies: " + "; ".join(f"{r} ({lbl.split(' - ', 1)[-1]})" for r, lbl, *_ in res) + ".",

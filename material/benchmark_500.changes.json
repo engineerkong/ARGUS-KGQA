@@ -1,0 +1,2372 @@
+[
+ {
+  "id": "B001",
+  "type": "basic",
+  "question": "How many sensor nodes are installed at Baltanas?",
+  "reference": {
+   "old": "13 sensor nodes.",
+   "new": "15 sensor nodes."
+  },
+  "reference_value": {
+   "old": 13,
+   "new": 15
+  }
+ },
+ {
+  "id": "B002",
+  "type": "basic",
+  "question": "How many sensor nodes are installed at Delos?",
+  "reference": {
+   "old": "15 sensor nodes.",
+   "new": "19 sensor nodes."
+  },
+  "reference_value": {
+   "old": 15,
+   "new": 19
+  }
+ },
+ {
+  "id": "B003",
+  "type": "basic",
+  "question": "How many sensor nodes are installed at Lucretili?",
+  "reference": {
+   "old": "13 sensor nodes.",
+   "new": "15 sensor nodes."
+  },
+  "reference_value": {
+   "old": 13,
+   "new": 15
+  }
+ },
+ {
+  "id": "B004",
+  "type": "basic",
+  "question": "How many sensor nodes are installed at Ranverso?",
+  "reference": {
+   "old": "7 sensor nodes.",
+   "new": "13 sensor nodes."
+  },
+  "reference_value": {
+   "old": 7,
+   "new": 13
+  }
+ },
+ {
+  "id": "B005",
+  "type": "basic",
+  "question": "How many sensor nodes are installed at Schenkenberg?",
+  "reference": {
+   "old": "7 sensor nodes.",
+   "new": "9 sensor nodes."
+  },
+  "reference_value": {
+   "old": 7,
+   "new": 9
+  }
+ },
+ {
+  "id": "B006",
+  "type": "basic",
+  "question": "How many sensors have reported readings at Baltanas?",
+  "reference": {
+   "old": "33 sensors.",
+   "new": "35 sensors."
+  },
+  "reference_value": {
+   "old": 33,
+   "new": 35
+  }
+ },
+ {
+  "id": "B007",
+  "type": "basic",
+  "question": "How many sensors have reported readings at Delos?",
+  "reference": {
+   "old": "26 sensors.",
+   "new": "30 sensors."
+  },
+  "reference_value": {
+   "old": 26,
+   "new": 30
+  }
+ },
+ {
+  "id": "B008",
+  "type": "basic",
+  "question": "How many sensors have reported readings at Lucretili?",
+  "reference": {
+   "old": "18 sensors.",
+   "new": "20 sensors."
+  },
+  "reference_value": {
+   "old": 18,
+   "new": 20
+  }
+ },
+ {
+  "id": "B009",
+  "type": "basic",
+  "question": "How many sensors have reported readings at Ranverso?",
+  "reference": {
+   "old": "13 sensors.",
+   "new": "19 sensors."
+  },
+  "reference_value": {
+   "old": 13,
+   "new": 19
+  }
+ },
+ {
+  "id": "B010",
+  "type": "basic",
+  "question": "How many sensors have reported readings at Schenkenberg?",
+  "reference": {
+   "old": "12 sensors.",
+   "new": "14 sensors."
+  },
+  "reference_value": {
+   "old": 12,
+   "new": 14
+  }
+ },
+ {
+  "id": "B011",
+  "type": "basic",
+  "question": "How many readings are stored for Baltanas?",
+  "reference": {
+   "old": "676272 readings.",
+   "new": "709170 readings."
+  },
+  "reference_value": {
+   "old": 676272,
+   "new": 709170
+  }
+ },
+ {
+  "id": "B012",
+  "type": "basic",
+  "question": "How many readings are stored for Delos?",
+  "reference": {
+   "old": "113789 readings.",
+   "new": "225945 readings."
+  },
+  "reference_value": {
+   "old": 113789,
+   "new": 225945
+  }
+ },
+ {
+  "id": "B013",
+  "type": "basic",
+  "question": "How many readings are stored for Lucretili?",
+  "reference": {
+   "old": "526071 readings.",
+   "new": "574578 readings."
+  },
+  "reference_value": {
+   "old": 526071,
+   "new": 574578
+  }
+ },
+ {
+  "id": "B014",
+  "type": "basic",
+  "question": "How many readings are stored for Ranverso?",
+  "reference": {
+   "old": "50695 readings.",
+   "new": "108150 readings."
+  },
+  "reference_value": {
+   "old": 50695,
+   "new": 108150
+  }
+ },
+ {
+  "id": "B015",
+  "type": "basic",
+  "question": "How many readings are stored for Schenkenberg?",
+  "reference": {
+   "old": "26859 readings.",
+   "new": "59713 readings."
+  },
+  "reference_value": {
+   "old": 26859,
+   "new": 59713
+  }
+ },
+ {
+  "id": "B016",
+  "type": "basic",
+  "question": "How many different physical quantities are measured at Baltanas?",
+  "reference": {
+   "old": "55 quantities.",
+   "new": "67 quantities."
+  },
+  "reference_value": {
+   "old": 55,
+   "new": 67
+  }
+ },
+ {
+  "id": "B017",
+  "type": "basic",
+  "question": "How many different physical quantities are measured at Lucretili?",
+  "reference": {
+   "old": "25 quantities.",
+   "new": "39 quantities."
+  },
+  "reference_value": {
+   "old": 25,
+   "new": 39
+  }
+ },
+ {
+  "id": "B018",
+  "type": "basic",
+  "question": "How many different physical quantities are measured at Ranverso?",
+  "reference": {
+   "old": "26 quantities.",
+   "new": "54 quantities."
+  },
+  "reference_value": {
+   "old": 26,
+   "new": 54
+  }
+ },
+ {
+  "id": "B019",
+  "type": "basic",
+  "question": "How many different physical quantities are measured at Schenkenberg?",
+  "reference": {
+   "old": "43 quantities.",
+   "new": "55 quantities."
+  },
+  "reference_value": {
+   "old": 43,
+   "new": 55
+  }
+ },
+ {
+  "id": "B031",
+  "type": "basic",
+  "question": "What is the average voltage observed at Baltanas?",
+  "reference": {
+   "old": "0.935.",
+   "new": "0.903 V."
+  },
+  "reference_value": {
+   "old": 0.934916,
+   "new": 0.902933
+  },
+  "unit": {
+   "old": "",
+   "new": "V"
+  }
+ },
+ {
+  "id": "B032",
+  "type": "basic",
+  "question": "What is the average voltage observed at Delos?",
+  "reference": {
+   "old": "1.656.",
+   "new": "2.387 V."
+  },
+  "reference_value": {
+   "old": 1.655922,
+   "new": 2.387406
+  },
+  "unit": {
+   "old": "",
+   "new": "V"
+  }
+ },
+ {
+  "id": "B045",
+  "type": "basic",
+  "question": "What is the maximum voltage measured at Delos?",
+  "reference": {
+   "old": "4.945.",
+   "new": "13104 V."
+  },
+  "reference_value": {
+   "old": 4.944706,
+   "new": 13104.0
+  },
+  "unit": {
+   "old": "",
+   "new": "V"
+  }
+ },
+ {
+  "id": "B047",
+  "type": "basic",
+  "question": "What is the maximum voltage observed at Baltanas?",
+  "reference": {
+   "old": "3.722.",
+   "new": "3.722 V."
+  },
+  "unit": {
+   "old": "",
+   "new": "V"
+  }
+ },
+ {
+  "id": "B058",
+  "type": "basic",
+  "question": "What is the minimum voltage measured at Baltanas?",
+  "reference": {
+   "old": "-0.001.",
+   "new": "-0.001 V."
+  },
+  "unit": {
+   "old": "",
+   "new": "V"
+  }
+ },
+ {
+  "id": "B059",
+  "type": "basic",
+  "question": "What is the minimum voltage recorded at Delos?",
+  "reference": {
+   "old": "-0.002.",
+   "new": "-0.002 V."
+  },
+  "unit": {
+   "old": "",
+   "new": "V"
+  }
+ },
+ {
+  "id": "B072",
+  "type": "basic",
+  "question": "How many voltage observations exist for Baltanas?",
+  "reference": {
+   "old": "167572 observations.",
+   "new": "182636 observations."
+  },
+  "reference_value": {
+   "old": 167572,
+   "new": 182636
+  }
+ },
+ {
+  "id": "B073",
+  "type": "basic",
+  "question": "How many voltage observations exist for Delos?",
+  "reference": {
+   "old": "35822 observations.",
+   "new": "35824 observations."
+  },
+  "reference_value": {
+   "old": 35822,
+   "new": 35824
+  }
+ },
+ {
+  "id": "B087",
+  "type": "basic",
+  "question": "How many sensors measure voltage at Baltanas?",
+  "reference": {
+   "old": "9 sensors.",
+   "new": "10 sensors."
+  },
+  "reference_value": {
+   "old": 9,
+   "new": 10
+  }
+ },
+ {
+  "id": "B088",
+  "type": "basic",
+  "question": "How many sensors measure voltage at Delos?",
+  "reference": {
+   "old": "15 sensors.",
+   "new": "16 sensors."
+  },
+  "reference_value": {
+   "old": 15,
+   "new": 16
+  }
+ },
+ {
+  "id": "B093",
+  "type": "basic",
+  "question": "Among Baltanas, Delos, Lucretili, Ranverso and Schenkenberg, which site has the most readings?",
+  "reference": {
+   "old": "Baltanas (676272 readings).",
+   "new": "Baltanas (709170 readings)."
+  }
+ },
+ {
+  "id": "B094",
+  "type": "basic",
+  "question": "Among Baltanas, Delos, Lucretili, Ranverso and Schenkenberg, which site has the most sensor nodes?",
+  "reference": {
+   "old": "Delos (15 nodes).",
+   "new": "Delos (19 nodes)."
+  }
+ },
+ {
+  "id": "B096",
+  "type": "basic",
+  "question": "What is the average barometric pressure at Ranverso?",
+  "template": {
+   "old": "unanswerable",
+   "new": "avg_quantity"
+  },
+  "reference": {
+   "old": "Cannot be answered: the knowledge graph has no barometric pressure data for Ranverso.",
+   "new": "97614.262 Pa."
+  },
+  "reference_value": {
+   "old": null,
+   "new": 97614.261919
+  },
+  "answerable": {
+   "old": false,
+   "new": true
+  },
+  "unit": {
+   "old": null,
+   "new": "Pa"
+  }
+ },
+ {
+  "id": "B097",
+  "type": "basic",
+  "question": "What is the average relative humidity at Baltanas?",
+  "template": {
+   "old": "unanswerable",
+   "new": "avg_quantity"
+  },
+  "reference": {
+   "old": "Cannot be answered: the knowledge graph has no relative humidity data for Baltanas.",
+   "new": "42.292 %."
+  },
+  "reference_value": {
+   "old": null,
+   "new": 42.291679
+  },
+  "answerable": {
+   "old": false,
+   "new": true
+  },
+  "unit": {
+   "old": null,
+   "new": "%"
+  }
+ },
+ {
+  "id": "B098",
+  "type": "basic",
+  "question": "What is the average relative humidity at Schenkenberg?",
+  "template": {
+   "old": "unanswerable",
+   "new": "avg_quantity"
+  },
+  "reference": {
+   "old": "Cannot be answered: the knowledge graph has no relative humidity data for Schenkenberg.",
+   "new": "46.258 %."
+  },
+  "reference_value": {
+   "old": null,
+   "new": 46.257641
+  },
+  "answerable": {
+   "old": false,
+   "new": true
+  },
+  "unit": {
+   "old": null,
+   "new": "%"
+  }
+ },
+ {
+  "id": "B100",
+  "type": "basic",
+  "question": "What is the average wind speed at Delos?",
+  "template": {
+   "old": "unanswerable",
+   "new": "avg_quantity"
+  },
+  "reference": {
+   "old": "Cannot be answered: the knowledge graph has no wind speed data for Delos.",
+   "new": "3.413 m/s."
+  },
+  "reference_value": {
+   "old": null,
+   "new": 3.412942
+  },
+  "answerable": {
+   "old": false,
+   "new": true
+  },
+  "unit": {
+   "old": null,
+   "new": "m/s"
+  }
+ },
+ {
+  "id": "S001",
+  "type": "spatial",
+  "question": "How far apart are the two most distant sensor nodes at Baltanas?",
+  "reference": {
+   "old": "380.8 m, between Gases and GNSS_Base.",
+   "new": "382.3 m, between A8610A3230467704 and GNSS_Base."
+  },
+  "reference_value": {
+   "old": 380.8,
+   "new": 382.3
+  }
+ },
+ {
+  "id": "S002",
+  "type": "spatial",
+  "question": "How far apart are the two most distant sensor nodes at Delos?",
+  "reference": {
+   "old": "1355.6 m, between H. Fournoi_wall attached 1 and LS-153157.",
+   "new": "1669.9 m, between 0004A30B0050C42F and H. Fournoi_wall attached 1."
+  },
+  "reference_value": {
+   "old": 1355.6,
+   "new": 1669.9
+  }
+ },
+ {
+  "id": "S005",
+  "type": "spatial",
+  "question": "How far apart are the two most distant sensor nodes at Schenkenberg?",
+  "reference": {
+   "old": "5.5 m, between LS-152555 and LS-175480.",
+   "new": "5.3 m, between LS-152555 and LS-175480."
+  },
+  "reference_value": {
+   "old": 5.5,
+   "new": 5.3
+  }
+ },
+ {
+  "id": "S006",
+  "type": "spatial",
+  "question": "What is the centroid of the sensor nodes at Baltanas?",
+  "reference": {
+   "old": "Latitude 41.938315, longitude -4.244076 (mean of 12 nodes).",
+   "new": "Latitude 41.938386, longitude -4.244170 (mean of 15 nodes)."
+  },
+  "reference_value": {
+   "old": [
+    41.938315,
+    -4.244076
+   ],
+   "new": [
+    41.938386,
+    -4.24417
+   ]
+  }
+ },
+ {
+  "id": "S007",
+  "type": "spatial",
+  "question": "What is the centroid of the sensor nodes at Delos?",
+  "reference": {
+   "old": "Latitude 37.396446, longitude 25.269236 (mean of 15 nodes).",
+   "new": "Latitude 37.396699, longitude 25.269551 (mean of 19 nodes)."
+  },
+  "reference_value": {
+   "old": [
+    37.396446,
+    25.269236
+   ],
+   "new": [
+    37.396699,
+    25.269551
+   ]
+  }
+ },
+ {
+  "id": "S008",
+  "type": "spatial",
+  "question": "What is the centroid of the sensor nodes at Lucretili?",
+  "reference": {
+   "old": "Latitude 42.045464, longitude 12.843224 (mean of 13 nodes).",
+   "new": "Latitude 42.048244, longitude 12.851007 (mean of 15 nodes)."
+  },
+  "reference_value": {
+   "old": [
+    42.045464,
+    12.843224
+   ],
+   "new": [
+    42.048244,
+    12.851007
+   ]
+  }
+ },
+ {
+  "id": "S009",
+  "type": "spatial",
+  "question": "What is the centroid of the sensor nodes at Ranverso?",
+  "reference": {
+   "old": "Latitude 45.081183, longitude 7.449715 (mean of 7 nodes).",
+   "new": "Latitude 45.081158, longitude 7.449714 (mean of 10 nodes)."
+  },
+  "reference_value": {
+   "old": [
+    45.081183,
+    7.449715
+   ],
+   "new": [
+    45.081158,
+    7.449714
+   ]
+  }
+ },
+ {
+  "id": "S010",
+  "type": "spatial",
+  "question": "What is the centroid of the sensor nodes at Schenkenberg?",
+  "reference": {
+   "old": "Latitude 47.442133, longitude 8.101044 (mean of 7 nodes).",
+   "new": "Latitude 47.442132, longitude 8.101022 (mean of 9 nodes)."
+  },
+  "reference_value": {
+   "old": [
+    47.442133,
+    8.101044
+   ],
+   "new": [
+    47.442132,
+    8.101022
+   ]
+  }
+ },
+ {
+  "id": "S011",
+  "type": "spatial",
+  "question": "Which sensor node at Baltanas is at the highest altitude?",
+  "reference": {
+   "old": "AF4, at 798.42 m.",
+   "new": "AF4, at 798.38 m."
+  }
+ },
+ {
+  "id": "S014",
+  "type": "spatial",
+  "question": "Which sensor node at Ranverso is at the highest altitude?",
+  "reference": {
+   "old": "LS-170894, at 339.42 m.",
+   "new": "ae_ranverso, at 340.16 m."
+  },
+  "reference_value": {
+   "old": "LS-170894",
+   "new": "ae_ranverso"
+  }
+ },
+ {
+  "id": "S016",
+  "type": "spatial",
+  "question": "Which sensor node at Delos is at the lowest altitude?",
+  "reference": {
+   "old": "LS-153157, at 12.32 m.",
+   "new": "0004A30B0050C42F, at 9.64 m."
+  },
+  "reference_value": {
+   "old": "LS-153157",
+   "new": "0004A30B0050C42F"
+  }
+ },
+ {
+  "id": "S018",
+  "type": "spatial",
+  "question": "Which sensor node at Schenkenberg is at the lowest altitude?",
+  "reference": {
+   "old": "LS-149796, at 637.9 m.",
+   "new": "2CF7F1C072600345, at 643 m."
+  },
+  "reference_value": {
+   "old": "LS-149796",
+   "new": "2CF7F1C072600345"
+  }
+ },
+ {
+  "id": "S019",
+  "type": "spatial",
+  "question": "What is the altitude range of the sensor nodes at Baltanas?",
+  "reference": {
+   "old": "18.52 m (from 779.9 m to 798.42 m).",
+   "new": "18.48 m (from 779.9 m to 798.38 m)."
+  },
+  "reference_value": {
+   "old": 18.52,
+   "new": 18.48
+  }
+ },
+ {
+  "id": "S020",
+  "type": "spatial",
+  "question": "What is the altitude range of the sensor nodes at Delos?",
+  "reference": {
+   "old": "31.16 m (from 12.32 m to 43.48 m).",
+   "new": "33.84 m (from 9.64 m to 43.48 m)."
+  },
+  "reference_value": {
+   "old": 31.16,
+   "new": 33.84
+  }
+ },
+ {
+  "id": "S022",
+  "type": "spatial",
+  "question": "What is the altitude range of the sensor nodes at Ranverso?",
+  "reference": {
+   "old": "0.53 m (from 338.89 m to 339.42 m).",
+   "new": "1.27 m (from 338.89 m to 340.16 m)."
+  },
+  "reference_value": {
+   "old": 0.53,
+   "new": 1.27
+  }
+ },
+ {
+  "id": "S023",
+  "type": "spatial",
+  "question": "What is the altitude range of the sensor nodes at Schenkenberg?",
+  "reference": {
+   "old": "5.63 m (from 637.9 m to 643.53 m).",
+   "new": "8.2 m (from 643 m to 651.2 m)."
+  },
+  "reference_value": {
+   "old": 5.63,
+   "new": 8.2
+  }
+ },
+ {
+  "id": "S024",
+  "type": "spatial",
+  "question": "Which sensor node at Baltanas is the northernmost?",
+  "reference": {
+   "old": "AF4 (latitude 41.938544).",
+   "new": "2CF7F1C073400212 (latitude 41.939097)."
+  },
+  "reference_value": {
+   "old": "AF4",
+   "new": "2CF7F1C073400212"
+  }
+ },
+ {
+  "id": "S025",
+  "type": "spatial",
+  "question": "Which sensor node at Delos is the northernmost?",
+  "reference": {
+   "old": "LS-153157 (latitude 37.403328).",
+   "new": "0004A30B0050C42F (latitude 37.405975)."
+  },
+  "reference_value": {
+   "old": "LS-153157",
+   "new": "0004A30B0050C42F"
+  }
+ },
+ {
+  "id": "S030",
+  "type": "spatial",
+  "question": "Which sensor node at Ranverso is the southernmost?",
+  "reference": {
+   "old": "LS-170894 (latitude 45.081133).",
+   "new": "ae_ranverso (latitude 45.081058)."
+  },
+  "reference_value": {
+   "old": "LS-170894",
+   "new": "ae_ranverso"
+  }
+ },
+ {
+  "id": "S032",
+  "type": "spatial",
+  "question": "What is the distance between sensor nodes AF3 and GNSS-Rover at Baltanas?",
+  "reference": {
+   "old": "10.8 m.",
+   "new": "11 m."
+  },
+  "reference_value": {
+   "old": 10.8,
+   "new": 11.0
+  }
+ },
+ {
+  "id": "S035",
+  "type": "spatial",
+  "question": "What is the distance between sensor nodes Gases and P_WL at Baltanas?",
+  "reference": {
+   "old": "46.4 m.",
+   "new": "46.5 m."
+  },
+  "reference_value": {
+   "old": 46.4,
+   "new": 46.5
+  }
+ },
+ {
+  "id": "S036",
+  "type": "spatial",
+  "question": "What is the distance between sensor nodes Gases and WP2 at Baltanas?",
+  "reference": {
+   "old": "44.9 m.",
+   "new": "45.1 m."
+  },
+  "reference_value": {
+   "old": 44.9,
+   "new": 45.1
+  }
+ },
+ {
+  "id": "S049",
+  "type": "spatial",
+  "question": "What is the distance between sensor nodes LS-149796 and LS-152479 at Schenkenberg?",
+  "reference": {
+   "old": "1.6 m.",
+   "new": "1.5 m."
+  },
+  "reference_value": {
+   "old": 1.6,
+   "new": 1.5
+  }
+ },
+ {
+  "id": "S050",
+  "type": "spatial",
+  "question": "What is the distance between sensor nodes LS-149796 and LS-175480 at Schenkenberg?",
+  "reference": {
+   "old": "2.2 m.",
+   "new": "1.8 m."
+  },
+  "reference_value": {
+   "old": 2.2,
+   "new": 1.8
+  }
+ },
+ {
+  "id": "S052",
+  "type": "spatial",
+  "question": "What is the distance between sensor nodes LS-152479 and LS-152914 at Schenkenberg?",
+  "reference": {
+   "old": "3.5 m.",
+   "new": "3.7 m."
+  },
+  "reference_value": {
+   "old": 3.5,
+   "new": 3.7
+  }
+ },
+ {
+  "id": "S060",
+  "type": "spatial",
+  "question": "Which sensor node is closest to Acc-3A at Baltanas?",
+  "reference": {
+   "old": "GNSS-Rover, 66.6 m away.",
+   "new": "sensor, 65.2 m away."
+  },
+  "reference_value": {
+   "old": "GNSS-Rover",
+   "new": "sensor"
+  }
+ },
+ {
+  "id": "S061",
+  "type": "spatial",
+  "question": "Which sensor node is closest to Gases at Baltanas?",
+  "reference": {
+   "old": "AF2, 41.2 m away.",
+   "new": "A8610A3230467704, 1.6 m away."
+  },
+  "reference_value": {
+   "old": "AF2",
+   "new": "A8610A3230467704"
+  }
+ },
+ {
+  "id": "S067",
+  "type": "spatial",
+  "question": "Which sensor node is closest to LS-152899 at Schenkenberg?",
+  "reference": {
+   "old": "LS-152479, 0.9 m away.",
+   "new": "2CF7F1C072300226, 0.6 m away."
+  },
+  "reference_value": {
+   "old": "LS-152479",
+   "new": "2CF7F1C072300226"
+  }
+ },
+ {
+  "id": "S071",
+  "type": "spatial",
+  "question": "Which sensor node is closest to P_WL at Baltanas?",
+  "reference": {
+   "old": "Acc-2A, 0.9 m away.",
+   "new": "Acc-2A, 1 m away."
+  }
+ },
+ {
+  "id": "S073",
+  "type": "spatial",
+  "question": "How many other sensor nodes at Baltanas are within 10 m of P_WL?",
+  "reference": {
+   "old": "7.",
+   "new": "8."
+  },
+  "reference_value": {
+   "old": 7,
+   "new": 8
+  }
+ },
+ {
+  "id": "S075",
+  "type": "spatial",
+  "question": "How many other sensor nodes at Delos are within 10 m of H. Masks_Mask mosaic_window?",
+  "reference": {
+   "old": "6.",
+   "new": "7."
+  },
+  "reference_value": {
+   "old": 6,
+   "new": 7
+  }
+ },
+ {
+  "id": "S076",
+  "type": "spatial",
+  "question": "How many other sensor nodes at Delos are within 10 m of H. Masks_Masks mosaic_flow meter?",
+  "reference": {
+   "old": "6.",
+   "new": "7."
+  },
+  "reference_value": {
+   "old": 6,
+   "new": 7
+  }
+ },
+ {
+  "id": "S077",
+  "type": "spatial",
+  "question": "How many other sensor nodes at Delos are within 100 m of H. Masks_Dyonisios mosaic_pole mounted?",
+  "reference": {
+   "old": "8.",
+   "new": "10."
+  },
+  "reference_value": {
+   "old": 8,
+   "new": 10
+  }
+ },
+ {
+  "id": "S078",
+  "type": "spatial",
+  "question": "How many other sensor nodes at Delos are within 100 m of H. Masks_Mask mosaic_pole mounted 2?",
+  "reference": {
+   "old": "8.",
+   "new": "10."
+  },
+  "reference_value": {
+   "old": 8,
+   "new": 10
+  }
+ },
+ {
+  "id": "S084",
+  "type": "spatial",
+  "question": "How many other sensor nodes at Ranverso are within 100 m of LS-149248?",
+  "reference": {
+   "old": "6.",
+   "new": "9."
+  },
+  "reference_value": {
+   "old": 6,
+   "new": 9
+  }
+ },
+ {
+  "id": "S085",
+  "type": "spatial",
+  "question": "How many other sensor nodes at Ranverso are within 500 m of LS-174188?",
+  "reference": {
+   "old": "6.",
+   "new": "9."
+  },
+  "reference_value": {
+   "old": 6,
+   "new": 9
+  }
+ },
+ {
+  "id": "S086",
+  "type": "spatial",
+  "question": "How many other sensor nodes at Ranverso are within 500 m of LS-177315?",
+  "reference": {
+   "old": "6.",
+   "new": "9."
+  },
+  "reference_value": {
+   "old": 6,
+   "new": 9
+  }
+ },
+ {
+  "id": "S087",
+  "type": "spatial",
+  "question": "How many other sensor nodes at Schenkenberg are within 50 m of LS-152555?",
+  "reference": {
+   "old": "6.",
+   "new": "8."
+  },
+  "reference_value": {
+   "old": 6,
+   "new": 8
+  }
+ },
+ {
+  "id": "S088",
+  "type": "spatial",
+  "question": "How far apart are Baltanas and Delos, measured between the centroids of their sensor nodes?",
+  "reference": {
+   "old": "2562.8 km.",
+   "new": "2562.9 km."
+  },
+  "reference_value": {
+   "old": 2562.8,
+   "new": 2562.9
+  }
+ },
+ {
+  "id": "S089",
+  "type": "spatial",
+  "question": "How far apart are Baltanas and Lucretili, measured between the centroids of their sensor nodes?",
+  "reference": {
+   "old": "1409.9 km.",
+   "new": "1410.5 km."
+  },
+  "reference_value": {
+   "old": 1409.9,
+   "new": 1410.5
+  }
+ },
+ {
+  "id": "S092",
+  "type": "spatial",
+  "question": "How far apart are Delos and Lucretili, measured between the centroids of their sensor nodes?",
+  "reference": {
+   "old": "1180.2 km.",
+   "new": "1179.8 km."
+  },
+  "reference_value": {
+   "old": 1180.2,
+   "new": 1179.8
+  }
+ },
+ {
+  "id": "S095",
+  "type": "spatial",
+  "question": "How far apart are Lucretili and Ranverso, measured between the centroids of their sensor nodes?",
+  "reference": {
+   "old": "550.1 km.",
+   "new": "550.4 km."
+  },
+  "reference_value": {
+   "old": 550.1,
+   "new": 550.4
+  }
+ },
+ {
+  "id": "S096",
+  "type": "spatial",
+  "question": "How far apart are Lucretili and Schenkenberg, measured between the centroids of their sensor nodes?",
+  "reference": {
+   "old": "707 km.",
+   "new": "707.1 km."
+  },
+  "reference_value": {
+   "old": 707.0,
+   "new": 707.1
+  }
+ },
+ {
+  "id": "T007",
+  "type": "temporal",
+  "question": "When was the most recent reading recorded at Delos?",
+  "reference": {
+   "old": "2026-08-12 09:00 UTC.",
+   "new": "2026-08-12 09:14 UTC."
+  },
+  "reference_value": {
+   "old": "2026-08-12 09:00 UTC",
+   "new": "2026-08-12 09:14 UTC"
+  }
+ },
+ {
+  "id": "T009",
+  "type": "temporal",
+  "question": "When was the most recent reading recorded at Ranverso?",
+  "reference": {
+   "old": "2026-08-12 09:00 UTC.",
+   "new": "2026-08-12 09:13 UTC."
+  },
+  "reference_value": {
+   "old": "2026-08-12 09:00 UTC",
+   "new": "2026-08-12 09:13 UTC"
+  }
+ },
+ {
+  "id": "T010",
+  "type": "temporal",
+  "question": "When was the most recent reading recorded at Schenkenberg?",
+  "reference": {
+   "old": "2026-08-12 09:00 UTC.",
+   "new": "2026-08-12 09:13 UTC."
+  },
+  "reference_value": {
+   "old": "2026-08-12 09:00 UTC",
+   "new": "2026-08-12 09:13 UTC"
+  }
+ },
+ {
+  "id": "T012",
+  "type": "temporal",
+  "question": "What time period do the readings at Delos cover?",
+  "reference": {
+   "old": "From 2026-05-13 01:00 UTC to 2026-08-12 09:00 UTC.",
+   "new": "From 2026-05-13 01:00 UTC to 2026-08-12 09:14 UTC."
+  },
+  "reference_value": {
+   "old": [
+    "2026-05-13 01:00 UTC",
+    "2026-08-12 09:00 UTC"
+   ],
+   "new": [
+    "2026-05-13 01:00 UTC",
+    "2026-08-12 09:14 UTC"
+   ]
+  }
+ },
+ {
+  "id": "T014",
+  "type": "temporal",
+  "question": "What time period do the readings at Ranverso cover?",
+  "reference": {
+   "old": "From 2026-05-13 01:00 UTC to 2026-08-12 09:00 UTC.",
+   "new": "From 2026-05-13 01:00 UTC to 2026-08-12 09:13 UTC."
+  },
+  "reference_value": {
+   "old": [
+    "2026-05-13 01:00 UTC",
+    "2026-08-12 09:00 UTC"
+   ],
+   "new": [
+    "2026-05-13 01:00 UTC",
+    "2026-08-12 09:13 UTC"
+   ]
+  }
+ },
+ {
+  "id": "T015",
+  "type": "temporal",
+  "question": "What time period do the readings at Schenkenberg cover?",
+  "reference": {
+   "old": "From 2026-05-14 00:00 UTC to 2026-08-12 09:00 UTC.",
+   "new": "From 2026-05-14 00:00 UTC to 2026-08-12 09:13 UTC."
+  },
+  "reference_value": {
+   "old": [
+    "2026-05-14 00:00 UTC",
+    "2026-08-12 09:00 UTC"
+   ],
+   "new": [
+    "2026-05-14 00:00 UTC",
+    "2026-08-12 09:13 UTC"
+   ]
+  }
+ },
+ {
+  "id": "T032",
+  "type": "temporal",
+  "question": "How many readings were recorded at Baltanas in August 2026?",
+  "reference": {
+   "old": "77492 readings.",
+   "new": "82932 readings."
+  },
+  "reference_value": {
+   "old": 77492,
+   "new": 82932
+  }
+ },
+ {
+  "id": "T033",
+  "type": "temporal",
+  "question": "How many readings were recorded at Baltanas in July 2026?",
+  "reference": {
+   "old": "220893 readings.",
+   "new": "239902 readings."
+  },
+  "reference_value": {
+   "old": 220893,
+   "new": 239902
+  }
+ },
+ {
+  "id": "T034",
+  "type": "temporal",
+  "question": "How many readings were recorded at Delos in June 2026?",
+  "reference": {
+   "old": "38443 readings.",
+   "new": "65551 readings."
+  },
+  "reference_value": {
+   "old": 38443,
+   "new": 65551
+  }
+ },
+ {
+  "id": "T035",
+  "type": "temporal",
+  "question": "How many readings were recorded at Lucretili in July 2026?",
+  "reference": {
+   "old": "199288 readings.",
+   "new": "220581 readings."
+  },
+  "reference_value": {
+   "old": 199288,
+   "new": 220581
+  }
+ },
+ {
+  "id": "T037",
+  "type": "temporal",
+  "question": "How many readings were recorded at Ranverso in August 2026?",
+  "reference": {
+   "old": "7037 readings.",
+   "new": "16263 readings."
+  },
+  "reference_value": {
+   "old": 7037,
+   "new": 16263
+  }
+ },
+ {
+  "id": "T038",
+  "type": "temporal",
+  "question": "How many readings were recorded at Ranverso in July 2026?",
+  "reference": {
+   "old": "17850 readings.",
+   "new": "51009 readings."
+  },
+  "reference_value": {
+   "old": 17850,
+   "new": 51009
+  }
+ },
+ {
+  "id": "T039",
+  "type": "temporal",
+  "question": "How many readings were recorded at Ranverso in June 2026?",
+  "reference": {
+   "old": "16596 readings.",
+   "new": "31666 readings."
+  },
+  "reference_value": {
+   "old": 16596,
+   "new": 31666
+  }
+ },
+ {
+  "id": "T040",
+  "type": "temporal",
+  "question": "How many readings were recorded at Schenkenberg in August 2026?",
+  "reference": {
+   "old": "1592 readings.",
+   "new": "8782 readings."
+  },
+  "reference_value": {
+   "old": 1592,
+   "new": 8782
+  }
+ },
+ {
+  "id": "T041",
+  "type": "temporal",
+  "question": "How many readings were recorded at Schenkenberg in June 2026?",
+  "reference": {
+   "old": "8285 readings.",
+   "new": "15272 readings."
+  },
+  "reference_value": {
+   "old": 8285,
+   "new": 15272
+  }
+ },
+ {
+  "id": "T099",
+  "type": "temporal",
+  "question": "What was the relative humidity at Baltanas on 2026-07-01?",
+  "template": {
+   "old": "unanswerable",
+   "new": "daily_avg"
+  },
+  "reference": {
+   "old": "Cannot be answered: no humidity data.",
+   "new": "57.118 % on average (296 observations, from 33 % to 78 %)."
+  },
+  "reference_value": {
+   "old": null,
+   "new": 57.118243
+  },
+  "answerable": {
+   "old": false,
+   "new": true
+  }
+ },
+ {
+  "id": "A008",
+  "type": "anomaly",
+  "question": "According to the AD-RT expert rules, was there a temperature anomaly at Lucretili on 2026-06-28?",
+  "reference": {
+   "old": "Yes. R9a_temp_lt: metric 26 vs threshold 20 (window ending 2026-06-28 23:55 UTC); R9b_temp_st: max 1h change 1 vs threshold 5 (ending 2026-06-28 23:55 UTC)",
+   "new": "Yes. R9a_temp_lt: metric 26 vs threshold 20 (window ending 2026-06-28 23:56 UTC); R9b_temp_st: max 1h change 1 vs threshold 5 (ending 2026-06-28 23:56 UTC)"
+  }
+ },
+ {
+  "id": "A018",
+  "type": "anomaly",
+  "question": "According to the AD-RT expert rules, was there a visitor count anomaly at Lucretili on 2026-08-01?",
+  "reference": {
+   "old": "No. R5_visitors: latest reading 0 at 2026-08-01 23:55 UTC vs threshold 3",
+   "new": "No. R5_visitors: latest reading 0 at 2026-08-01 23:59 UTC vs threshold 3"
+  }
+ },
+ {
+  "id": "A024",
+  "type": "anomaly",
+  "question": "Did the temperature at Lucretili exceed its AD-RT threshold on 2026-07-17?",
+  "reference": {
+   "old": "Yes. R9a_temp_lt: metric 25 vs threshold 20 (window ending 2026-07-17 23:55 UTC); R9b_temp_st: max 1h change 1 vs threshold 5 (ending 2026-07-17 23:55 UTC)",
+   "new": "Yes. R9a_temp_lt: metric 25 vs threshold 20 (window ending 2026-07-17 23:59 UTC); R9b_temp_st: max 1h change 1 vs threshold 5 (ending 2026-07-17 23:59 UTC)"
+  }
+ },
+ {
+  "id": "A025",
+  "type": "anomaly",
+  "question": "Did the temperature at Lucretili exceed its AD-RT threshold on 2026-08-11?",
+  "reference": {
+   "old": "Yes. R9a_temp_lt: metric 27 vs threshold 20 (window ending 2026-08-11 23:55 UTC); R9b_temp_st: max 1h change 1 vs threshold 5 (ending 2026-08-11 23:55 UTC)",
+   "new": "Yes. R9a_temp_lt: metric 27 vs threshold 20 (window ending 2026-08-11 23:59 UTC); R9b_temp_st: max 1h change 1 vs threshold 5 (ending 2026-08-11 23:59 UTC)"
+  }
+ },
+ {
+  "id": "A034",
+  "type": "anomaly",
+  "question": "Was the temperature at Lucretili anomalous on 2026-07-02 according to its AD-RT rules?",
+  "reference": {
+   "old": "No. R9a_temp_lt: metric 18 vs threshold 20 (window ending 2026-07-02 23:55 UTC); R9b_temp_st: max 1h change 1 vs threshold 5 (ending 2026-07-02 23:55 UTC)",
+   "new": "No. R9a_temp_lt: metric 18 vs threshold 20 (window ending 2026-07-02 23:56 UTC); R9b_temp_st: max 1h change 1 vs threshold 5 (ending 2026-07-02 23:56 UTC)"
+  }
+ },
+ {
+  "id": "A035",
+  "type": "anomaly",
+  "question": "Was the temperature at Lucretili anomalous on 2026-07-03 according to its AD-RT rules?",
+  "reference": {
+   "old": "Yes. R9a_temp_lt: metric 25 vs threshold 20 (window ending 2026-07-03 23:55 UTC); R9b_temp_st: max 1h change 1 vs threshold 5 (ending 2026-07-03 23:55 UTC)",
+   "new": "Yes. R9a_temp_lt: metric 25 vs threshold 20 (window ending 2026-07-03 23:56 UTC); R9b_temp_st: max 1h change 1 vs threshold 5 (ending 2026-07-03 23:56 UTC)"
+  }
+ },
+ {
+  "id": "A036",
+  "type": "anomaly",
+  "question": "Was the temperature at Lucretili anomalous on 2026-07-09 according to its AD-RT rules?",
+  "reference": {
+   "old": "Yes. R9a_temp_lt: metric 27 vs threshold 20 (window ending 2026-07-09 23:55 UTC); R9b_temp_st: max 1h change 1 vs threshold 5 (ending 2026-07-09 23:55 UTC)",
+   "new": "Yes. R9a_temp_lt: metric 27 vs threshold 20 (window ending 2026-07-09 23:57 UTC); R9b_temp_st: max 1h change 1 vs threshold 5 (ending 2026-07-09 23:57 UTC)"
+  }
+ },
+ {
+  "id": "A051",
+  "type": "anomaly",
+  "question": "According to the AD-RT expert rules, was there a combined low temperature and high humidity anomaly at Schenkenberg on 2026-06-24?",
+  "template": {
+   "old": "verdict_no_data",
+   "new": "verdict_on_date"
+  },
+  "reference": {
+   "old": "Cannot be determined: the snapshot has no combined low temperature and high humidity readings at Schenkenberg for its AD-RT rule(s).",
+   "new": "No. R1_temp_hum: latest temperature 25.9 at 2026-06-24 23:59 UTC (fires below 0), latest humidity 44 at 2026-06-24 23:58 UTC (fires above 90)"
+  },
+  "reference_value": {
+   "old": "Cannot be determined",
+   "new": "No"
+  }
+ },
+ {
+  "id": "A052",
+  "type": "anomaly",
+  "question": "According to the AD-RT expert rules, was there a rainfall anomaly at Delos on 2026-06-01?",
+  "reference": {
+   "old": "Cannot be determined: the snapshot has no rainfall readings at Delos for its AD-RT rule(s).",
+   "new": "Cannot be determined: Delos's rainfall rule(s) (R1a_rain_1h, R1b_rain_3h) take rainfall amounts in mm per window; the snapshot's only rain readings at Delos are the weather station's rainfall intensity (rain_1, mm/h) and its running total since installation (rain_acc), neither of which is a rule's quantity."
+  }
+ },
+ {
+  "id": "A053",
+  "type": "anomaly",
+  "question": "According to the AD-RT expert rules, was there a soil moisture anomaly at Ranverso on 2026-06-21?",
+  "template": {
+   "old": "verdict_no_data",
+   "new": "verdict_on_date"
+  },
+  "reference": {
+   "old": "Cannot be determined: the snapshot has no soil moisture readings at Ranverso for its AD-RT rule(s).",
+   "new": "Yes. R4a_soil_high: latest reading 2.471 at 2026-06-21 23:58 UTC vs threshold 60; R4b_soil_low: latest reading 2.471 at 2026-06-21 23:58 UTC vs threshold 5 (fires below)"
+  },
+  "reference_value": {
+   "old": "Cannot be determined",
+   "new": "Yes"
+  }
+ },
+ {
+  "id": "A055",
+  "type": "anomaly",
+  "question": "Did the airflow at Baltanas exceed its AD-RT threshold on 2026-05-23?",
+  "template": {
+   "old": "verdict_no_data",
+   "new": "verdict_on_date"
+  },
+  "reference": {
+   "old": "Cannot be determined: the snapshot has no airflow readings at Baltanas for its AD-RT rule(s).",
+   "new": "Cannot be determined. R5a_airflow_const: no readings; R5b_airflow_range: no readings"
+  }
+ },
+ {
+  "id": "A057",
+  "type": "anomaly",
+  "question": "Did the humidity at Delos exceed its AD-RT threshold on 2026-05-29?",
+  "reference": {
+   "old": "Cannot be determined: the snapshot has no humidity readings at Delos for its AD-RT rule(s).",
+   "new": "Cannot be determined: Delos's humidity rule, R3_hum_cross, counts threshold crossings of a humidity series smoothed twice over AD-RT's fixed sampling interval (a 12-hour then a 3-sample rolling mean, 3-day window); the snapshot's humidity readings are irregular, so the rule is not evaluated."
+  }
+ },
+ {
+  "id": "A060",
+  "type": "anomaly",
+  "question": "Did the wind speed at Delos exceed its AD-RT threshold on 2026-08-09?",
+  "template": {
+   "old": "verdict_no_data",
+   "new": "verdict_on_date"
+  },
+  "reference": {
+   "old": "Cannot be determined: the snapshot has no wind speed readings at Delos for its AD-RT rule(s).",
+   "new": "No. R2_wind: latest reading 6.2 at 2026-08-09 23:59 UTC vs threshold 12"
+  },
+  "reference_value": {
+   "old": "Cannot be determined",
+   "new": "No"
+  }
+ },
+ {
+  "id": "A061",
+  "type": "anomaly",
+  "question": "Did the wind speed at Lucretili exceed its AD-RT threshold on 2026-05-24?",
+  "template": {
+   "old": "verdict_no_data",
+   "new": "verdict_on_date"
+  },
+  "reference": {
+   "old": "Cannot be determined: the snapshot has no wind speed readings at Lucretili for its AD-RT rule(s).",
+   "new": "Cannot be determined. R7_wind: no readings"
+  }
+ },
+ {
+  "id": "A062",
+  "type": "anomaly",
+  "question": "Was the barometric pressure at Lucretili anomalous on 2026-06-06 according to its AD-RT rules?",
+  "template": {
+   "old": "verdict_no_data",
+   "new": "verdict_on_date"
+  },
+  "reference": {
+   "old": "Cannot be determined: the snapshot has no barometric pressure readings at Lucretili for its AD-RT rule(s).",
+   "new": "Cannot be determined. R8_baro: no readings"
+  }
+ },
+ {
+  "id": "A064",
+  "type": "anomaly",
+  "question": "Was the humidity at Baltanas anomalous on 2026-07-28 according to its AD-RT rules?",
+  "reference": {
+   "old": "Cannot be determined: the snapshot has no humidity readings at Baltanas for its AD-RT rule(s).",
+   "new": "Cannot be determined: Baltanas's humidity rule, R2_hum_daily_range, excludes the hum1 and ee3 channels, and the snapshot has no other humidity readings at Baltanas."
+  }
+ },
+ {
+  "id": "A065",
+  "type": "anomaly",
+  "question": "Was the humidity at Ranverso anomalous on 2026-08-04 according to its AD-RT rules?",
+  "reference": {
+   "old": "Cannot be determined: the snapshot has no humidity readings at Ranverso for its AD-RT rule(s).",
+   "new": "Cannot be determined: Ranverso's humidity rule, R1_hum_inside, concerns indoor humidity (quantities labelled with both 'hum' and 'in'); the snapshot has no such readings at Ranverso."
+  }
+ },
+ {
+  "id": "F003",
+  "type": "followup",
+  "question": "What about Baltanas?",
+  "reference": {
+   "old": "0.935.",
+   "new": "0.903 V."
+  },
+  "reference_value": {
+   "old": 0.934916,
+   "new": 0.902933
+  }
+ },
+ {
+  "id": "F007",
+  "type": "followup",
+  "question": "What about Delos?",
+  "reference": {
+   "old": "1.656.",
+   "new": "2.387 V."
+  },
+  "reference_value": {
+   "old": 1.655922,
+   "new": 2.387406
+  }
+ },
+ {
+  "id": "F008",
+  "type": "followup",
+  "question": "What about Lucretili?",
+  "history": {
+   "old": [
+    {
+     "question": "What is the average voltage at Baltanas?",
+     "answer": "The average voltage at Baltanas is 0.935."
+    }
+   ],
+   "new": [
+    {
+     "question": "What is the average voltage at Baltanas?",
+     "answer": "The average voltage at Baltanas is 0.903 V."
+    }
+   ]
+  }
+ },
+ {
+  "id": "F009",
+  "type": "followup",
+  "question": "What about Ranverso?",
+  "history": {
+   "old": [
+    {
+     "question": "What is the average voltage at Baltanas?",
+     "answer": "The average voltage at Baltanas is 0.935."
+    }
+   ],
+   "new": [
+    {
+     "question": "What is the average voltage at Baltanas?",
+     "answer": "The average voltage at Baltanas is 0.903 V."
+    }
+   ]
+  }
+ },
+ {
+  "id": "F011",
+  "type": "followup",
+  "question": "What about Ranverso?",
+  "history": {
+   "old": [
+    {
+     "question": "What is the average voltage at Delos?",
+     "answer": "The average voltage at Delos is 1.656."
+    }
+   ],
+   "new": [
+    {
+     "question": "What is the average voltage at Delos?",
+     "answer": "The average voltage at Delos is 2.387 V."
+    }
+   ]
+  }
+ },
+ {
+  "id": "F021",
+  "type": "followup",
+  "question": "And the minimum?",
+  "reference": {
+   "old": "-0.002.",
+   "new": "-0.002 V."
+  },
+  "history": {
+   "old": [
+    {
+     "question": "What is the maximum voltage recorded at Delos?",
+     "answer": "The maximum is 4.945."
+    }
+   ],
+   "new": [
+    {
+     "question": "What is the maximum voltage recorded at Delos?",
+     "answer": "The maximum is 13104 V."
+    }
+   ]
+  }
+ },
+ {
+  "id": "F023",
+  "type": "followup",
+  "question": "When was it recorded?",
+  "history": {
+   "old": [
+    {
+     "question": "What is the maximum voltage recorded at Baltanas?",
+     "answer": "The maximum is 3.722."
+    }
+   ],
+   "new": [
+    {
+     "question": "What is the maximum voltage recorded at Baltanas?",
+     "answer": "The maximum is 3.722 V."
+    }
+   ]
+  }
+ },
+ {
+  "id": "F032",
+  "type": "followup",
+  "question": "Among these, how many measure composed RMS acceleration (rmsComposed)?",
+  "history": {
+   "old": [
+    {
+     "question": "How many sensors have reported readings at Schenkenberg?",
+     "answer": "12 sensors."
+    }
+   ],
+   "new": [
+    {
+     "question": "How many sensors have reported readings at Schenkenberg?",
+     "answer": "14 sensors."
+    }
+   ]
+  }
+ },
+ {
+  "id": "F033",
+  "type": "followup",
+  "question": "Among these, how many measure composed peak ground acceleration (pgaComposed)?",
+  "history": {
+   "old": [
+    {
+     "question": "How many sensors have reported readings at Schenkenberg?",
+     "answer": "12 sensors."
+    }
+   ],
+   "new": [
+    {
+     "question": "How many sensors have reported readings at Schenkenberg?",
+     "answer": "14 sensors."
+    }
+   ]
+  }
+ },
+ {
+  "id": "F034",
+  "type": "followup",
+  "question": "Among these, how many measure potentiometer displacement?",
+  "history": {
+   "old": [
+    {
+     "question": "How many sensors have reported readings at Delos?",
+     "answer": "26 sensors."
+    }
+   ],
+   "new": [
+    {
+     "question": "How many sensors have reported readings at Delos?",
+     "answer": "30 sensors."
+    }
+   ]
+  }
+ },
+ {
+  "id": "F035",
+  "type": "followup",
+  "question": "Among these, how many measure rainfall?",
+  "history": {
+   "old": [
+    {
+     "question": "How many sensors have reported readings at Ranverso?",
+     "answer": "13 sensors."
+    }
+   ],
+   "new": [
+    {
+     "question": "How many sensors have reported readings at Ranverso?",
+     "answer": "19 sensors."
+    }
+   ]
+  }
+ },
+ {
+  "id": "F036",
+  "type": "followup",
+  "question": "Among these, how many measure soil water potential?",
+  "history": {
+   "old": [
+    {
+     "question": "How many sensors have reported readings at Baltanas?",
+     "answer": "33 sensors."
+    }
+   ],
+   "new": [
+    {
+     "question": "How many sensors have reported readings at Baltanas?",
+     "answer": "35 sensors."
+    }
+   ]
+  }
+ },
+ {
+  "id": "F037",
+  "type": "followup",
+  "question": "Among these, how many measure temperature?",
+  "history": {
+   "old": [
+    {
+     "question": "How many sensors have reported readings at Lucretili?",
+     "answer": "18 sensors."
+    }
+   ],
+   "new": [
+    {
+     "question": "How many sensors have reported readings at Lucretili?",
+     "answer": "20 sensors."
+    }
+   ]
+  }
+ },
+ {
+  "id": "F038",
+  "type": "followup",
+  "question": "Among these, how many measure temperature?",
+  "history": {
+   "old": [
+    {
+     "question": "How many sensors have reported readings at Schenkenberg?",
+     "answer": "12 sensors."
+    }
+   ],
+   "new": [
+    {
+     "question": "How many sensors have reported readings at Schenkenberg?",
+     "answer": "14 sensors."
+    }
+   ]
+  }
+ },
+ {
+  "id": "F039",
+  "type": "followup",
+  "question": "Among these, how many measure temperature?",
+  "history": {
+   "old": [
+    {
+     "question": "How many sensors have reported readings at Delos?",
+     "answer": "26 sensors."
+    }
+   ],
+   "new": [
+    {
+     "question": "How many sensors have reported readings at Delos?",
+     "answer": "30 sensors."
+    }
+   ]
+  }
+ },
+ {
+  "id": "F040",
+  "type": "followup",
+  "question": "Among these, how many measure voltage?",
+  "history": {
+   "old": [
+    {
+     "question": "How many sensors have reported readings at Ranverso?",
+     "answer": "13 sensors."
+    }
+   ],
+   "new": [
+    {
+     "question": "How many sensors have reported readings at Ranverso?",
+     "answer": "19 sensors."
+    }
+   ]
+  }
+ },
+ {
+  "id": "F041",
+  "type": "followup",
+  "question": "Among these, how many measure voltage?",
+  "reference": {
+   "old": "15 sensors.",
+   "new": "16 sensors."
+  },
+  "reference_value": {
+   "old": 15,
+   "new": 16
+  },
+  "history": {
+   "old": [
+    {
+     "question": "How many sensors have reported readings at Delos?",
+     "answer": "26 sensors."
+    }
+   ],
+   "new": [
+    {
+     "question": "How many sensors have reported readings at Delos?",
+     "answer": "30 sensors."
+    }
+   ]
+  }
+ },
+ {
+  "id": "F043",
+  "type": "followup",
+  "question": "And which one is the lowest?",
+  "history": {
+   "old": [
+    {
+     "question": "Which sensor node at Ranverso is at the highest altitude?",
+     "answer": "LS-170894, at 339.42 m."
+    }
+   ],
+   "new": [
+    {
+     "question": "Which sensor node at Ranverso is at the highest altitude?",
+     "answer": "ae_ranverso, at 340.16 m."
+    }
+   ]
+  }
+ },
+ {
+  "id": "F044",
+  "type": "followup",
+  "question": "And which one is the lowest?",
+  "history": {
+   "old": [
+    {
+     "question": "Which sensor node at Baltanas is at the highest altitude?",
+     "answer": "AF4, at 798.42 m."
+    }
+   ],
+   "new": [
+    {
+     "question": "Which sensor node at Baltanas is at the highest altitude?",
+     "answer": "AF4, at 798.38 m."
+    }
+   ]
+  }
+ },
+ {
+  "id": "F045",
+  "type": "followup",
+  "question": "And which one is the lowest?",
+  "reference": {
+   "old": "LS-149796, at 637.9 m.",
+   "new": "2CF7F1C072600345, at 643 m."
+  },
+  "reference_value": {
+   "old": "LS-149796",
+   "new": "2CF7F1C072600345"
+  },
+  "history": {
+   "old": [
+    {
+     "question": "Which sensor node at Schenkenberg is at the highest altitude?",
+     "answer": "LS-152914, at 643.53 m."
+    }
+   ],
+   "new": [
+    {
+     "question": "Which sensor node at Schenkenberg is at the highest altitude?",
+     "answer": "2CF7F1C072300226, at 651.2 m."
+    }
+   ]
+  }
+ },
+ {
+  "id": "F046",
+  "type": "followup",
+  "question": "And which one is the lowest?",
+  "reference": {
+   "old": "LS-153157, at 12.32 m.",
+   "new": "0004A30B0050C42F, at 9.64 m."
+  },
+  "reference_value": {
+   "old": "LS-153157",
+   "new": "0004A30B0050C42F"
+  }
+ },
+ {
+  "id": "F047",
+  "type": "followup",
+  "question": "What about at Baltanas?",
+  "reference": {
+   "old": "380.8 m, between Gases and GNSS_Base.",
+   "new": "382.3 m, between A8610A3230467704 and GNSS_Base."
+  },
+  "reference_value": {
+   "old": 380.8,
+   "new": 382.3
+  },
+  "history": {
+   "old": [
+    {
+     "question": "How far apart are the two most distant sensor nodes at Delos?",
+     "answer": "1355.6 m, between H. Fournoi_wall attached 1 and LS-153157."
+    }
+   ],
+   "new": [
+    {
+     "question": "How far apart are the two most distant sensor nodes at Delos?",
+     "answer": "1669.9 m, between 0004A30B0050C42F and H. Fournoi_wall attached 1."
+    }
+   ]
+  }
+ },
+ {
+  "id": "F048",
+  "type": "followup",
+  "question": "What about at Delos?",
+  "reference": {
+   "old": "1355.6 m, between H. Fournoi_wall attached 1 and LS-153157.",
+   "new": "1669.9 m, between 0004A30B0050C42F and H. Fournoi_wall attached 1."
+  },
+  "reference_value": {
+   "old": 1355.6,
+   "new": 1669.9
+  },
+  "history": {
+   "old": [
+    {
+     "question": "How far apart are the two most distant sensor nodes at Schenkenberg?",
+     "answer": "5.5 m, between LS-152555 and LS-175480."
+    }
+   ],
+   "new": [
+    {
+     "question": "How far apart are the two most distant sensor nodes at Schenkenberg?",
+     "answer": "5.3 m, between LS-152555 and LS-175480."
+    }
+   ]
+  }
+ },
+ {
+  "id": "F049",
+  "type": "followup",
+  "question": "What about at Lucretili?",
+  "history": {
+   "old": [
+    {
+     "question": "How far apart are the two most distant sensor nodes at Schenkenberg?",
+     "answer": "5.5 m, between LS-152555 and LS-175480."
+    }
+   ],
+   "new": [
+    {
+     "question": "How far apart are the two most distant sensor nodes at Schenkenberg?",
+     "answer": "5.3 m, between LS-152555 and LS-175480."
+    }
+   ]
+  }
+ },
+ {
+  "id": "F050",
+  "type": "followup",
+  "question": "What about at Lucretili?",
+  "history": {
+   "old": [
+    {
+     "question": "How far apart are the two most distant sensor nodes at Baltanas?",
+     "answer": "380.8 m, between Gases and GNSS_Base."
+    }
+   ],
+   "new": [
+    {
+     "question": "How far apart are the two most distant sensor nodes at Baltanas?",
+     "answer": "382.3 m, between A8610A3230467704 and GNSS_Base."
+    }
+   ]
+  }
+ },
+ {
+  "id": "F052",
+  "type": "followup",
+  "question": "What about at Ranverso?",
+  "history": {
+   "old": [
+    {
+     "question": "How far apart are the two most distant sensor nodes at Baltanas?",
+     "answer": "380.8 m, between Gases and GNSS_Base."
+    }
+   ],
+   "new": [
+    {
+     "question": "How far apart are the two most distant sensor nodes at Baltanas?",
+     "answer": "382.3 m, between A8610A3230467704 and GNSS_Base."
+    }
+   ]
+  }
+ },
+ {
+  "id": "F053",
+  "type": "followup",
+  "question": "What about at Ranverso?",
+  "history": {
+   "old": [
+    {
+     "question": "How far apart are the two most distant sensor nodes at Schenkenberg?",
+     "answer": "5.5 m, between LS-152555 and LS-175480."
+    }
+   ],
+   "new": [
+    {
+     "question": "How far apart are the two most distant sensor nodes at Schenkenberg?",
+     "answer": "5.3 m, between LS-152555 and LS-175480."
+    }
+   ]
+  }
+ },
+ {
+  "id": "F054",
+  "type": "followup",
+  "question": "What about at Schenkenberg?",
+  "reference": {
+   "old": "5.5 m, between LS-152555 and LS-175480.",
+   "new": "5.3 m, between LS-152555 and LS-175480."
+  },
+  "reference_value": {
+   "old": 5.5,
+   "new": 5.3
+  }
+ },
+ {
+  "id": "F068",
+  "type": "followup",
+  "question": "What about on 2026-06-21?",
+  "reference": {
+   "old": "Yes. R9a_temp_lt: metric 27 vs threshold 20 (window ending 2026-06-21 23:55 UTC); R9b_temp_st: max 1h change 1 vs threshold 5 (ending 2026-06-21 23:55 UTC)",
+   "new": "Yes. R9a_temp_lt: metric 27 vs threshold 20 (window ending 2026-06-21 23:56 UTC); R9b_temp_st: max 1h change 1 vs threshold 5 (ending 2026-06-21 23:56 UTC)"
+  }
+ },
+ {
+  "id": "F069",
+  "type": "followup",
+  "question": "What about on 2026-06-30?",
+  "reference": {
+   "old": "Yes. R9a_temp_lt: metric 27 vs threshold 20 (window ending 2026-06-30 23:55 UTC); R9b_temp_st: max 1h change 1 vs threshold 5 (ending 2026-06-30 23:55 UTC)",
+   "new": "Yes. R9a_temp_lt: metric 27 vs threshold 20 (window ending 2026-06-30 23:57 UTC); R9b_temp_st: max 1h change 1 vs threshold 5 (ending 2026-06-30 23:57 UTC)"
+  },
+  "history": {
+   "old": [
+    {
+     "question": "Was the temperature at Lucretili anomalous on 2026-06-25 according to its AD-RT rules?",
+     "answer": "Yes. R9a_temp_lt: metric 27 vs threshold 20 (window ending 2026-06-25 23:55 UTC); R9b_temp_st: max 1h change 1 vs threshold 5 (ending 2026-06-25 23:55 UTC)"
+    }
+   ],
+   "new": [
+    {
+     "question": "Was the temperature at Lucretili anomalous on 2026-06-25 according to its AD-RT rules?",
+     "answer": "Yes. R9a_temp_lt: metric 27 vs threshold 20 (window ending 2026-06-25 23:58 UTC); R9b_temp_st: max 1h change 1 vs threshold 5 (ending 2026-06-25 23:58 UTC)"
+    }
+   ]
+  }
+ },
+ {
+  "id": "F070",
+  "type": "followup",
+  "question": "What about on 2026-07-14?",
+  "reference": {
+   "old": "Yes. R9a_temp_lt: metric 25 vs threshold 20 (window ending 2026-07-14 23:55 UTC); R9b_temp_st: max 1h change 1 vs threshold 5 (ending 2026-07-14 23:55 UTC)",
+   "new": "Yes. R9a_temp_lt: metric 25 vs threshold 20 (window ending 2026-07-14 23:58 UTC); R9b_temp_st: max 1h change 1 vs threshold 5 (ending 2026-07-14 23:58 UTC)"
+  },
+  "history": {
+   "old": [
+    {
+     "question": "Was the temperature at Lucretili anomalous on 2026-07-06 according to its AD-RT rules?",
+     "answer": "Yes. R9a_temp_lt: metric 25 vs threshold 20 (window ending 2026-07-06 23:55 UTC); R9b_temp_st: max 1h change 1 vs threshold 5 (ending 2026-07-06 23:55 UTC)"
+    }
+   ],
+   "new": [
+    {
+     "question": "Was the temperature at Lucretili anomalous on 2026-07-06 according to its AD-RT rules?",
+     "answer": "Yes. R9a_temp_lt: metric 25 vs threshold 20 (window ending 2026-07-06 23:58 UTC); R9b_temp_st: max 1h change 1 vs threshold 5 (ending 2026-07-06 23:58 UTC)"
+    }
+   ]
+  }
+ },
+ {
+  "id": "F076",
+  "type": "followup",
+  "question": "What about on 2026-08-07?",
+  "reference": {
+   "old": "No. R5_visitors: latest reading 0 at 2026-08-07 23:55 UTC vs threshold 3",
+   "new": "No. R5_visitors: latest reading 0 at 2026-08-07 23:59 UTC vs threshold 3"
+  },
+  "history": {
+   "old": [
+    {
+     "question": "Was the visitor count at Lucretili anomalous on 2026-08-02 according to its AD-RT rules?",
+     "answer": "No. R5_visitors: latest reading 0 at 2026-08-02 23:55 UTC vs threshold 3"
+    }
+   ],
+   "new": [
+    {
+     "question": "Was the visitor count at Lucretili anomalous on 2026-08-02 according to its AD-RT rules?",
+     "answer": "No. R5_visitors: latest reading 0 at 2026-08-02 23:59 UTC vs threshold 3"
+    }
+   ]
+  }
+ },
+ {
+  "id": "F078",
+  "type": "followup",
+  "question": "And in the following month?",
+  "reference": {
+   "old": "198983 readings.",
+   "new": "206492 readings."
+  },
+  "reference_value": {
+   "old": 198983,
+   "new": 206492
+  }
+ },
+ {
+  "id": "F079",
+  "type": "followup",
+  "question": "And in the following month?",
+  "reference": {
+   "old": "14501 readings.",
+   "new": "37315 readings."
+  },
+  "reference_value": {
+   "old": 14501,
+   "new": 37315
+  },
+  "history": {
+   "old": [
+    {
+     "question": "How many readings were recorded at Delos in July 2026?",
+     "answer": "40130 readings."
+    }
+   ],
+   "new": [
+    {
+     "question": "How many readings were recorded at Delos in July 2026?",
+     "answer": "102364 readings."
+    }
+   ]
+  }
+ },
+ {
+  "id": "F080",
+  "type": "followup",
+  "question": "And in the following month?",
+  "reference": {
+   "old": "38443 readings.",
+   "new": "65551 readings."
+  },
+  "reference_value": {
+   "old": 38443,
+   "new": 65551
+  }
+ },
+ {
+  "id": "F081",
+  "type": "followup",
+  "question": "And in the following month?",
+  "reference": {
+   "old": "67447 readings.",
+   "new": "87152 readings."
+  },
+  "reference_value": {
+   "old": 67447,
+   "new": 87152
+  },
+  "history": {
+   "old": [
+    {
+     "question": "How many readings were recorded at Lucretili in July 2026?",
+     "answer": "199288 readings."
+    }
+   ],
+   "new": [
+    {
+     "question": "How many readings were recorded at Lucretili in July 2026?",
+     "answer": "220581 readings."
+    }
+   ]
+  }
+ },
+ {
+  "id": "F082",
+  "type": "followup",
+  "question": "And in the following month?",
+  "reference": {
+   "old": "77492 readings.",
+   "new": "82932 readings."
+  },
+  "reference_value": {
+   "old": 77492,
+   "new": 82932
+  },
+  "history": {
+   "old": [
+    {
+     "question": "How many readings were recorded at Baltanas in July 2026?",
+     "answer": "220893 readings."
+    }
+   ],
+   "new": [
+    {
+     "question": "How many readings were recorded at Baltanas in July 2026?",
+     "answer": "239902 readings."
+    }
+   ]
+  }
+ },
+ {
+  "id": "F083",
+  "type": "followup",
+  "question": "And in the following month?",
+  "reference": {
+   "old": "40130 readings.",
+   "new": "102364 readings."
+  },
+  "reference_value": {
+   "old": 40130,
+   "new": 102364
+  },
+  "history": {
+   "old": [
+    {
+     "question": "How many readings were recorded at Delos in June 2026?",
+     "answer": "38443 readings."
+    }
+   ],
+   "new": [
+    {
+     "question": "How many readings were recorded at Delos in June 2026?",
+     "answer": "65551 readings."
+    }
+   ]
+  }
+ },
+ {
+  "id": "F084",
+  "type": "followup",
+  "question": "And in the following month?",
+  "reference": {
+   "old": "199288 readings.",
+   "new": "220581 readings."
+  },
+  "reference_value": {
+   "old": 199288,
+   "new": 220581
+  },
+  "history": {
+   "old": [
+    {
+     "question": "How many readings were recorded at Lucretili in June 2026?",
+     "answer": "198983 readings."
+    }
+   ],
+   "new": [
+    {
+     "question": "How many readings were recorded at Lucretili in June 2026?",
+     "answer": "206492 readings."
+    }
+   ]
+  }
+ },
+ {
+  "id": "F085",
+  "type": "followup",
+  "question": "And in the following month?",
+  "reference": {
+   "old": "236483 readings.",
+   "new": "244932 readings."
+  },
+  "reference_value": {
+   "old": 236483,
+   "new": 244932
+  }
+ },
+ {
+  "id": "F098",
+  "type": "followup",
+  "question": "And the relative humidity?",
+  "template": {
+   "old": "unanswerable",
+   "new": "and_the_quantity"
+  },
+  "reference": {
+   "old": "Cannot be answered: no humidity data at Baltanas.",
+   "new": "42.292 %."
+  },
+  "reference_value": {
+   "old": null,
+   "new": 42.291679
+  },
+  "answerable": {
+   "old": false,
+   "new": true
+  }
+ },
+ {
+  "id": "F099",
+  "type": "followup",
+  "question": "And the relative humidity?",
+  "template": {
+   "old": "unanswerable",
+   "new": "and_the_quantity"
+  },
+  "reference": {
+   "old": "Cannot be answered: no humidity data at Lucretili.",
+   "new": "64.216 %."
+  },
+  "reference_value": {
+   "old": null,
+   "new": 64.21552
+  },
+  "answerable": {
+   "old": false,
+   "new": true
+  }
+ },
+ {
+  "id": "F100",
+  "type": "followup",
+  "question": "And the relative humidity?",
+  "template": {
+   "old": "unanswerable",
+   "new": "and_the_quantity"
+  },
+  "reference": {
+   "old": "Cannot be answered: no humidity data at Delos.",
+   "new": "63.983 %."
+  },
+  "reference_value": {
+   "old": null,
+   "new": 63.983098
+  },
+  "answerable": {
+   "old": false,
+   "new": true
+  }
+ }
+]

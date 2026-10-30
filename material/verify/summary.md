@@ -8,13 +8,13 @@ MATCH: the SQL recomputation equals the stored reference. MANUAL: needs a human 
 | basic | sensor_count | 5 | 0 | 0 |
 | basic | reading_count | 5 | 0 | 0 |
 | basic | quantity_count | 4 | 0 | 0 |
-| basic | avg_quantity | 14 | 0 | 0 |
+| basic | avg_quantity | 18 | 0 | 0 |
 | basic | max_quantity | 14 | 0 | 0 |
 | basic | min_quantity | 13 | 0 | 0 |
 | basic | obs_count | 15 | 0 | 0 |
 | basic | sensors_measuring | 15 | 0 | 0 |
 | basic | site_compare | 4 | 0 | 0 |
-| basic | unanswerable | 6 | 0 | 0 |
+| basic | unanswerable | 2 | 0 | 0 |
 | spatial | farthest_pair | 5 | 0 | 0 |
 | spatial | centroid | 5 | 0 | 0 |
 | spatial | highest_node | 4 | 0 | 0 |
@@ -34,15 +34,15 @@ MATCH: the SQL recomputation equals the stored reference. MANUAL: needs a human 
 | temporal | time_of_max | 8 | 0 | 0 |
 | temporal | monthly_count | 10 | 0 | 0 |
 | temporal | relative_window | 8 | 0 | 0 |
-| temporal | daily_avg | 10 | 0 | 0 |
+| temporal | daily_avg | 11 | 0 | 0 |
 | temporal | daily_max | 9 | 0 | 0 |
 | temporal | daily_min | 9 | 0 | 0 |
 | temporal | hottest_day | 8 | 0 | 0 |
 | temporal | range_avg | 12 | 0 | 0 |
-| temporal | unanswerable | 1 | 0 | 2 |
-| anomaly | verdict_on_date | 45 | 0 | 0 |
+| temporal | unanswerable | 0 | 0 | 2 |
+| anomaly | verdict_on_date | 51 | 0 | 0 |
 | anomaly | verdict_latest | 5 | 0 | 0 |
-| anomaly | verdict_no_data | 15 | 0 | 0 |
+| anomaly | verdict_no_data | 8 | 0 | 1 |
 | anomaly | verdict_no_rule | 0 | 0 | 5 |
 | anomaly | threshold_lookup | 30 | 0 | 0 |
 | followup | what_about_site | 12 | 0 | 0 |
@@ -55,8 +55,8 @@ MATCH: the SQL recomputation equals the stored reference. MANUAL: needs a human 
 | followup | anomaly_other_date | 12 | 0 | 0 |
 | followup | next_month | 8 | 0 | 0 |
 | followup | two_turn | 12 | 0 | 0 |
-| followup | unanswerable | 3 | 0 | 0 |
-| **total** | | **490** | **0** | **10** |
+| followup | and_the_quantity | 3 | 0 | 0 |
+| **total** | | **489** | **0** | **11** |
 
 ## Mismatches
 _none_

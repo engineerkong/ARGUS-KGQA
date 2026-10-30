@@ -13,7 +13,7 @@ SELECT min(result_time) AS first, max(result_time) AS last, count(*) FROM readin
 ```
 | first | last | count |
 |---|---|---|
-| 2026-05-13 00:50:00 | 2026-08-12 09:15:00 | 676272 |
+| 2026-05-13 00:50:00 | 2026-08-12 09:15:00 | 709170 |
 
 
 ---
@@ -29,7 +29,7 @@ SELECT min(result_time) AS first, max(result_time) AS last, count(*) FROM readin
 ```
 | first | last | count |
 |---|---|---|
-| 2026-05-13 01:00:00 | 2026-08-12 09:00:00 | 113789 |
+| 2026-05-13 01:00:00 | 2026-08-12 09:14:17 | 225945 |
 
 
 ---
@@ -45,7 +45,7 @@ SELECT min(result_time) AS first, max(result_time) AS last, count(*) FROM readin
 ```
 | first | last | count |
 |---|---|---|
-| 2026-05-13 00:50:00 | 2026-08-12 09:15:00 | 526071 |
+| 2026-05-13 00:50:00 | 2026-08-12 09:15:00 | 574578 |
 
 
 ---
@@ -61,7 +61,7 @@ SELECT min(result_time) AS first, max(result_time) AS last, count(*) FROM readin
 ```
 | first | last | count |
 |---|---|---|
-| 2026-05-13 01:00:00 | 2026-08-12 09:00:00 | 50695 |
+| 2026-05-13 01:00:00 | 2026-08-12 09:13:25 | 108150 |
 
 
 ---
@@ -77,7 +77,7 @@ SELECT min(result_time) AS first, max(result_time) AS last, count(*) FROM readin
 ```
 | first | last | count |
 |---|---|---|
-| 2026-05-14 00:00:00 | 2026-08-12 09:00:00 | 26859 |
+| 2026-05-14 00:00:00 | 2026-08-12 09:13:57 | 59713 |
 
 
 ---
@@ -93,7 +93,7 @@ SELECT min(result_time) AS first, max(result_time) AS last, count(*) FROM readin
 ```
 | first | last | count |
 |---|---|---|
-| 2026-05-13 00:50:00 | 2026-08-12 09:15:00 | 676272 |
+| 2026-05-13 00:50:00 | 2026-08-12 09:15:00 | 709170 |
 
 
 ---
@@ -101,15 +101,15 @@ SELECT min(result_time) AS first, max(result_time) AS last, count(*) FROM readin
 ## T007 · last_reading
 
 **Question:** When was the most recent reading recorded at Delos?  
-**Reference:** 2026-08-12 09:00 UTC.  
-**Recomputed:** `2026-08-12 09:00 UTC` → **MATCH**
+**Reference:** 2026-08-12 09:14 UTC.  
+**Recomputed:** `2026-08-12 09:14 UTC` → **MATCH**
 
 ```sql
 SELECT min(result_time) AS first, max(result_time) AS last, count(*) FROM readings WHERE site_id = 'delos';
 ```
 | first | last | count |
 |---|---|---|
-| 2026-05-13 01:00:00 | 2026-08-12 09:00:00 | 113789 |
+| 2026-05-13 01:00:00 | 2026-08-12 09:14:17 | 225945 |
 
 
 ---
@@ -125,7 +125,7 @@ SELECT min(result_time) AS first, max(result_time) AS last, count(*) FROM readin
 ```
 | first | last | count |
 |---|---|---|
-| 2026-05-13 00:50:00 | 2026-08-12 09:15:00 | 526071 |
+| 2026-05-13 00:50:00 | 2026-08-12 09:15:00 | 574578 |
 
 
 ---
@@ -133,15 +133,15 @@ SELECT min(result_time) AS first, max(result_time) AS last, count(*) FROM readin
 ## T009 · last_reading
 
 **Question:** When was the most recent reading recorded at Ranverso?  
-**Reference:** 2026-08-12 09:00 UTC.  
-**Recomputed:** `2026-08-12 09:00 UTC` → **MATCH**
+**Reference:** 2026-08-12 09:13 UTC.  
+**Recomputed:** `2026-08-12 09:13 UTC` → **MATCH**
 
 ```sql
 SELECT min(result_time) AS first, max(result_time) AS last, count(*) FROM readings WHERE site_id = 'ranverso';
 ```
 | first | last | count |
 |---|---|---|
-| 2026-05-13 01:00:00 | 2026-08-12 09:00:00 | 50695 |
+| 2026-05-13 01:00:00 | 2026-08-12 09:13:25 | 108150 |
 
 
 ---
@@ -149,15 +149,15 @@ SELECT min(result_time) AS first, max(result_time) AS last, count(*) FROM readin
 ## T010 · last_reading
 
 **Question:** When was the most recent reading recorded at Schenkenberg?  
-**Reference:** 2026-08-12 09:00 UTC.  
-**Recomputed:** `2026-08-12 09:00 UTC` → **MATCH**
+**Reference:** 2026-08-12 09:13 UTC.  
+**Recomputed:** `2026-08-12 09:13 UTC` → **MATCH**
 
 ```sql
 SELECT min(result_time) AS first, max(result_time) AS last, count(*) FROM readings WHERE site_id = 'schenkenberg';
 ```
 | first | last | count |
 |---|---|---|
-| 2026-05-14 00:00:00 | 2026-08-12 09:00:00 | 26859 |
+| 2026-05-14 00:00:00 | 2026-08-12 09:13:57 | 59713 |
 
 
 ---
@@ -173,7 +173,7 @@ SELECT min(result_time) AS first, max(result_time) AS last, count(*) FROM readin
 ```
 | first | last | count |
 |---|---|---|
-| 2026-05-13 00:50:00 | 2026-08-12 09:15:00 | 676272 |
+| 2026-05-13 00:50:00 | 2026-08-12 09:15:00 | 709170 |
 
 
 ---
@@ -181,15 +181,15 @@ SELECT min(result_time) AS first, max(result_time) AS last, count(*) FROM readin
 ## T012 · span
 
 **Question:** What time period do the readings at Delos cover?  
-**Reference:** From 2026-05-13 01:00 UTC to 2026-08-12 09:00 UTC.  
-**Recomputed:** `['2026-05-13 01:00 UTC', '2026-08-12 09:00 UTC']` → **MATCH**
+**Reference:** From 2026-05-13 01:00 UTC to 2026-08-12 09:14 UTC.  
+**Recomputed:** `['2026-05-13 01:00 UTC', '2026-08-12 09:14 UTC']` → **MATCH**
 
 ```sql
 SELECT min(result_time) AS first, max(result_time) AS last, count(*) FROM readings WHERE site_id = 'delos';
 ```
 | first | last | count |
 |---|---|---|
-| 2026-05-13 01:00:00 | 2026-08-12 09:00:00 | 113789 |
+| 2026-05-13 01:00:00 | 2026-08-12 09:14:17 | 225945 |
 
 
 ---
@@ -205,7 +205,7 @@ SELECT min(result_time) AS first, max(result_time) AS last, count(*) FROM readin
 ```
 | first | last | count |
 |---|---|---|
-| 2026-05-13 00:50:00 | 2026-08-12 09:15:00 | 526071 |
+| 2026-05-13 00:50:00 | 2026-08-12 09:15:00 | 574578 |
 
 
 ---
@@ -213,15 +213,15 @@ SELECT min(result_time) AS first, max(result_time) AS last, count(*) FROM readin
 ## T014 · span
 
 **Question:** What time period do the readings at Ranverso cover?  
-**Reference:** From 2026-05-13 01:00 UTC to 2026-08-12 09:00 UTC.  
-**Recomputed:** `['2026-05-13 01:00 UTC', '2026-08-12 09:00 UTC']` → **MATCH**
+**Reference:** From 2026-05-13 01:00 UTC to 2026-08-12 09:13 UTC.  
+**Recomputed:** `['2026-05-13 01:00 UTC', '2026-08-12 09:13 UTC']` → **MATCH**
 
 ```sql
 SELECT min(result_time) AS first, max(result_time) AS last, count(*) FROM readings WHERE site_id = 'ranverso';
 ```
 | first | last | count |
 |---|---|---|
-| 2026-05-13 01:00:00 | 2026-08-12 09:00:00 | 50695 |
+| 2026-05-13 01:00:00 | 2026-08-12 09:13:25 | 108150 |
 
 
 ---
@@ -229,15 +229,15 @@ SELECT min(result_time) AS first, max(result_time) AS last, count(*) FROM readin
 ## T015 · span
 
 **Question:** What time period do the readings at Schenkenberg cover?  
-**Reference:** From 2026-05-14 00:00 UTC to 2026-08-12 09:00 UTC.  
-**Recomputed:** `['2026-05-14 00:00 UTC', '2026-08-12 09:00 UTC']` → **MATCH**
+**Reference:** From 2026-05-14 00:00 UTC to 2026-08-12 09:13 UTC.  
+**Recomputed:** `['2026-05-14 00:00 UTC', '2026-08-12 09:13 UTC']` → **MATCH**
 
 ```sql
 SELECT min(result_time) AS first, max(result_time) AS last, count(*) FROM readings WHERE site_id = 'schenkenberg';
 ```
 | first | last | count |
 |---|---|---|
-| 2026-05-14 00:00:00 | 2026-08-12 09:00:00 | 26859 |
+| 2026-05-14 00:00:00 | 2026-08-12 09:13:57 | 59713 |
 
 
 ---
@@ -502,10 +502,10 @@ ORDER BY o.value DESC, o.result_time ASC LIMIT 5;
 | value | result_time | sensor_id |
 |---|---|---|
 | 50 | 2026-07-31 11:30:00 | 8250dd80-8269-11f0-9283-e956b63ef652 |
-| 50 | 2026-07-31 11:30:00 | 0cf22310-81be-11f0-9283-e956b63ef652 |
 | 50 | 2026-07-31 11:30:00 | 82508f60-8269-11f0-b6dc-556f88243956 |
-| 50 | 2026-08-01 11:30:00 | 82508f60-8269-11f0-b6dc-556f88243956 |
+| 50 | 2026-07-31 11:30:00 | 0cf22310-81be-11f0-9283-e956b63ef652 |
 | 50 | 2026-08-01 11:30:00 | 8250dd80-8269-11f0-9283-e956b63ef652 |
+| 50 | 2026-08-01 11:30:00 | 82508f60-8269-11f0-b6dc-556f88243956 |
 
 - The maximum occurs more than once; the reference uses the earliest.
 
@@ -558,8 +558,8 @@ ORDER BY o.value DESC, o.result_time ASC LIMIT 5;
 ## T032 · monthly_count
 
 **Question:** How many readings were recorded at Baltanas in August 2026?  
-**Reference:** 77492 readings.  
-**Recomputed:** `77492` → **MATCH**
+**Reference:** 82932 readings.  
+**Recomputed:** `82932` → **MATCH**
 
 ```sql
 SELECT count(*) AS readings FROM readings WHERE site_id = 'baltanas'
@@ -567,7 +567,7 @@ SELECT count(*) AS readings FROM readings WHERE site_id = 'baltanas'
 ```
 | readings |
 |---|
-| 77492 |
+| 82932 |
 
 
 ---
@@ -575,8 +575,8 @@ SELECT count(*) AS readings FROM readings WHERE site_id = 'baltanas'
 ## T033 · monthly_count
 
 **Question:** How many readings were recorded at Baltanas in July 2026?  
-**Reference:** 220893 readings.  
-**Recomputed:** `220893` → **MATCH**
+**Reference:** 239902 readings.  
+**Recomputed:** `239902` → **MATCH**
 
 ```sql
 SELECT count(*) AS readings FROM readings WHERE site_id = 'baltanas'
@@ -584,7 +584,7 @@ SELECT count(*) AS readings FROM readings WHERE site_id = 'baltanas'
 ```
 | readings |
 |---|
-| 220893 |
+| 239902 |
 
 
 ---
@@ -592,8 +592,8 @@ SELECT count(*) AS readings FROM readings WHERE site_id = 'baltanas'
 ## T034 · monthly_count
 
 **Question:** How many readings were recorded at Delos in June 2026?  
-**Reference:** 38443 readings.  
-**Recomputed:** `38443` → **MATCH**
+**Reference:** 65551 readings.  
+**Recomputed:** `65551` → **MATCH**
 
 ```sql
 SELECT count(*) AS readings FROM readings WHERE site_id = 'delos'
@@ -601,7 +601,7 @@ SELECT count(*) AS readings FROM readings WHERE site_id = 'delos'
 ```
 | readings |
 |---|
-| 38443 |
+| 65551 |
 
 
 ---
@@ -609,8 +609,8 @@ SELECT count(*) AS readings FROM readings WHERE site_id = 'delos'
 ## T035 · monthly_count
 
 **Question:** How many readings were recorded at Lucretili in July 2026?  
-**Reference:** 199288 readings.  
-**Recomputed:** `199288` → **MATCH**
+**Reference:** 220581 readings.  
+**Recomputed:** `220581` → **MATCH**
 
 ```sql
 SELECT count(*) AS readings FROM readings WHERE site_id = 'lucretili'
@@ -618,7 +618,7 @@ SELECT count(*) AS readings FROM readings WHERE site_id = 'lucretili'
 ```
 | readings |
 |---|
-| 199288 |
+| 220581 |
 
 
 ---
@@ -643,8 +643,8 @@ SELECT count(*) AS readings FROM readings WHERE site_id = 'lucretili'
 ## T037 · monthly_count
 
 **Question:** How many readings were recorded at Ranverso in August 2026?  
-**Reference:** 7037 readings.  
-**Recomputed:** `7037` → **MATCH**
+**Reference:** 16263 readings.  
+**Recomputed:** `16263` → **MATCH**
 
 ```sql
 SELECT count(*) AS readings FROM readings WHERE site_id = 'ranverso'
@@ -652,7 +652,7 @@ SELECT count(*) AS readings FROM readings WHERE site_id = 'ranverso'
 ```
 | readings |
 |---|
-| 7037 |
+| 16263 |
 
 
 ---
@@ -660,8 +660,8 @@ SELECT count(*) AS readings FROM readings WHERE site_id = 'ranverso'
 ## T038 · monthly_count
 
 **Question:** How many readings were recorded at Ranverso in July 2026?  
-**Reference:** 17850 readings.  
-**Recomputed:** `17850` → **MATCH**
+**Reference:** 51009 readings.  
+**Recomputed:** `51009` → **MATCH**
 
 ```sql
 SELECT count(*) AS readings FROM readings WHERE site_id = 'ranverso'
@@ -669,7 +669,7 @@ SELECT count(*) AS readings FROM readings WHERE site_id = 'ranverso'
 ```
 | readings |
 |---|
-| 17850 |
+| 51009 |
 
 
 ---
@@ -677,8 +677,8 @@ SELECT count(*) AS readings FROM readings WHERE site_id = 'ranverso'
 ## T039 · monthly_count
 
 **Question:** How many readings were recorded at Ranverso in June 2026?  
-**Reference:** 16596 readings.  
-**Recomputed:** `16596` → **MATCH**
+**Reference:** 31666 readings.  
+**Recomputed:** `31666` → **MATCH**
 
 ```sql
 SELECT count(*) AS readings FROM readings WHERE site_id = 'ranverso'
@@ -686,7 +686,7 @@ SELECT count(*) AS readings FROM readings WHERE site_id = 'ranverso'
 ```
 | readings |
 |---|
-| 16596 |
+| 31666 |
 
 
 ---
@@ -694,8 +694,8 @@ SELECT count(*) AS readings FROM readings WHERE site_id = 'ranverso'
 ## T040 · monthly_count
 
 **Question:** How many readings were recorded at Schenkenberg in August 2026?  
-**Reference:** 1592 readings.  
-**Recomputed:** `1592` → **MATCH**
+**Reference:** 8782 readings.  
+**Recomputed:** `8782` → **MATCH**
 
 ```sql
 SELECT count(*) AS readings FROM readings WHERE site_id = 'schenkenberg'
@@ -703,7 +703,7 @@ SELECT count(*) AS readings FROM readings WHERE site_id = 'schenkenberg'
 ```
 | readings |
 |---|
-| 1592 |
+| 8782 |
 
 
 ---
@@ -711,8 +711,8 @@ SELECT count(*) AS readings FROM readings WHERE site_id = 'schenkenberg'
 ## T041 · monthly_count
 
 **Question:** How many readings were recorded at Schenkenberg in June 2026?  
-**Reference:** 8285 readings.  
-**Recomputed:** `8285` → **MATCH**
+**Reference:** 15272 readings.  
+**Recomputed:** `15272` → **MATCH**
 
 ```sql
 SELECT count(*) AS readings FROM readings WHERE site_id = 'schenkenberg'
@@ -720,7 +720,7 @@ SELECT count(*) AS readings FROM readings WHERE site_id = 'schenkenberg'
 ```
 | readings |
 |---|
-| 8285 |
+| 15272 |
 
 
 ---
@@ -917,7 +917,7 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'soil_temperature' AND o.value 
 
 **Question:** What was the average soil temperature at Baltanas on 2026-06-24?  
 **Reference:** 28.933.  
-**Recomputed:** `28.93314236111108` → **MATCH**
+**Recomputed:** `28.933142361111077` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -935,7 +935,7 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'soil_temperature' AND o.value 
 
 **Question:** What was the average temperature at Baltanas on 2026-06-18?  
 **Reference:** 22.54.  
-**Recomputed:** `22.539979716024355` → **MATCH**
+**Recomputed:** `22.539979716024362` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -953,7 +953,7 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Question:** What was the average temperature at Baltanas on 2026-08-10?  
 **Reference:** 23.981.  
-**Recomputed:** `23.98112050739956` → **MATCH**
+**Recomputed:** `23.98112050739957` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -1007,7 +1007,7 @@ WHERE r.site_id = 'lucretili' AND o.property_id = 'temperature' AND o.value IS N
 
 **Question:** What was the average temperature at Ranverso on 2026-05-21?  
 **Reference:** 17.879.  
-**Recomputed:** `17.878703703703703` → **MATCH**
+**Recomputed:** `17.878703703703707` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -1396,7 +1396,7 @@ GROUP BY 1 HAVING count(*) >= 10 ORDER BY 2 DESC LIMIT 5;
 | day | avg | n |
 |---|---|---|
 | 2026-07-22 | 30.5561 | 237 |
-| 2026-07-20 | 30.0988 | 240 |
+| 2026-07-20 | 30.0987 | 240 |
 | 2026-07-21 | 29.7921 | 239 |
 | 2026-07-03 | 29.4208 | 240 |
 | 2026-07-02 | 29.1988 | 240 |
@@ -1569,7 +1569,7 @@ GROUP BY 1 HAVING count(*) >= 10 ORDER BY 2 DESC LIMIT 5;
 
 **Question:** What was the average temperature at Baltanas between 2026-05-19 and 2026-05-25?  
 **Reference:** 19.074 (31989 observations, both days inclusive).  
-**Recomputed:** `19.074062959142307` → **MATCH**
+**Recomputed:** `19.074062959142303` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -1587,7 +1587,7 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Question:** What was the average temperature at Baltanas between 2026-06-18 and 2026-06-24?  
 **Reference:** 23.44 (34506 observations, both days inclusive).  
-**Recomputed:** `23.43961050252129` → **MATCH**
+**Recomputed:** `23.439610502521294` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -1605,7 +1605,7 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Question:** What was the average temperature at Baltanas between 2026-07-27 and 2026-08-02?  
 **Reference:** 24.215 (34409 observations, both days inclusive).  
-**Recomputed:** `24.215089075532603` → **MATCH**
+**Recomputed:** `24.215089075532543` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -1623,7 +1623,7 @@ WHERE r.site_id = 'baltanas' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Question:** What was the average temperature at Delos between 2026-05-20 and 2026-05-26?  
 **Reference:** 21.651 (1663 observations, both days inclusive).  
-**Recomputed:** `21.650691521346968` → **MATCH**
+**Recomputed:** `21.650691521346964` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -1641,7 +1641,7 @@ WHERE r.site_id = 'delos' AND o.property_id = 'temperature' AND o.value IS NOT N
 
 **Question:** What was the average temperature at Delos between 2026-06-29 and 2026-07-05?  
 **Reference:** 28.318 (1680 observations, both days inclusive).  
-**Recomputed:** `28.31755952380951` → **MATCH**
+**Recomputed:** `28.317559523809514` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -1659,7 +1659,7 @@ WHERE r.site_id = 'delos' AND o.property_id = 'temperature' AND o.value IS NOT N
 
 **Question:** What was the average temperature at Lucretili between 2026-07-04 and 2026-07-10?  
 **Reference:** 23.698 (27435 observations, both days inclusive).  
-**Recomputed:** `23.698487333697827` → **MATCH**
+**Recomputed:** `23.698487333697855` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -1677,7 +1677,7 @@ WHERE r.site_id = 'lucretili' AND o.property_id = 'temperature' AND o.value IS N
 
 **Question:** What was the average temperature at Lucretili between 2026-07-06 and 2026-07-12?  
 **Reference:** 24.241 (27290 observations, both days inclusive).  
-**Recomputed:** `24.24065225357278` → **MATCH**
+**Recomputed:** `24.24065225357277` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -1695,7 +1695,7 @@ WHERE r.site_id = 'lucretili' AND o.property_id = 'temperature' AND o.value IS N
 
 **Question:** What was the average temperature at Lucretili between 2026-07-08 and 2026-07-14?  
 **Reference:** 25.067 (27656 observations, both days inclusive).  
-**Recomputed:** `25.066690772345996` → **MATCH**
+**Recomputed:** `25.066690772346004` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -1731,7 +1731,7 @@ WHERE r.site_id = 'ranverso' AND o.property_id = 'temperature' AND o.value IS NO
 
 **Question:** What was the average temperature at Ranverso between 2026-06-29 and 2026-07-05?  
 **Reference:** 26.248 (1512 observations, both days inclusive).  
-**Recomputed:** `26.247751322751316` → **MATCH**
+**Recomputed:** `26.247751322751327` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -1767,7 +1767,7 @@ WHERE r.site_id = 'schenkenberg' AND o.property_id = 'temperature' AND o.value I
 
 **Question:** What was the average temperature at Schenkenberg between 2026-07-10 and 2026-07-16?  
 **Reference:** 27.677 (1610 observations, both days inclusive).  
-**Recomputed:** `27.67689440993789` → **MATCH**
+**Recomputed:** `27.676894409937887` → **MATCH**
 
 ```sql
 SELECT avg(o.value) AS avg, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
@@ -1798,19 +1798,21 @@ SELECT count(*) AS readings FROM readings WHERE site_id = 'ranverso'
 
 ---
 
-## T099 · unanswerable
+## T099 · daily_avg
 
 **Question:** What was the relative humidity at Baltanas on 2026-07-01?  
-**Reference:** Cannot be answered: no humidity data.  
-**Recomputed:** `None` → **MATCH**
+**Reference:** 57.118 % on average (296 observations, from 33 % to 78 %).  
+**Recomputed:** `57.11824324324324` → **MATCH**
 
 ```sql
-SELECT DISTINCT o.property_id FROM observations o JOIN readings r USING (reading_id)
-WHERE r.site_id = 'baltanas' AND (lower(o.property_id) LIKE '%hum%');
+SELECT avg(o.value) AS avg, max(o.value) AS max, min(o.value) AS min, count(*) AS n FROM observations o JOIN readings r USING (reading_id)
+WHERE r.site_id = 'baltanas' AND o.property_id = 'hum1' AND o.value IS NOT NULL
+  AND o.result_time >= '2026-07-01' AND o.result_time < '2026-07-01'::date + 1;
 ```
-_(no rows)_
+| avg | max | min | n |
+|---|---|---|---|
+| 57.1182 | 78 | 33 | 296 |
 
-- Expected: no rows (no relative humidity data at baltanas). Got 0 row(s).
 
 ---
 
@@ -1825,7 +1827,7 @@ SELECT min(result_time) AS first, max(result_time) AS last, count(*) FROM readin
 ```
 | first | last | count |
 |---|---|---|
-| 2026-05-13 01:00:00 | 2026-08-12 09:00:00 | 113789 |
+| 2026-05-13 01:00:00 | 2026-08-12 09:14:17 | 225945 |
 
 - Expected: the asked period lies outside first..last.
 

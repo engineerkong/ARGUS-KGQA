@@ -4,13 +4,13 @@
   "type": "user",
   "template": "per_site",
   "question": "How many sensors are deployed per site?",
-  "reference": "Baltanas 33; Delos 26; Lucretili 18; Ranverso 13; Schenkenberg 12.",
+  "reference": "Baltanas 35; Delos 30; Lucretili 20; Ranverso 19; Schenkenberg 14.",
   "reference_value": [
-   33,
-   26,
-   18,
-   13,
-   12
+   35,
+   30,
+   20,
+   19,
+   14
   ],
   "score_mode": "all",
   "answerable": true,
@@ -21,10 +21,10 @@
   "type": "user",
   "template": "total",
   "question": "How many readings are available in total?",
-  "reference": "1,674,205 readings in the knowledge graph (1,393,686 at the five pilot sites).",
+  "reference": "1,677,556 readings in the knowledge graph (1,677,556 at the five pilot sites).",
   "reference_value": [
-   1674205,
-   1393686
+   1677556,
+   1677556
   ],
   "score_mode": "any",
   "answerable": true,
@@ -35,9 +35,9 @@
   "type": "user",
   "template": "latest_site",
   "question": "what are the most recent readings in delos?",
-  "reference": "Latest readings at Delos: 2026-08-12 09:00 UTC — H. Fournoi_pole mounted_outdoors thermistor 8495.726; H. Fournoi_pole mounted_outdoors thermistor_ysi44005 28.708; H. Fournoi_pole mounted_outdoors voltage 0.555; H. Fournoi_pole mounted_outdoors voltage 2.559; H. Fournoi_pole mounted_outdoors voltage 3.327; H. Fournoi_pole mounted_outdoors voltage_1 166.526; H. Fournoi_pole mounted_outdoors voltage_1 66.536; H. Fournoi_pole mounted_outdoors voltage_polynomial_4 14.794; H. Fournoi_wall attached 1 temperature 29; H. Fournoi_wall attached 1 voltage 0.71; H. Fournoi_wall attached 1 voltage_1 76.355; H. Masks_Dolphins mosaic_pole mounted thermistor 8711.498 … and 66 more.",
+  "reference": "Latest readings at Delos: 2026-08-12 09:14 UTC — 2CF7F1C062800035 peopleCount 0.",
   "reference_value": [
-   "2026-08-12 09:00"
+   "2026-08-12 09:14"
   ],
   "score_mode": "all",
   "answerable": true,
@@ -49,13 +49,13 @@
   "type": "user",
   "template": "per_site",
   "question": "How many readings are available per site?",
-  "reference": "Baltanas 676,272; Delos 113,789; Lucretili 526,071; Ranverso 50,695; Schenkenberg 26,859.",
+  "reference": "Baltanas 709,170; Delos 225,945; Lucretili 574,578; Ranverso 108,150; Schenkenberg 59,713.",
   "reference_value": [
-   676272,
-   113789,
-   526071,
-   50695,
-   26859
+   709170,
+   225945,
+   574578,
+   108150,
+   59713
   ],
   "score_mode": "all",
   "answerable": true,
@@ -66,7 +66,7 @@
   "type": "user",
   "template": "argmax_site",
   "question": "Which site has the most readings?",
-  "reference": "Baltanas (676,272 readings).",
+  "reference": "Baltanas (709,170 readings).",
   "reference_value": [
    "Baltanas"
   ],
@@ -79,13 +79,13 @@
   "type": "user",
   "template": "per_site_avg",
   "question": "What is the average voltage per site?",
-  "reference": "Baltanas 0.935; Delos 1.656; Lucretili 0.142; Ranverso 1.543; Schenkenberg 0.026.",
+  "reference": "Baltanas 0.903; Delos 2.387; Lucretili 0.142; Ranverso 1.543; Schenkenberg 0.026.",
   "reference_value": [
-   0.935,
-   1.656,
-   0.142,
-   1.543,
-   0.026
+   0.902933,
+   2.387406,
+   0.141636,
+   1.543225,
+   0.025699
   ],
   "score_mode": "all",
   "answerable": true,
@@ -187,13 +187,13 @@
   "type": "user",
   "template": "nodes_per_site",
   "question": "Which nodes are available per site?",
-  "reference": "Baltanas (13): Acc-2A, Acc-3A, AF1, AF2, AF3, AF4, Gases, GNSS_Base, GNSS-Rover, P_WL, sensor, WP1, WP2; Delos (15): H. Fournoi_pole mounted_outdoors, H. Fournoi_wall attached 1, H. Masks_Dolphins mosaic_pole mounted, H. Masks_Dyonisios mosaic_pole mounted, H. Masks_Dyonisios &panter mosaic_flow meter, H. Masks_Dyonisios &panter mosaic_pole mounted 2, H. Masks_Mask mosaic_pole mounted, H. Masks_Mask mosaic_pole mounted 2, H. Masks_Mask mosaic_window, H. Masks_Masks mosaic_flow meter, LS-150900, LS-153157, LS-153242, LS-153295, Outdoors area H. Masks_Mask_pole mounted; Lucretili (13): LS-152608 - Tiltmeter Conventillo, LS-152816 Tiltmeter Conventillo, LS-152931 Tiltemeter Conventillo, LS-153061 - Tiltmeter Conventillo, LS-174156 Crackmeter Villa Orazio, LS-177237 Pyranometer Villa Orazio, LS-177239 - Humidity sensor Conventillo, LS-177253 Crackmeter Conventillo, LS-177266 - Crackmeter Conventillo, LS-177281 Humidity-Temperature Montefalco, LS-177287 Crackmeter Villa Orazio, LS-177310 Crackmeter Montefalco, LS-177320 CrackMeter Conventillo; Ranverso (7): LS-143276, LS-149248, LS-149361, LS-168442, LS-170894, LS-174188, LS-177315; Schenkenberg (7): LS-149796, LS-152479, LS-152555, LS-152899, LS-152914, LS-159070, LS-175480.",
+  "reference": "Baltanas (15): 2CF7F1C073400212, A8610A3230467704, Acc-2A, Acc-3A, AF1, AF2, AF3, AF4, Gases, GNSS_Base, GNSS-Rover, P_WL, sensor, WP1, WP2; Delos (19): 0004A30B0050C42F, 2CF7F1C061300548, 2CF7F1C062800035, 2CF7F1C0723001F4, H. Fournoi_pole mounted_outdoors, H. Fournoi_wall attached 1, H. Masks_Dolphins mosaic_pole mounted, H. Masks_Dyonisios mosaic_pole mounted, H. Masks_Dyonisios &panter mosaic_flow meter, H. Masks_Dyonisios &panter mosaic_pole mounted 2, H. Masks_Mask mosaic_pole mounted, H. Masks_Mask mosaic_pole mounted 2, H. Masks_Mask mosaic_window, H. Masks_Masks mosaic_flow meter, LS-150900, LS-153157, LS-153242, LS-153295, Outdoors area H. Masks_Mask_pole mounted; Lucretili (15): 24E124600E450308, 2CF7F1C072300286, LS-152608 - Tiltmeter Conventillo, LS-152816 Tiltmeter Conventillo, LS-152931 Tiltemeter Conventillo, LS-153061 - Tiltmeter Conventillo, LS-174156 Crackmeter Villa Orazio, LS-177237 Pyranometer Villa Orazio, LS-177239 - Humidity sensor Conventillo, LS-177253 Crackmeter Conventillo, LS-177266 - Crackmeter Conventillo, LS-177281 Humidity-Temperature Montefalco, LS-177287 Crackmeter Villa Orazio, LS-177310 Crackmeter Montefalco, LS-177320 CrackMeter Conventillo; Ranverso (13): 2CF7F1C0734001E8, A8610A333526680F, A8610A3338359111, ae_ranverso, LS-143276, LS-149248, LS-149361, LS-168442, LS-170894, LS-174188, LS-177315, Multimodal Imager_1, Multimodal Imager_2; Schenkenberg (9): 2CF7F1C072300226, 2CF7F1C072600345, LS-149796, LS-152479, LS-152555, LS-152899, LS-152914, LS-159070, LS-175480.",
   "reference_value": [
-   13,
+   15,
+   19,
    15,
    13,
-   7,
-   7
+   9
   ],
   "score_mode": "manual",
   "answerable": true,
@@ -265,7 +265,7 @@
   "type": "user",
   "template": "per_quantity",
   "question": "How many readings are available per observed quantity?",
-  "reference": "89 quantities; the most frequent: temperature 820,700; voltage 404,917; voltage_1 222,104; thermistor 196,017; pulse_counter 157,460; voltage_polynomial_4 145,760; axis_y_std 77,126; axis_z 77,126; axis_z_std 77,126; axis_x_std 77,126 … (full list in the SQL result).",
+  "reference": "137 quantities at the five pilot sites; the most frequent: temperature 820,700; voltage 419,983; voltage_1 222,104; thermistor 196,017; pulse_counter 157,460; voltage_polynomial_4 145,760; temp1 138,412; hum1 123,659; baro 94,561; uv 94,560 … (full list in the SQL result).",
   "reference_value": [
    "temperature",
    "voltage",
@@ -331,9 +331,9 @@
   "type": "user",
   "template": "verdict",
   "question": "Check Delos wind anomaly using the wind policy.",
-  "reference": "Cannot be determined. R2_wind: no readings in the snapshot",
+  "reference": "No. R2_wind: latest reading 9.8 at 2026-08-12 09:11 UTC vs threshold 12",
   "reference_value": [
-   "Cannot be determined"
+   "No"
   ],
   "score_mode": "verdict",
   "answerable": true,
@@ -379,9 +379,9 @@
   "type": "user",
   "template": "count_sensors",
   "question": "how many sensors are there in delos?",
-  "reference": "26 sensors have readings at Delos.",
+  "reference": "30 sensors have readings at Delos.",
   "reference_value": [
-   26
+   30
   ],
   "score_mode": "all",
   "answerable": true,
@@ -413,7 +413,7 @@
   "history": [
    {
     "question": "how many sensors are there in delos?",
-    "answer": "26 sensors have readings at Delos."
+    "answer": "30 sensors have readings at Delos."
    }
   ]
  },
@@ -422,7 +422,7 @@
   "type": "user",
   "template": "verdict",
   "question": "Check Delos rainfall anomaly using the rainfall 1 hour policy.",
-  "reference": "Cannot be determined. R1a_rain_1h: no readings in the snapshot",
+  "reference": "Cannot be determined. R1a_rain_1h: Delos's rainfall rule(s) (R1a_rain_1h, R1b_rain_3h) take rainfall amounts in mm per window; the snapshot's only rain readings at Delos are the weather station's rainfall intensity (rain_1, mm/h) and its running total since installation (rain_acc), neither of which is a rule's quantity.",
   "reference_value": [
    "Cannot be determined"
   ],
@@ -435,12 +435,11 @@
   "type": "user",
   "template": "latest_time",
   "question": "What is the latest reading timestamp overall?",
-  "reference": "2026-08-12 09:15 UTC (latest observation; the latest reading record, a LoRaWAN reading without values, is 2026-08-12 09:36 UTC).",
+  "reference": "2026-08-12 09:15 UTC.",
   "reference_value": [
-   "2026-08-12 09:15",
-   "2026-08-12 09:36"
+   "2026-08-12 09:15"
   ],
-  "score_mode": "any",
+  "score_mode": "all",
   "answerable": true,
   "source": "ask_events.jsonl (KG question 26)"
  },
@@ -449,7 +448,7 @@
   "type": "user",
   "template": "verdict",
   "question": "Check Baltanas rainfall anomaly using the rainfall 1 hour policy.",
-  "reference": "Cannot be determined. R6_rain_1h: no readings in the snapshot",
+  "reference": "Cannot be determined. R6_rain_1h: Baltanas's rainfall rule(s) (R6_rain_1h) take rainfall amounts in mm per window; the snapshot's only rain readings at Baltanas are the weather station's rainfall intensity (rain_1, mm/h) and its running total since installation (rain_acc), neither of which is a rule's quantity.",
   "reference_value": [
    "Cannot be determined"
   ],
@@ -492,11 +491,13 @@
  {
   "id": "U029",
   "type": "user",
-  "template": "no_data",
+  "template": "latest_props",
   "question": "latest wind dir from baltanas",
-  "reference": "No wind direction data at Baltanas in the snapshot (these channels come from LoRaWAN devices whose values were not ingested).",
-  "reference_value": [],
-  "score_mode": "negative",
+  "reference": "Latest at Baltanas, per sensor: wind_direction_1 228 deg at 2026-08-12 09:12 UTC (2CF7F1C073400212, Weather station).",
+  "reference_value": [
+   "2026-08-12 09:12"
+  ],
+  "score_mode": "all",
   "answerable": true,
   "source": "ask_events.jsonl (KG question 32)",
   "paraphrase_group": "baltanas-wind-direction"
@@ -504,11 +505,17 @@
  {
   "id": "U030",
   "type": "user",
-  "template": "no_data",
+  "template": "latest_per_site",
   "question": "give me live wind data from all ARGUS sites",
-  "reference": "No wind data in the snapshot (these channels come from LoRaWAN devices whose values were not ingested).",
-  "reference_value": [],
-  "score_mode": "negative",
+  "reference": "Latest wind_speed_1 per site (the same readings carry wind_direction_1 and wind_peak_1): Baltanas 2026-08-12 09:12 UTC; Delos 2026-08-12 09:11 UTC; Lucretili 2026-08-12 09:14 UTC; Ranverso 2026-08-12 09:12 UTC; Schenkenberg 2026-08-12 09:13 UTC.",
+  "reference_value": [
+   "2026-08-12 09:12",
+   "2026-08-12 09:11",
+   "2026-08-12 09:14",
+   "2026-08-12 09:12",
+   "2026-08-12 09:13"
+  ],
+  "score_mode": "all",
   "answerable": true,
   "source": "ask_events.jsonl (KG question 33)",
   "paraphrase_group": "wind-all-sites"
@@ -518,13 +525,13 @@
   "type": "user",
   "template": "per_site_stats",
   "question": "Show live temperature statistics per site",
-  "reference": "Baltanas: 435,215 observations, min -0.6, mean 21.722, max 44.6; Delos: 21,126 observations, min 11.5, mean 26.087, max 54.2; Lucretili: 318,576 observations, min 0, mean 23.639, max 50; Ranverso: 18,924 observations, min 2, mean 24.209, max 40; Schenkenberg: 26,859 observations, min 9.2, mean 23.672, max 48.3.",
+  "reference": "Baltanas: 435,215 observations, min -0.6, mean 21.722, max 44.6; Delos: 21,126 observations, min 11.5, mean 26.087, max 54.2; Lucretili: 318,576 observations, min 0, mean 23.639, max 50; Ranverso: 18,924 observations, min 2, mean 24.209, max 40; Schenkenberg: 26,859 observations, min 9.2, mean 23.672, max 48.3. (\"Statistics\" is open: any of these per-site statistics, correctly stated for every site, answers the question.)",
   "reference_value": [
-   21.722,
-   26.087,
-   23.639,
-   24.209,
-   23.672
+   21.721905,
+   26.08703,
+   23.638579,
+   24.208592,
+   23.672203
   ],
   "score_mode": "manual",
   "answerable": true,
@@ -545,11 +552,13 @@
  {
   "id": "U033",
   "type": "user",
-  "template": "no_data",
+  "template": "latest_props",
   "question": "give me latest rainfall data from Baltanas",
-  "reference": "No rainfall data at Baltanas in the snapshot (these channels come from LoRaWAN devices whose values were not ingested).",
-  "reference_value": [],
-  "score_mode": "negative",
+  "reference": "Latest at Baltanas, per sensor: rain_1 0 mm at 2026-08-12 09:12 UTC (2CF7F1C073400212, Weather station); rain_acc 43.942 mm at 2026-08-12 09:12 UTC (2CF7F1C073400212, Weather station).",
+  "reference_value": [
+   "2026-08-12 09:12"
+  ],
+  "score_mode": "all",
   "answerable": true,
   "source": "ask_events.jsonl (KG question 36)"
  },
@@ -558,8 +567,10 @@
   "type": "user",
   "template": "list_sensors",
   "question": "Which sensors are available at the baltanas site?",
-  "reference": "33 sensors (30 distinct names): Acc-2A, Acc-3A, GNSS-Rover, GNSS_Base, ls-130314hw-meter-teros32-2, ls-130432hw-meter-teros32-2, ls-149367hw-pulse-3, ls-149367hw-thermistor-2, ls-149367hw-voltsingle-1, ls-149402hw-pulse-3, ls-149402hw-thermistor-2, ls-149402hw-voltsingle-1, ls-149421hw-pulse-3, ls-149421hw-thermistor-2, ls-149421hw-voltsingle-1, ls-149443hw-pulse-3, ls-149443hw-thermistor-2, ls-149443hw-voltsingle-1, ls-149780hw-pulse-3, ls-149780hw-thermistor-2, ls-149780hw-voltsingle-1, ls-151810hw-voltage-1, ls-151810hw-voltage-2, ls-151810hw-voltage-3, ls-151810hw-voltage-4, shellydw2-AAB1AC, shellyht-6B6DEE, shellyht-701EE3, shellyht-7020C8, shellyht-CAAE03.",
+  "reference": "35 sensors (32 distinct names): 2CF7F1C073400212, A8610A3230467704, Acc-2A, Acc-3A, GNSS-Rover, GNSS_Base, ls-130314hw-meter-teros32-2, ls-130432hw-meter-teros32-2, ls-149367hw-pulse-3, ls-149367hw-thermistor-2, ls-149367hw-voltsingle-1, ls-149402hw-pulse-3, ls-149402hw-thermistor-2, ls-149402hw-voltsingle-1, ls-149421hw-pulse-3, ls-149421hw-thermistor-2, ls-149421hw-voltsingle-1, ls-149443hw-pulse-3, ls-149443hw-thermistor-2, ls-149443hw-voltsingle-1, ls-149780hw-pulse-3, ls-149780hw-thermistor-2, ls-149780hw-voltsingle-1, ls-151810hw-voltage-1, ls-151810hw-voltage-2, ls-151810hw-voltage-3, ls-151810hw-voltage-4, shellydw2-AAB1AC, shellyht-6B6DEE, shellyht-701EE3, shellyht-7020C8, shellyht-CAAE03.",
   "reference_value": [
+   "2CF7F1C073400212",
+   "A8610A3230467704",
    "Acc-2A",
    "Acc-3A",
    "GNSS-Rover",
@@ -601,8 +612,10 @@
   "type": "user",
   "template": "node_locations",
   "question": "Where are the sensor nodes at the baltanas site?",
-  "reference": "12 located nodes: Acc-2A (41.938432, -4.243868, 797.59 m); Acc-3A (41.937933, -4.243313, 796.89 m); AF1 (41.938408, -4.243822, 797.42 m); AF2 (41.938453, -4.243799, 797.51 m); AF3 (41.938472, -4.243900, 797.92 m); AF4 (41.938544, -4.243940, 798.42 m); Gases (41.938538, -4.243314, 797.16 m); GNSS_Base (41.937244, -4.247576, 779.90 m); GNSS-Rover (41.938386, -4.243841, 797.29 m); P_WL (41.938435, -4.243858, 797.58 m); WP1 (41.938482, -4.243839, 797.84 m); WP2 (41.938454, -4.243845, 797.67 m).",
+  "reference": "15 located nodes: 2CF7F1C073400212 (41.939097, -4.246581, 789.85 m); A8610A3230467704 (41.938533, -4.243292, 797.09 m); Acc-2A (41.938431, -4.243867, 797.51 m); Acc-3A (41.937931, -4.243311, 796.85 m); AF1 (41.938406, -4.243819, 797.33 m); AF2 (41.938450, -4.243797, 797.52 m); AF3 (41.938472, -4.243897, 797.81 m); AF4 (41.938542, -4.243939, 798.38 m); Gases (41.938536, -4.243311, 797.07 m); GNSS_Base (41.937244, -4.247576, 779.90 m); GNSS-Rover (41.938383, -4.243839, 797.22 m); P_WL (41.938433, -4.243856, 797.52 m); sensor (41.938397, -4.243789, 797.26 m); WP1 (41.938481, -4.243836, 797.75 m); WP2 (41.938453, -4.243844, 797.60 m).",
   "reference_value": [
+   "2CF7F1C073400212",
+   "A8610A3230467704",
    "Acc-2A",
    "Acc-3A",
    "AF1",
@@ -613,6 +626,7 @@
    "GNSS_Base",
    "GNSS-Rover",
    "P_WL",
+   "sensor",
    "WP1",
    "WP2"
   ],
@@ -625,12 +639,12 @@
   "type": "user",
   "template": "range_compare",
   "question": "How does the voltage range at delos compare to baltanas?",
-  "reference": "Delos -0.002 to 4.945; Baltanas -0.001 to 3.722.",
+  "reference": "Delos -0.002 to 13104 V; Baltanas -0.001 to 3.722 V.",
   "reference_value": [
-   -0.002,
-   4.945,
-   -0.001,
-   3.722
+   -0.001676,
+   13104.0,
+   -0.001172,
+   3.722426
   ],
   "score_mode": "all",
   "answerable": true,
@@ -654,20 +668,36 @@
   "type": "user",
   "template": "range_compare",
   "question": "How does the rainfall range at Delos compare to Baltanas?",
-  "reference": "Delos: no rainfall data in the snapshot; Baltanas: no rainfall data in the snapshot.",
-  "reference_value": [],
-  "score_mode": "negative",
+  "reference": "Delos rain_1 0 to 76.2 mm; Delos rain_acc 281.178 to 299.466 mm; Baltanas rain_1 0 to 0.065 mm; Baltanas rain_acc 43.18 to 43.942 mm. (rain_1 is the weather station's rainfall intensity in mm/h, rain_acc its running total since installation; neither is a rainfall amount per interval)",
+  "reference_value": [
+   0.0,
+   76.2,
+   281.178,
+   299.466,
+   0.0,
+   0.065,
+   43.18,
+   43.942
+  ],
+  "score_mode": "manual",
   "answerable": true,
   "source": "ask_events.jsonl (KG question 42)"
  },
  {
   "id": "U039",
   "type": "user",
-  "template": "no_data",
+  "template": "list_sensors_q",
   "question": "Which instruments measure wind direction?",
-  "reference": "No wind direction data in the snapshot (these channels come from LoRaWAN devices whose values were not ingested).",
-  "reference_value": [],
-  "score_mode": "negative",
+  "reference": "6 sensors measure wind_direction_1 at the five sites: 2CF7F1C073400212 (Baltanas), 2CF7F1C061300548 (Delos), 2CF7F1C0723001F4 (Delos), 2CF7F1C072300286 (Lucretili), 2CF7F1C0734001E8 (Ranverso), 2CF7F1C072300226 (Schenkenberg).",
+  "reference_value": [
+   "2CF7F1C073400212",
+   "2CF7F1C061300548",
+   "2CF7F1C0723001F4",
+   "2CF7F1C072300286",
+   "2CF7F1C0734001E8",
+   "2CF7F1C072300226"
+  ],
+  "score_mode": "all",
   "answerable": true,
   "source": "ask_events.jsonl (KG question 43)"
  },
@@ -687,15 +717,15 @@
   "type": "user",
   "template": "device_types",
   "question": "Which device types exist in the live ARGUS KG?",
-  "reference": "Node (device) models: LS-G6-PICO (25); LS-G6-TIL90-X (10); LSG7ACL-BILH-VIB (8); LS-G6-VOLT-4-FCC (7); LSG7GNS-SXLH (2); MAPIR Survey 3 (RGN) (2); LS-G6-DIG-2-FCC (2); Spotwave_vallen (1).",
+  "reference": "Node (device) models: LS-G6-PICO (25); LS-G6-TIL90-X (10); LSG7ACL-BILH-VIB (8); LS-G6-VOLT-4-FCC (7); LSG7GNS-SXLH (2); LS-G6-DIG-2-FCC (2); MAPIR Survey 3 (RGN) (2); Spotwave_vallen (1).",
   "reference_value": [
    "LS-G6-PICO",
    "LS-G6-TIL90-X",
    "LSG7ACL-BILH-VIB",
    "LS-G6-VOLT-4-FCC",
    "LSG7GNS-SXLH",
-   "MAPIR Survey 3 (RGN)",
    "LS-G6-DIG-2-FCC",
+   "MAPIR Survey 3 (RGN)",
    "Spotwave_vallen"
   ],
   "score_mode": "manual",
@@ -729,11 +759,13 @@
  {
   "id": "U044",
   "type": "user",
-  "template": "no_data",
+  "template": "latest_props",
   "question": "Give me the latest wind direction from Baltanas.",
-  "reference": "No wind direction data at Baltanas in the snapshot (these channels come from LoRaWAN devices whose values were not ingested).",
-  "reference_value": [],
-  "score_mode": "negative",
+  "reference": "Latest at Baltanas, per sensor: wind_direction_1 228 deg at 2026-08-12 09:12 UTC (2CF7F1C073400212, Weather station).",
+  "reference_value": [
+   "2026-08-12 09:12"
+  ],
+  "score_mode": "all",
   "answerable": true,
   "source": "ask_events.jsonl (KG question 56)",
   "paraphrase_group": "baltanas-wind-direction"
@@ -741,11 +773,15 @@
  {
   "id": "U045",
   "type": "user",
-  "template": "no_data",
+  "template": "latest_props",
   "question": "What are the latest humidity readings from Ranverso?",
-  "reference": "No humidity data at Ranverso in the snapshot (these channels come from LoRaWAN devices whose values were not ingested).",
-  "reference_value": [],
-  "score_mode": "negative",
+  "reference": "Latest at Ranverso, per sensor: hum1 56 % at 2026-08-12 09:12 UTC (2CF7F1C0734001E8, Weather station); hum1 0 % at 2026-08-12 09:13 UTC (A8610A333526680F, Soil moisture); hum1 55.46 % at 2026-08-06 12:28 UTC (A8610A3338359111, Gas); hum2 0 % at 2026-08-12 09:13 UTC (A8610A333526680F, Soil moisture).",
+  "reference_value": [
+   "2026-08-12 09:13",
+   "2026-08-12 09:12",
+   "2026-08-06 12:28"
+  ],
+  "score_mode": "any",
   "answerable": true,
   "source": "ask_events.jsonl (KG question 57)"
  },
@@ -754,7 +790,7 @@
   "type": "user",
   "template": "no_data",
   "question": "Show me the latest soil moisture data from Delos.",
-  "reference": "No soil moisture data at Delos in the snapshot (these channels come from LoRaWAN devices whose values were not ingested).",
+  "reference": "No soil moisture data at Delos in the snapshot.",
   "reference_value": [],
   "score_mode": "negative",
   "answerable": true,
@@ -765,10 +801,10 @@
   "type": "user",
   "template": "total",
   "question": "How many observations are available in the live ARGUS KG?",
-  "reference": "3,737,747 observations in the knowledge graph (3,684,898 at the five pilot sites).",
+  "reference": "5,227,617 observations in the knowledge graph (5,227,617 at the five pilot sites).",
   "reference_value": [
-   3737747,
-   3684898
+   5227617,
+   5227617
   ],
   "score_mode": "any",
   "answerable": true,
@@ -779,9 +815,9 @@
   "type": "user",
   "template": "count_readings",
   "question": "How many readings are available for Delos Island?",
-  "reference": "113,789 readings.",
+  "reference": "225,945 readings.",
   "reference_value": [
-   113789
+   225945
   ],
   "score_mode": "all",
   "answerable": true,
@@ -792,12 +828,14 @@
   "type": "user",
   "template": "quantities",
   "question": "What measurements are available at Baltanas?",
-  "reference": "55 quantities are measured at Baltanas: activeTime, alt, applied, backgroundEvent, channel_error_2, channel_error_4, cn0, composedAxis, deviation, duration, eastwest_displacement_millimeters, fixBeforeCorrections, freqXAxis, freqYAxis, freqZAxis, hasFix, haversine_distance_absolute_horizontal_displacement_millimeters, horizontal, installation_pitch_angle, installation_roll_angle, inUse, inView, lat, latLon, length, lon, northsouth_displacement_millimeters, numPerSample, numSamples, overThresholdEvents, pulse_counter, rssiAvg, rssiStdDev, samplesNoFix, snrAvg, snrStdDev, soil_temperature, soil_water_potential, temperature, thermistor, timeToFirst, timeToFix, underThresholdEvents, unexpectedPackets, updated, vertical, vertical_displacement_millimeters, voltage, voltage_polynomial_4, xAxis, xAxisStd, yAxis, yAxisStd, zAxis, zAxisStd.",
+  "reference": "67 quantities are measured at Baltanas: activeTime, airflow, alt, applied, backgroundEvent, baro, channel_error_2, channel_error_4, cn0, composedAxis, deviation, duration, eastwest_displacement_millimeters, fixBeforeCorrections, freqXAxis, freqYAxis, freqZAxis, hasFix, haversine_distance_absolute_horizontal_displacement_millimeters, horizontal, hum1, installation_pitch_angle, installation_roll_angle, inUse, inView, lat, latLon, length, light, lon, northsouth_displacement_millimeters, numPerSample, numSamples, overThresholdEvents, pir, pulse_counter, rain_1, rain_acc, rssiAvg, rssiStdDev, samplesNoFix, snrAvg, snrStdDev, soil_temperature, soil_water_potential, temp1, temperature, thermistor, timeToFirst, timeToFix, underThresholdEvents, unexpectedPackets, updated, uv, vertical, vertical_displacement_millimeters, voltage, voltage_polynomial_4, wind_direction_1, wind_peak_1, wind_speed_1, xAxis, xAxisStd, yAxis, yAxisStd, zAxis, zAxisStd.",
   "reference_value": [
    "activeTime",
+   "airflow",
    "alt",
    "applied",
    "backgroundEvent",
+   "baro",
    "channel_error_2",
    "channel_error_4",
    "cn0",
@@ -812,6 +850,7 @@
    "hasFix",
    "haversine_distance_absolute_horizontal_displacement_millimeters",
    "horizontal",
+   "hum1",
    "installation_pitch_angle",
    "installation_roll_angle",
    "inUse",
@@ -819,12 +858,16 @@
    "lat",
    "latLon",
    "length",
+   "light",
    "lon",
    "northsouth_displacement_millimeters",
    "numPerSample",
    "numSamples",
    "overThresholdEvents",
+   "pir",
    "pulse_counter",
+   "rain_1",
+   "rain_acc",
    "rssiAvg",
    "rssiStdDev",
    "samplesNoFix",
@@ -832,6 +875,7 @@
    "snrStdDev",
    "soil_temperature",
    "soil_water_potential",
+   "temp1",
    "temperature",
    "thermistor",
    "timeToFirst",
@@ -839,10 +883,14 @@
    "underThresholdEvents",
    "unexpectedPackets",
    "updated",
+   "uv",
    "vertical",
    "vertical_displacement_millimeters",
    "voltage",
    "voltage_polynomial_4",
+   "wind_direction_1",
+   "wind_peak_1",
+   "wind_speed_1",
    "xAxis",
    "xAxisStd",
    "yAxis",
@@ -859,7 +907,7 @@
   "type": "user",
   "template": "quantities",
   "question": "What measurements are available at Ranverso?",
-  "reference": "26 quantities are measured at Ranverso: activeTime, axis_x, axis_x_std, axis_y, axis_y_std, axis_z, axis_z_std, backgroundEvent, composedAxis, duration, freqXAxis, freqYAxis, freqZAxis, overThresholdEvents, pulse_counter, rainfall, temperature, thermistor, thermistor_ysi44005, underThresholdEvents, voltage, voltage_1, voltage_polynomial_4, xAxis, yAxis, zAxis.",
+  "reference": "54 quantities are measured at Ranverso: activeTime, axis_x, axis_x_std, axis_y, axis_y_std, axis_z, axis_z_std, backgroundEvent, baro, co, co2, composedAxis, cumulative counts, cumulative energy, duration, freqXAxis, freqYAxis, freqZAxis, hit count, hum1, hum2, light, moisture, nh3, no2, nox, overThresholdEvents, pm1, pm10, pm2_5, pm4, pulse_counter, rain_1, rain_acc, rainfall, so2, temp1, temp2, temperature, thermistor, thermistor_ysi44005, underThresholdEvents, uv, vegetation_fraction (NDVI), voc, voltage, voltage_1, voltage_polynomial_4, wind_direction_1, wind_peak_1, wind_speed_1, xAxis, yAxis, zAxis.",
   "reference_value": [
    "activeTime",
    "axis_x",
@@ -869,21 +917,49 @@
    "axis_z",
    "axis_z_std",
    "backgroundEvent",
+   "baro",
+   "co",
+   "co2",
    "composedAxis",
+   "cumulative counts",
+   "cumulative energy",
    "duration",
    "freqXAxis",
    "freqYAxis",
    "freqZAxis",
+   "hit count",
+   "hum1",
+   "hum2",
+   "light",
+   "moisture",
+   "nh3",
+   "no2",
+   "nox",
    "overThresholdEvents",
+   "pm1",
+   "pm10",
+   "pm2_5",
+   "pm4",
    "pulse_counter",
+   "rain_1",
+   "rain_acc",
    "rainfall",
+   "so2",
+   "temp1",
+   "temp2",
    "temperature",
    "thermistor",
    "thermistor_ysi44005",
    "underThresholdEvents",
+   "uv",
+   "vegetation_fraction (NDVI)",
+   "voc",
    "voltage",
    "voltage_1",
    "voltage_polynomial_4",
+   "wind_direction_1",
+   "wind_peak_1",
+   "wind_speed_1",
    "xAxis",
    "yAxis",
    "zAxis"
@@ -925,7 +1001,7 @@
   "type": "user",
   "template": "range_compare",
   "question": "Compare the temperature range between Delos and Schenkenberg.",
-  "reference": "Delos 11.5 to 54.2; Schenkenberg 9.2 to 48.3.",
+  "reference": "Delos 11.5 to 54.2; Schenkenberg 9.2 to 48.3 Cel.",
   "reference_value": [
    11.5,
    54.2,
@@ -939,22 +1015,29 @@
  {
   "id": "U054",
   "type": "user",
-  "template": "no_data",
+  "template": "range_compare",
   "question": "What is the humidity range at Ranverso?",
-  "reference": "No humidity data at Ranverso in the snapshot (these channels come from LoRaWAN devices whose values were not ingested).",
-  "reference_value": [],
-  "score_mode": "negative",
+  "reference": "Ranverso hum1 0 to 91 %; Ranverso hum2 0 to 0 %.",
+  "reference_value": [
+   0.0,
+   91.0,
+   0.0,
+   0.0
+  ],
+  "score_mode": "all",
   "answerable": true,
   "source": "ask_events.jsonl (KG question 78)"
  },
  {
   "id": "U055",
   "type": "user",
-  "template": "no_data",
+  "template": "rain_summary",
   "question": "What is the average rainfall at Baltanas?",
-  "reference": "No rainfall data at Baltanas in the snapshot (these channels come from LoRaWAN devices whose values were not ingested).",
-  "reference_value": [],
-  "score_mode": "negative",
+  "reference": "Baltanas has no per-interval rainfall amounts; the weather station's rainfall intensity rain_1 averages 0 mm/h (max 0.065 mm/h, 16,741 observations, 2026-06-17 11:01 to 2026-08-12 09:12 UTC); its running total rain_acc rose from 43.18 to 43.942 mm, i.e. 0.762 mm of rain over that period.",
+  "reference_value": [
+   2.1e-05
+  ],
+  "score_mode": "manual",
   "answerable": true,
   "source": "ask_events.jsonl (KG question 79)"
  },
@@ -963,7 +1046,7 @@
   "type": "user",
   "template": "argmax_site",
   "question": "Which site has the most observations?",
-  "reference": "Baltanas (1,925,908 observations).",
+  "reference": "Baltanas (2,138,510 observations).",
   "reference_value": [
    "Baltanas"
   ],
@@ -976,7 +1059,7 @@
   "type": "user",
   "template": "per_quantity",
   "question": "How many observations are available per measurement?",
-  "reference": "89 quantities; the most frequent: temperature 820,700; voltage 404,917; voltage_1 222,104; thermistor 196,017; pulse_counter 157,460; voltage_polynomial_4 145,760; axis_y_std 77,126; axis_z 77,126; axis_z_std 77,126; axis_x_std 77,126 … (full list in the SQL result).",
+  "reference": "137 quantities at the five pilot sites; the most frequent: temperature 820,700; voltage 419,983; voltage_1 222,104; thermistor 196,017; pulse_counter 157,460; voltage_polynomial_4 145,760; temp1 138,412; hum1 123,659; baro 94,561; uv 94,560 … (full list in the SQL result).",
   "reference_value": [
    "temperature",
    "voltage",
@@ -991,7 +1074,7 @@
   "type": "user",
   "template": "top_quantity",
   "question": "Which measurements have the most readings?",
-  "reference": "temperature (820,700 observations), then voltage (404,917), voltage_1 (222,104), thermistor (196,017), pulse_counter (157,460).",
+  "reference": "temperature (820,700 observations), then voltage (419,983), voltage_1 (222,104), thermistor (196,017), pulse_counter (157,460).",
   "reference_value": [
    "temperature"
   ],
@@ -1002,11 +1085,17 @@
  {
   "id": "U059",
   "type": "user",
-  "template": "no_data",
+  "template": "per_site_count",
   "question": "How many wind observations are available per site?",
-  "reference": "No wind data in the snapshot (these channels come from LoRaWAN devices whose values were not ingested).",
-  "reference_value": [],
-  "score_mode": "negative",
+  "reference": "Baltanas: wind_direction_1 16,741, wind_peak_1 16,741, wind_speed_1 16,741; Delos: wind_direction_1 32,422, wind_peak_1 32,422, wind_speed_1 32,422; Lucretili: wind_direction_1 17,474, wind_peak_1 17,474, wind_speed_1 17,474; Ranverso: wind_direction_1 10,026, wind_peak_1 10,026, wind_speed_1 10,026; Schenkenberg: wind_direction_1 17,897, wind_peak_1 17,897, wind_speed_1 17,897. (Each reading of a weather station carries the three wind quantities, so a per-site count of any of them, or their sum, answers the question.)",
+  "reference_value": [
+   16741,
+   32422,
+   17474,
+   10026,
+   17897
+  ],
+  "score_mode": "manual",
   "answerable": true,
   "source": "ask_events.jsonl (KG question 83)",
   "paraphrase_group": "wind-all-sites"
@@ -1016,7 +1105,7 @@
   "type": "user",
   "template": "latest_each_quantity",
   "question": "What is the latest value for each measurement at Delos?",
-  "reference": "axis_x -87.099 at 2026-08-12 09:00; axis_x_std 0 at 2026-08-12 09:00; axis_y -1.221 at 2026-08-12 09:00; axis_y_std 0 at 2026-08-12 09:00; axis_z -2.631 at 2026-08-12 09:00; axis_z_std 0 at 2026-08-12 09:00; potentiometer 924.481 at 2026-08-12 09:00; potentiometer_displacement 7.552 at 2026-08-12 09:00; temperature 25 at 2026-08-12 09:00; thermistor 8531.752 at 2026-08-12 09:00; thermistor_ysi44005 27.282 at 2026-08-12 09:00; voltage 0.588 at 2026-08-12 09:00; voltage_1 5741.629 at 2026-08-12 09:00; voltage_polynomial_4 0.387 at 2026-08-12 09:00 (UTC).",
+  "reference": "axis_x -85.79 at 2026-08-12 09:00; axis_x_std 0 at 2026-08-12 09:00; axis_y 1.188 at 2026-08-12 09:00; axis_y_std 0 at 2026-08-12 09:00; axis_z -4.039 at 2026-08-12 09:00; axis_z_std 0 at 2026-08-12 09:00; baro 100670 at 2026-08-12 09:11; co 216 at 2026-06-29 09:37; co2 417 at 2026-06-29 09:37; hum1 69 at 2026-08-12 09:11; light 110376 at 2026-08-12 09:11; no2 41 at 2026-06-29 09:37; ox 0 at 2026-06-29 09:37; peopleCount 0 at 2026-08-12 09:14; pm10 0 at 2026-06-29 09:37; potentiometer 530.679 at 2026-08-12 09:00; potentiometer_displacement 46.932 at 2026-08-12 09:00; rain_1 0 at 2026-08-12 09:11; rain_acc 299.466 at 2026-08-12 09:11; raw 31340 at 2026-06-29 09:37; sn1 41 at 2026-06-29 09:37; sn1_ae 260 at 2026-06-29 09:37; sn1_we 273 at 2026-06-29 09:37; sn3 216 at 2026-06-29 09:37; sn3_ae 84 at 2026-06-29 09:37; sn3_we 518 at 2026-06-29 09:37; sn4 384 at 2026-06-29 09:37; sn4_ae 364 at 2026-06-29 09:37; sn4_we 425 at 2026-06-29 09:37; so2 384 at 2026-06-29 09:37; temp1 26.8 at 2026-08-12 09:11; temp2 321 at 2026-06-29 09:37; temperature 26 at 2026-08-12 09:00; thermistor 8531.752 at 2026-08-12 09:00; thermistor_ysi44005 28.61 at 2026-08-12 09:00; uv 9.5 at 2026-08-12 09:11; voc_index 99 at 2026-06-29 09:37; voltage 0.492 at 2026-08-12 09:00; voltage_1 55.919 at 2026-08-12 09:00; voltage_polynomial_4 -0.041 at 2026-08-12 09:00; wind_direction_1 351 at 2026-08-12 09:11; wind_peak_1 13.7 at 2026-08-12 09:11; wind_speed_1 9.8 at 2026-08-12 09:11 (UTC).",
   "reference_value": [
    "axis_x",
    "axis_x_std",
@@ -1024,14 +1113,43 @@
    "axis_y_std",
    "axis_z",
    "axis_z_std",
+   "baro",
+   "co",
+   "co2",
+   "hum1",
+   "light",
+   "no2",
+   "ox",
+   "peopleCount",
+   "pm10",
    "potentiometer",
    "potentiometer_displacement",
+   "rain_1",
+   "rain_acc",
+   "raw",
+   "sn1",
+   "sn1_ae",
+   "sn1_we",
+   "sn3",
+   "sn3_ae",
+   "sn3_we",
+   "sn4",
+   "sn4_ae",
+   "sn4_we",
+   "so2",
+   "temp1",
+   "temp2",
    "temperature",
    "thermistor",
    "thermistor_ysi44005",
+   "uv",
+   "voc_index",
    "voltage",
    "voltage_1",
-   "voltage_polynomial_4"
+   "voltage_polynomial_4",
+   "wind_direction_1",
+   "wind_peak_1",
+   "wind_speed_1"
   ],
   "score_mode": "manual",
   "answerable": true,
@@ -1134,11 +1252,14 @@
  {
   "id": "U063",
   "type": "user",
-  "template": "no_data",
+  "template": "list_sensors_q",
   "question": "Which instruments measure soil moisture?",
-  "reference": "No soil moisture data in the snapshot (these channels come from LoRaWAN devices whose values were not ingested).",
-  "reference_value": [],
-  "score_mode": "negative",
+  "reference": "2 sensors measure moisture at the five sites: A8610A333526680F (Ranverso), 2CF7F1C072600345 (Schenkenberg).",
+  "reference_value": [
+   "A8610A333526680F",
+   "2CF7F1C072600345"
+  ],
+  "score_mode": "all",
   "answerable": true,
   "source": "ask_events.jsonl (KG question 87)"
  },
@@ -1181,8 +1302,10 @@
   "type": "user",
   "template": "list_sensors",
   "question": "Which sensors are available at Baltanas?",
-  "reference": "33 sensors (30 distinct names): Acc-2A, Acc-3A, GNSS-Rover, GNSS_Base, ls-130314hw-meter-teros32-2, ls-130432hw-meter-teros32-2, ls-149367hw-pulse-3, ls-149367hw-thermistor-2, ls-149367hw-voltsingle-1, ls-149402hw-pulse-3, ls-149402hw-thermistor-2, ls-149402hw-voltsingle-1, ls-149421hw-pulse-3, ls-149421hw-thermistor-2, ls-149421hw-voltsingle-1, ls-149443hw-pulse-3, ls-149443hw-thermistor-2, ls-149443hw-voltsingle-1, ls-149780hw-pulse-3, ls-149780hw-thermistor-2, ls-149780hw-voltsingle-1, ls-151810hw-voltage-1, ls-151810hw-voltage-2, ls-151810hw-voltage-3, ls-151810hw-voltage-4, shellydw2-AAB1AC, shellyht-6B6DEE, shellyht-701EE3, shellyht-7020C8, shellyht-CAAE03.",
+  "reference": "35 sensors (32 distinct names): 2CF7F1C073400212, A8610A3230467704, Acc-2A, Acc-3A, GNSS-Rover, GNSS_Base, ls-130314hw-meter-teros32-2, ls-130432hw-meter-teros32-2, ls-149367hw-pulse-3, ls-149367hw-thermistor-2, ls-149367hw-voltsingle-1, ls-149402hw-pulse-3, ls-149402hw-thermistor-2, ls-149402hw-voltsingle-1, ls-149421hw-pulse-3, ls-149421hw-thermistor-2, ls-149421hw-voltsingle-1, ls-149443hw-pulse-3, ls-149443hw-thermistor-2, ls-149443hw-voltsingle-1, ls-149780hw-pulse-3, ls-149780hw-thermistor-2, ls-149780hw-voltsingle-1, ls-151810hw-voltage-1, ls-151810hw-voltage-2, ls-151810hw-voltage-3, ls-151810hw-voltage-4, shellydw2-AAB1AC, shellyht-6B6DEE, shellyht-701EE3, shellyht-7020C8, shellyht-CAAE03.",
   "reference_value": [
+   "2CF7F1C073400212",
+   "A8610A3230467704",
    "Acc-2A",
    "Acc-3A",
    "GNSS-Rover",
@@ -1224,8 +1347,12 @@
   "type": "user",
   "template": "list_sensors",
   "question": "Which sensors are available at Delos?",
-  "reference": "26 sensors (26 distinct names): ls-109315hw-voltsingle-1, ls-149368hw-potentiometer-1, ls-149405hw-voltsingle-1, ls-149423hw-potentiometer-1, ls-149460hw-voltsingle-1, ls-149678hw-voltsingle-1, ls-150900hw-1, ls-151805hw-thermistor-2, ls-151805hw-voltage-1, ls-151805hw-voltage-3, ls-151809hw-thermistor-2, ls-151809hw-voltage-1, ls-151809hw-voltage-3, ls-151815hw-thermistor-2, ls-151815hw-voltage-1, ls-151815hw-voltage-3, ls-151815hw-voltage-4, ls-151836hw-thermistor-2, ls-151836hw-voltage-1, ls-151836hw-voltage-3, ls-153157hw-1, ls-153242hw-1, ls-153295hw-1, ls-168439hw-thermistor-2, ls-168439hw-voltage-1, ls-168439hw-voltage-3.",
+  "reference": "30 sensors (30 distinct names): 0004A30B0050C42F, 2CF7F1C061300548, 2CF7F1C062800035, 2CF7F1C0723001F4, ls-109315hw-voltsingle-1, ls-149368hw-potentiometer-1, ls-149405hw-voltsingle-1, ls-149423hw-potentiometer-1, ls-149460hw-voltsingle-1, ls-149678hw-voltsingle-1, ls-150900hw-1, ls-151805hw-thermistor-2, ls-151805hw-voltage-1, ls-151805hw-voltage-3, ls-151809hw-thermistor-2, ls-151809hw-voltage-1, ls-151809hw-voltage-3, ls-151815hw-thermistor-2, ls-151815hw-voltage-1, ls-151815hw-voltage-3, ls-151815hw-voltage-4, ls-151836hw-thermistor-2, ls-151836hw-voltage-1, ls-151836hw-voltage-3, ls-153157hw-1, ls-153242hw-1, ls-153295hw-1, ls-168439hw-thermistor-2, ls-168439hw-voltage-1, ls-168439hw-voltage-3.",
   "reference_value": [
+   "0004A30B0050C42F",
+   "2CF7F1C061300548",
+   "2CF7F1C062800035",
+   "2CF7F1C0723001F4",
    "ls-109315hw-voltsingle-1",
    "ls-149368hw-potentiometer-1",
    "ls-149405hw-voltsingle-1",
@@ -1260,11 +1387,18 @@
  {
   "id": "U068",
   "type": "user",
-  "template": "no_data",
+  "template": "weather_stations",
   "question": "Which installed instruments are associated with Weather Stations?",
-  "reference": "No weather station data in the snapshot (these channels come from LoRaWAN devices whose values were not ingested).",
-  "reference_value": [],
-  "score_mode": "negative",
+  "reference": "6 weather stations (LoRaWAN nodes named \"Weather station\"): 2CF7F1C073400212 (Baltanas), 2CF7F1C061300548 (Delos), 2CF7F1C0723001F4 (Delos), 2CF7F1C072300286 (Lucretili), 2CF7F1C0734001E8 (Ranverso), 2CF7F1C072300226 (Schenkenberg).",
+  "reference_value": [
+   "2CF7F1C073400212",
+   "2CF7F1C061300548",
+   "2CF7F1C0723001F4",
+   "2CF7F1C072300286",
+   "2CF7F1C0734001E8",
+   "2CF7F1C072300226"
+  ],
+  "score_mode": "all",
   "answerable": true,
   "source": "ask_events.jsonl (KG question 92)",
   "paraphrase_group": "weather-stations"
@@ -1272,11 +1406,22 @@
  {
   "id": "U069",
   "type": "user",
-  "template": "no_data",
+  "template": "weather_station_quantities",
   "question": "What physical quantities are monitored by weather stations?",
-  "reference": "No weather station data in the snapshot (these channels come from LoRaWAN devices whose values were not ingested).",
-  "reference_value": [],
-  "score_mode": "negative",
+  "reference": "10 quantities: baro (Pa), hum1 (%), light (lx), rain_1 (mm), rain_acc (mm), temp1 (C), uv, wind_direction_1 (deg), wind_peak_1 (m/s), wind_speed_1 (m/s).",
+  "reference_value": [
+   "baro",
+   "hum1",
+   "light",
+   "rain_1",
+   "rain_acc",
+   "temp1",
+   "uv",
+   "wind_direction_1",
+   "wind_peak_1",
+   "wind_speed_1"
+  ],
+  "score_mode": "all",
   "answerable": true,
   "source": "ask_events.jsonl (KG question 93)",
   "paraphrase_group": "weather-stations"
@@ -1284,11 +1429,17 @@
  {
   "id": "U070",
   "type": "user",
-  "template": "no_data",
+  "template": "sites_with",
   "question": "Which sites have wind sensors?",
-  "reference": "No wind data in the snapshot (these channels come from LoRaWAN devices whose values were not ingested).",
-  "reference_value": [],
-  "score_mode": "negative",
+  "reference": "5 sites: Baltanas (1 sensor), Delos (2 sensors), Lucretili (1 sensor), Ranverso (1 sensor), Schenkenberg (1 sensor) (wind_speed_1, from the LoRaWAN weather stations).",
+  "reference_value": [
+   "Baltanas",
+   "Delos",
+   "Lucretili",
+   "Ranverso",
+   "Schenkenberg"
+  ],
+  "score_mode": "all",
   "answerable": true,
   "source": "ask_events.jsonl (KG question 94)",
   "paraphrase_group": "wind-all-sites"
@@ -1298,7 +1449,7 @@
   "type": "user",
   "template": "verdict",
   "question": "Is there a rainfall anomaly at Baltanas?",
-  "reference": "Cannot be determined. R6_rain_1h: no readings in the snapshot",
+  "reference": "Cannot be determined. R6_rain_1h: Baltanas's rainfall rule(s) (R6_rain_1h) take rainfall amounts in mm per window; the snapshot's only rain readings at Baltanas are the weather station's rainfall intensity (rain_1, mm/h) and its running total since installation (rain_acc), neither of which is a rule's quantity.",
   "reference_value": [
    "Cannot be determined"
   ],
@@ -1312,9 +1463,9 @@
   "type": "user",
   "template": "verdict",
   "question": "Is the latest wind speed at Delos anomalous?",
-  "reference": "Cannot be determined. R2_wind: no readings in the snapshot",
+  "reference": "No. R2_wind: latest reading 9.8 at 2026-08-12 09:11 UTC vs threshold 12",
   "reference_value": [
-   "Cannot be determined"
+   "No"
   ],
   "score_mode": "verdict",
   "answerable": true,
@@ -1359,25 +1510,28 @@
   "type": "user",
   "template": "policies",
   "question": "Which policies are defined for Delos?",
-  "reference": "4 AD-RT policies: R1a_rain_1h (rainfall 1h); R1b_rain_3h (rainfall 3h); R2_wind (wind); R3_hum_cross (humidity crossings).",
+  "reference": "52 policies: 4 AD-RT, 48 IRA (the AD-RT ones: 4 AD-RT policies: R1a_rain_1h (rainfall 1h); R1b_rain_3h (rainfall 3h); R2_wind (wind); R3_hum_cross (humidity crossings).)",
   "reference_value": [
-   "R1a_rain_1h",
-   "R1b_rain_3h",
-   "R2_wind",
-   "R3_hum_cross"
+   52
   ],
-  "score_mode": "all",
+  "score_mode": "manual",
   "answerable": true,
   "source": "ask_events.jsonl (KG question 100)"
  },
  {
   "id": "U076",
   "type": "user",
-  "template": "no_data",
+  "template": "per_site_stats",
   "question": "Compare wind speed readings across ARGUS sites.",
-  "reference": "No wind speed data in the snapshot (these channels come from LoRaWAN devices whose values were not ingested).",
-  "reference_value": [],
-  "score_mode": "negative",
+  "reference": "Baltanas: 16,741 observations, min 0, mean 2.625, max 18.3; Delos: 32,422 observations, min 0, mean 3.413, max 16.9; Lucretili: 17,474 observations, min 0, mean 0.256, max 5.2; Ranverso: 10,026 observations, min 0, mean 1.12, max 7.9; Schenkenberg: 17,897 observations, min 0, mean 1.389, max 12.3. (\"Statistics\" is open: any of these per-site statistics, correctly stated for every site, answers the question.)",
+  "reference_value": [
+   2.624927,
+   3.412942,
+   0.256289,
+   1.120088,
+   1.389009
+  ],
+  "score_mode": "manual",
   "answerable": true,
   "source": "ask_events.jsonl (KG question 101)",
   "paraphrase_group": "wind-all-sites"
@@ -1387,9 +1541,9 @@
   "type": "user",
   "template": "count_sensors",
   "question": "how many sensors are there in delos pilot?",
-  "reference": "26 sensors have readings at Delos.",
+  "reference": "30 sensors have readings at Delos.",
   "reference_value": [
-   26
+   30
   ],
   "score_mode": "all",
   "answerable": true,
@@ -1401,9 +1555,9 @@
   "type": "user",
   "template": "count_sensors",
   "question": "how many sensors are in delos site",
-  "reference": "26 sensors have readings at Delos.",
+  "reference": "30 sensors have readings at Delos.",
   "reference_value": [
-   26
+   30
   ],
   "score_mode": "all",
   "answerable": true,
@@ -1415,13 +1569,13 @@
   "type": "user",
   "template": "per_site",
   "question": "How many devices are installed per ARGUS site?",
-  "reference": "Baltanas 13; Delos 15; Lucretili 13; Ranverso 7; Schenkenberg 7.",
+  "reference": "Baltanas 15; Delos 19; Lucretili 15; Ranverso 13; Schenkenberg 9.",
   "reference_value": [
-   13,
+   15,
+   19,
    15,
    13,
-   7,
-   7
+   9
   ],
   "score_mode": "all",
   "answerable": true,

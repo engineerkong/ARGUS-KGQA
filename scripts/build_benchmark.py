@@ -7,18 +7,26 @@ with SQL and plain Python — independently of HeriKGQA, Interactive-KBQA and
 TextRAG — and still needs manual validation before use.
 
     python scripts/build_benchmark.py            # writes material/benchmark_500.{json,csv,meta.json}
+    python scripts/build_benchmark.py --update-references
+        # keeps the questions (and ids) of material/benchmark_500.json and recomputes their references
+        # on the current snapshot; the changes go to material/benchmark_500.changes.json
 
 Conventions (also written to benchmark_500.meta.json):
   - all times UTC; "on <date>" = that UTC calendar day;
   - relative times ("last 24 hours") end at the snapshot's last reading;
   - distances are haversine on a 6,371,000 m sphere; a centroid is the mean
-    latitude/longitude of the nodes; only nodes with coordinates count;
+    latitude/longitude of the nodes; only nodes with coordinates count; a
+    distance between nodes is also accepted as the straight-line distance, the
+    haversine distance combined with the altitude difference
+    (reference_value_alt), since the questions do not say which is meant;
   - AD-RT verdicts follow each rule's definition: windows end at the latest
     matching reading at or before the end of the named day (or the snapshot
     end), every (sensor, quantity) series is evaluated separately and a rule
-    fires if any series crosses its threshold; a question's verdict is Yes if
-    any applicable rule fires, No if at least one was evaluated and none fired,
-    Cannot be determined if none could be evaluated.
+    fires if any series crosses its threshold; the LoRaWAN running totals
+    (rain_acc, counter_acc_*) and rainfall intensity (rain_1, mm/h) are never a
+    rule's quantity; a question's verdict is Yes if
+    any applicable rule fires, No if every applicable rule was evaluated and
+    none fired, Cannot be determined otherwise.
 """
 
 from __future__ import annotations
@@ -30,6 +38,7 @@ import json
 import math
 import os
 import random
+import sys
 from collections import defaultdict
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
@@ -49,7 +58,10 @@ QNAME = {
     "pgaComposed": "composed peak ground acceleration (pgaComposed)",
     "rmsComposed": "composed RMS acceleration (rmsComposed)",
     "potentiometer_displacement": "potentiometer displacement",
+    # LoRaWAN weather-station channels (snapshot v2)
+    "hum1": "relative humidity", "wind_speed_1": "wind speed", "baro": "barometric pressure", "co2": "CO2 concentration",
 }
+PROP_OF = {v: k for k, v in QNAME.items()}
 # quantities asked about, per site (must have data there)
 SITE_QUANTITIES = {
     "baltanas": ["temperature", "soil_temperature", "soil_water_potential", "voltage"],
@@ -61,6 +73,18 @@ SITE_QUANTITIES = {
 DAILY_QUANTITIES = ["temperature", "soil_temperature", "soil_water_potential", "rainfall"]
 MONTHS = [(2026, 5, "May"), (2026, 6, "June"), (2026, 7, "July"), (2026, 8, "August")]
 EARTH_R = 6371000.0
+
+# FULL: every candidate question instead of a random sample of them (--update-references matches the
+# existing questions against these)
+FULL = False
+
+
+def pick(rng, population, k):
+    return list(population) if FULL else rng.sample(population, k)
+
+
+def choices(rng, options):
+    return list(options) if FULL else [rng.choice(options)]
 
 # Questions too close to an in-context example of a system under test
 # (HeriKGQA parser few-shots, Interactive-KBQA dialog demos).
@@ -100,6 +124,20 @@ def haversine(a, b) -> float:
     dp, dl = p2 - p1, math.radians(b[1] - a[1])
     h = math.sin(dp / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dl / 2) ** 2
     return 2 * EARTH_R * math.asin(math.sqrt(h))
+
+
+def straight_line(a, b) -> float:
+    """Distance (m) between two nodes (label, lat, lon, alt) with the altitude difference: the haversine
+    distance combined with it (every node with coordinates has an altitude)."""
+    return math.hypot(haversine(a[1:3], b[1:3]), b[3] - a[3])
+
+
+def alt_text(horizontal, straight, pair=False) -> str:
+    """The straight-line alternative for a reference text, when it reads differently."""
+    if round(straight[0], 1) == round(horizontal[0], 1) and (not pair or straight[1:] == horizontal[1:]):
+        return ""
+    return (f" With the altitude difference: {fnum(straight[0], 1)} m"
+            + (f", between {straight[1]} and {straight[2]}." if pair else "."))
 
 
 class Bench:
@@ -168,6 +206,10 @@ def load(b: Bench):
                                AND o.result_time > %s AND o.result_time <= %s""",
                           s, d["end"] - timedelta(hours=hours), d["end"])
             d["window_avg"][(s, hours)] = (a, n)
+    (a, mn, mx, n), = b.q("""SELECT avg(o.value), min(o.value), max(o.value), count(*) FROM observations o
+                             JOIN readings r USING (reading_id) WHERE r.site_id = 'baltanas' AND o.property_id = 'hum1'
+                               AND o.value IS NOT NULL AND (o.result_time AT TIME ZONE 'UTC')::date = '2026-07-01'""")
+    d["humidity_day"] = dict(avg=a, mn=mn, mx=mx, n=n)
     return d
 
 
@@ -189,10 +231,11 @@ def gen_basic(b: Bench, d):
             for agg, word, key in (("avg", "average", "avg"), ("max", "maximum", "mx"), ("min", "minimum", "mn")):
                 if (agg, s, p) in EXCLUDED:
                     continue
-                verb = random.choice(["recorded", "measured", "observed"])
-                b.add("basic", f"{agg}_quantity", f"What is the {word} {QNAME[p]} {verb} at {SITE[s]}?",
-                      f"{fnum(float(st[key]))}" + (f" {unit(st['unit'])}" if st["unit"] else "") + ".", float(st[key]),
-                      unit=unit(st["unit"]))
+                verbs = ["recorded", "measured", "observed"]
+                for verb in (verbs if FULL else [random.choice(verbs)]):
+                    b.add("basic", f"{agg}_quantity", f"What is the {word} {QNAME[p]} {verb} at {SITE[s]}?",
+                          f"{fnum(float(st[key]))}" + (f" {unit(st['unit'])}" if st["unit"] else "") + ".", float(st[key]),
+                          unit=unit(st["unit"]))
             b.add("basic", "obs_count", f"How many {QNAME[p]} observations exist for {SITE[s]}?",
                   f"{st['n']} observations.", st["n"])
             b.add("basic", "sensors_measuring", f"How many sensors measure {QNAME[p]} at {SITE[s]}?",
@@ -211,8 +254,14 @@ def gen_basic(b: Bench, d):
           f"{SITE[most_r]} ({d['span'][most_r][2]} readings).", SITE[most_r])
     for s, what in [("baltanas", "relative humidity"), ("delos", "wind speed"), ("lucretili", "CO2 concentration"),
                     ("ranverso", "barometric pressure"), ("schenkenberg", "relative humidity"), ("delos", "solar radiation")]:
-        b.add("basic", "unanswerable", f"What is the average {what} at {SITE[s]}?",
-              f"Cannot be answered: the knowledge graph has no {what} data for {SITE[s]}.", None, answerable=False)
+        st = d["stats"].get((s, PROP_OF.get(what)))
+        if st:   # data the LoRaWAN weather stations added (snapshot v2)
+            b.add("basic", "avg_quantity", f"What is the average {what} at {SITE[s]}?",
+                  f"{fnum(float(st['avg']))}" + (f" {unit(st['unit'])}" if st["unit"] else "") + ".", float(st["avg"]),
+                  unit=unit(st["unit"]))
+        else:
+            b.add("basic", "unanswerable", f"What is the average {what} at {SITE[s]}?",
+                  f"Cannot be answered: the knowledge graph has no {what} data for {SITE[s]}.", None, answerable=False)
 
 
 # ── spatial ────────────────────────────────────────────────────────────────
@@ -225,8 +274,10 @@ def gen_spatial(b: Bench, d):
         unique = {l for l in labels if labels.count(l) == 1}
         pairs = [(haversine(a[1:3], c[1:3]), a[0], c[0]) for a, c in itertools.combinations(ns, 2)]
         far = max(pairs)
+        far3 = max((straight_line(a, c), a[0], c[0]) for a, c in itertools.combinations(ns, 2))
         b.add("spatial", "farthest_pair", f"How far apart are the two most distant sensor nodes at {SITE[s]}?",
-              f"{fnum(far[0], 1)} m, between {far[1]} and {far[2]}.", round(far[0], 1), unit="m")
+              f"{fnum(far[0], 1)} m, between {far[1]} and {far[2]}." + alt_text(far, far3, pair=True),
+              round(far[0], 1), unit="m", reference_value_alt=round(far3[0], 1))
         clat, clon = sum(n[1] for n in ns) / len(ns), sum(n[2] for n in ns) / len(ns)
         b.add("spatial", "centroid", f"What is the centroid of the sensor nodes at {SITE[s]}?",
               f"Latitude {clat:.6f}, longitude {clon:.6f} (mean of {len(ns)} nodes).", [round(clat, 6), round(clon, 6)])
@@ -249,19 +300,30 @@ def gen_spatial(b: Bench, d):
             b.add("spatial", "southernmost", f"Which sensor node at {SITE[s]} is the southernmost?",
                   f"{south[0]} (latitude {south[1]:.6f}).", south[0])
         named = [n for n in ns if n[0] in unique]
-        for a, c in rng.sample(list(itertools.combinations(named, 2)), min(8, len(named) * (len(named) - 1) // 2)):
-            dist = haversine(a[1:3], c[1:3])
+        pairs_named = list(itertools.combinations(named, 2))
+        for a, c in pick(rng, pairs_named + [(c, a) for a, c in pairs_named] if FULL else pairs_named,
+                         min(8, len(named) * (len(named) - 1) // 2)):
+            dist, dist3 = haversine(a[1:3], c[1:3]), straight_line(a, c)
             b.add("spatial", "pair_distance", f"What is the distance between sensor nodes {a[0]} and {c[0]} at {SITE[s]}?",
-                  f"{fnum(dist, 1)} m.", round(dist, 1), unit="m")
-        for a in rng.sample(named, min(5, len(named))):
+                  f"{fnum(dist, 1)} m." + alt_text((dist,), (dist3,)), round(dist, 1), unit="m",
+                  reference_value_alt=round(dist3, 1))
+        for a in pick(rng, named, min(5, len(named))):
             others = sorted((haversine(a[1:3], c[1:3]), c[0]) for c in ns if c is not a)
-            if len(others) > 1 and others[0][0] < others[1][0] - 0.05 and others[0][1] in unique:
+            others3 = sorted((straight_line(a, c), c[0]) for c in ns if c is not a)
+            if (len(others) > 1 and others[0][0] < others[1][0] - 0.05 and others[0][1] in unique
+                    and others3[0][0] < others3[1][0] - 0.05 and others3[0][1] in unique):
+                near, near3 = others[0], others3[0]
                 b.add("spatial", "nearest_node", f"Which sensor node is closest to {a[0]} at {SITE[s]}?",
-                      f"{others[0][1]}, {fnum(others[0][0], 1)} m away.", others[0][1])
-            radius = rng.choice([10, 50, 100, 500])
-            within = sum(1 for dd, _ in others if dd <= radius)
-            b.add("spatial", "within_radius", f"How many other sensor nodes at {SITE[s]} are within {radius} m of {a[0]}?",
-                  f"{within}.", within)
+                      f"{near[1]}, {fnum(near[0], 1)} m away."
+                      + (f" With the altitude difference: {near3[1]}, {fnum(near3[0], 1)} m away."
+                         if (near3[1], round(near3[0], 1)) != (near[1], round(near[0], 1)) else ""),
+                      near[1], reference_value_alt=near3[1])
+            for radius in choices(rng, [10, 50, 100, 500]):
+                within = sum(1 for dd, _ in others if dd <= radius)
+                within3 = sum(1 for dd, _ in others3 if dd <= radius)
+                b.add("spatial", "within_radius", f"How many other sensor nodes at {SITE[s]} are within {radius} m of {a[0]}?",
+                      f"{within}." + (f" With the altitude difference: {within3}." if within3 != within else ""),
+                      within, reference_value_alt=within3)
     cents = {s: (sum(n[1] for n in d["nodes"][s]) / len(d["nodes"][s]), sum(n[2] for n in d["nodes"][s]) / len(d["nodes"][s]))
              for s in SITES}
     for a, c in itertools.combinations(SITES, 2):
@@ -303,12 +365,12 @@ def gen_temporal(b: Bench, d):
                 b.add("temporal", "relative_window", f"What was the average temperature at {SITE[s]} over {phrase}?",
                       f"{fnum(float(avg))} ({n} observations, window ending {ftime(end)}).", float(avg))
     days = sorted({k[2] for k in d["daily"]})
-    for (s, p, day), st in rng.sample(sorted(d["daily"].items()), 120):
+    for (s, p, day), st in pick(rng, sorted(d["daily"].items()), 120):
         if st["n"] < 10:
             continue
-        agg, word, key = rng.choice([("avg", "average", "avg"), ("max", "maximum", "mx"), ("min", "minimum", "mn")])
-        b.add("temporal", f"daily_{agg}", f"What was the {word} {QNAME[p]} at {SITE[s]} on {day.isoformat()}?",
-              f"{fnum(float(st[key]))}.", float(st[key]))
+        for agg, word, key in choices(rng, [("avg", "average", "avg"), ("max", "maximum", "mx"), ("min", "minimum", "mn")]):
+            b.add("temporal", f"daily_{agg}", f"What was the {word} {QNAME[p]} at {SITE[s]} on {day.isoformat()}?",
+                  f"{fnum(float(st[key]))}.", float(st[key]))
     for s in SITES:
         for y, m, mname in MONTHS[1:3]:
             ds = {k[2]: v["avg"] for k, v in d["daily"].items()
@@ -318,8 +380,8 @@ def gen_temporal(b: Bench, d):
                 b.add("temporal", "hottest_day", f"Which day in {mname} {y} had the highest average temperature at {SITE[s]}?",
                       f"{best.isoformat()} (daily average {fnum(float(ds[best]))}).", best.isoformat())
     for s in SITES:
-        for _ in range(3):
-            start = date(2026, 5, 15) + timedelta(days=rng.randrange(0, 80))
+        for offset in (range(80) if FULL else [rng.randrange(0, 80) for _ in range(3)]):
+            start = date(2026, 5, 15) + timedelta(days=offset)
             stop = start + timedelta(days=6)
             rows = [v for k, v in d["daily"].items() if k[0] == s and k[1] == "temperature" and start <= k[2] <= stop]
             n = sum(v["n"] for v in rows)
@@ -329,21 +391,56 @@ def gen_temporal(b: Bench, d):
                       f"What was the average temperature at {SITE[s]} between {start.isoformat()} and {stop.isoformat()}?",
                       f"{fnum(avg)} ({n} observations, both days inclusive).", avg)
     for qtext, ref in [("What was the temperature at Delos in April 2026?", "Cannot be answered: the data starts on 2026-05-13."),
-                       ("What was the relative humidity at Baltanas on 2026-07-01?", "Cannot be answered: no humidity data."),
                        ("How many readings were recorded at Ranverso in September 2026?", "Cannot be answered: the data ends on 2026-08-12.")]:
         b.add("temporal", "unanswerable", qtext, ref, None, answerable=False)
+    # relative humidity at Baltanas: none in snapshot v1, the LoRaWAN weather station's hum1 in v2
+    st = d["humidity_day"]
+    if st["n"]:
+        b.add("temporal", "daily_avg", "What was the relative humidity at Baltanas on 2026-07-01?",
+              f"{fnum(float(st['avg']))} % on average ({st['n']} observations, from {fnum(float(st['mn']))} % "
+              f"to {fnum(float(st['mx']))} %).", float(st["avg"]))
+    else:
+        b.add("temporal", "unanswerable", "What was the relative humidity at Baltanas on 2026-07-01?",
+              "Cannot be answered: no humidity data.", None, answerable=False)
 
 
 # ── anomaly ────────────────────────────────────────────────────────────────
 
+# LoRaWAN station channels that are never a rule's quantity, whatever its matcher ("rain", "counter",
+# "acc"): the running totals since installation (rain_acc in mm, counter_acc_* visitors) and rain_1, a
+# rainfall intensity in mm/h, where the rainfall thresholds are amounts in mm per window.
+NON_RULE = ("rain_acc", "counter_acc", "rain_1")
+
+
 def _matches(label, any_of=(), all_of=(), excludes=()):
     l = label.lower()
     return ((not any_of or any(x in l for x in any_of)) and all(x in l for x in all_of)
-            and not any(x in l for x in excludes))
+            and not any(x in l for x in excludes) and not any(x in l for x in NON_RULE))
 
 
 # Rules that have data in the snapshot, with their definition.
 EVALUABLE = {
+    # with the LoRaWAN weather stations, people counters, airflow and soil sensors (snapshot v2)
+    ("delos", "R2_wind"): dict(match=dict(any_of=("wind_speed",), excludes=("dir",)), kind="direct", key="R2_wind"),
+    ("baltanas", "R5a_airflow_const"): dict(match=dict(any_of=("airflow",)), kind="airflow_const", hours=24,
+                                            key="R5a_airflow_const"),
+    ("baltanas", "R5b_airflow_range"): dict(match=dict(any_of=("airflow",)), kind="window",
+                                            windows=[(24, "range", "R5b_airflow_range")]),
+    ("lucretili", "R4a_hum_spike_6h"): dict(match=dict(any_of=("hum",)), kind="window",
+                                            windows=[(6, "mean", "R4a_hum_spike_6h")]),
+    ("lucretili", "R4b_hum_persist_7d"): dict(match=dict(any_of=("hum",)), kind="window",
+                                              windows=[(168, "mean", "R4b_hum_persist_7d")]),
+    ("lucretili", "R4c_hum_rapid_1h"): dict(match=dict(any_of=("hum",)), kind="max_abs_diff", hours=1, key="R4c_hum_rapid_1h"),
+    ("lucretili", "R7_wind"): dict(match=dict(any_of=("wind",), excludes=("dir",)), kind="peak_ratio", hours=24,
+                                   key="R7a_wind_peak_ratio"),
+    ("lucretili", "R8_baro"): dict(match=dict(any_of=("baro",)), kind="window", windows=[(6, "range", "R8_baro_range")]),
+    ("ranverso", "R4a_soil_high"): dict(match=dict(any_of=("moisture",), excludes=("temp", "hum")), kind="direct",
+                                        key="R4a_soil_high"),
+    ("ranverso", "R4b_soil_low"): dict(match=dict(any_of=("moisture",), excludes=("temp", "hum")), kind="direct",
+                                       key="R4b_soil_low", direction="lt"),
+    ("schenkenberg", "R1_temp_hum"): dict(match=dict(all_of=("temp",)), match2=dict(any_of=("hum",)), kind="composite",
+                                          keys=("R1_temp_low", "R1_hum_high")),
+    # with data in snapshot v1 already
     ("lucretili", "R9a_temp_lt"): dict(match=dict(any_of=("temp",)), kind="window", windows=[(24, "range", "R9a_temp_lt")]),
     ("lucretili", "R9b_temp_st"): dict(match=dict(any_of=("temp",)), kind="max_abs_diff", hours=1, key="R9b_temp_st"),
     ("lucretili", "R6a_rain"): dict(match=dict(any_of=("rain",)), kind="window",
@@ -362,14 +459,41 @@ DATA_GROUPS = [
     ("lucretili", "visitor count", ["R5_visitors"]),
     ("ranverso", "rainfall", ["R2_rain_7d"]),
     ("schenkenberg", "vibration", ["R3_vib_zscore", "R4_pga"]),
+    # snapshot v2 (LoRaWAN)
+    ("delos", "wind speed", ["R2_wind"]),
+    ("baltanas", "airflow", ["R5a_airflow_const", "R5b_airflow_range"]),
+    ("lucretili", "humidity", ["R4a_hum_spike_6h", "R4b_hum_persist_7d", "R4c_hum_rapid_1h"]),
+    ("lucretili", "wind speed", ["R7_wind"]),
+    ("lucretili", "barometric pressure", ["R8_baro"]),
+    ("ranverso", "soil moisture", ["R4a_soil_high", "R4b_soil_low"]),
+    ("schenkenberg", "combined low temperature and high humidity", ["R1_temp_hum"]),
 ]
+# (site, phrase, rules): no reading matches the rules' quantities, or the rule cannot be evaluated
 NO_DATA_GROUPS = [
-    ("delos", "rainfall"), ("delos", "wind speed"), ("delos", "humidity"), ("baltanas", "rainfall"),
-    ("baltanas", "humidity"), ("baltanas", "soil moisture"), ("baltanas", "airflow"), ("baltanas", "vibration (PPV)"),
-    ("lucretili", "humidity"), ("lucretili", "wind speed"), ("lucretili", "crack width"), ("lucretili", "tilt"),
-    ("lucretili", "barometric pressure"), ("ranverso", "humidity"), ("ranverso", "soil moisture"),
-    ("schenkenberg", "crack width"), ("schenkenberg", "combined low temperature and high humidity"),
+    ("delos", "rainfall", ["R1a_rain_1h", "R1b_rain_3h"]), ("baltanas", "rainfall", ["R6_rain_1h"]),
+    ("delos", "humidity", ["R3_hum_cross"]), ("baltanas", "humidity", ["R2_hum_daily_range"]),
+    ("baltanas", "soil moisture", ["R4a_soil_high", "R4b_soil_range"]), ("baltanas", "vibration (PPV)", ["R1_ppv"]),
+    ("lucretili", "crack width", ["R1a_crack_step", "R1b_crack_offset"]),
+    ("lucretili", "tilt", ["R2a_tilt_step", "R2b_tilt_offset"]), ("ranverso", "humidity", ["R1_hum_inside"]),
+    ("schenkenberg", "crack width", ["R2_crack_step"]),
 ]
+NO_DATA_REFERENCE = {
+    **{(s, "rainfall"): (
+        f"Cannot be determined: {S}'s rainfall rule(s) ({rules}) take rainfall amounts in mm per window; the "
+        f"snapshot's only rain readings at {S} are the weather station's rainfall intensity (rain_1, mm/h) and its "
+        f"running total since installation (rain_acc), neither of which is a rule's quantity.")
+       for s, S, rules in [("delos", "Delos", "R1a_rain_1h, R1b_rain_3h"), ("baltanas", "Baltanas", "R6_rain_1h")]},
+    ("delos", "humidity"): (
+        "Cannot be determined: Delos's humidity rule, R3_hum_cross, counts threshold crossings of a humidity "
+        "series smoothed twice over AD-RT's fixed sampling interval (a 12-hour then a 3-sample rolling mean, "
+        "3-day window); the snapshot's humidity readings are irregular, so the rule is not evaluated."),
+    ("baltanas", "humidity"): (
+        "Cannot be determined: Baltanas's humidity rule, R2_hum_daily_range, excludes the hum1 and ee3 "
+        "channels, and the snapshot has no other humidity readings at Baltanas."),
+    ("ranverso", "humidity"): (
+        "Cannot be determined: Ranverso's humidity rule, R1_hum_inside, concerns indoor humidity (quantities "
+        "labelled with both 'hum' and 'in'); the snapshot has no such readings at Ranverso."),
+}
 NO_RULE_GROUPS = [("delos", "temperature"), ("baltanas", "temperature"), ("ranverso", "temperature"),
                   ("baltanas", "soil temperature"), ("delos", "voltage")]
 # A rule that concerns the quantity without being a threshold on its value (partner review, 2026-10-20)
@@ -409,15 +533,20 @@ class RuleEngine:
         for s, p in b.q("""SELECT DISTINCT r.site_id, o.property_id FROM observations o JOIN readings r USING (reading_id)
                            WHERE o.value IS NOT NULL"""):
             props_at[s].add(p)
+        self.series2 = {}   # the second quantity of a two-quantity rule (match2)
+        self.cache = {}
         for (s, rule), spec in EVALUABLE.items():
-            props = sorted(p for p in props_at[s] if _matches(p, **spec["match"]))
-            cols = defaultdict(lambda: ([], []))
-            for sensor, p, t, v in b.q("""SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o
-                                          JOIN readings r USING (reading_id) WHERE r.site_id = %s AND o.property_id = ANY(%s)
-                                          AND o.value IS NOT NULL ORDER BY o.result_time""", s, props):
-                cols[(sensor, p)][0].append(t)
-                cols[(sensor, p)][1].append(float(v))
-            self.series[(s, rule)] = dict(cols)
+            for target, match in ((self.series, spec["match"]), (self.series2, spec.get("match2"))):
+                if match is None:
+                    continue
+                props = sorted(p for p in props_at[s] if _matches(p, **match))
+                cols = defaultdict(lambda: ([], []))
+                for sensor, p, t, v in b.q("""SELECT r.sensor_id, o.property_id, o.result_time, o.value FROM observations o
+                                              JOIN readings r USING (reading_id) WHERE r.site_id = %s AND o.property_id = ANY(%s)
+                                              AND o.value IS NOT NULL ORDER BY o.result_time""", s, props):
+                    cols[(sensor, p)][0].append(t)
+                    cols[(sensor, p)][1].append(float(v))
+                target[(s, rule)] = dict(cols)
 
     def threshold(self, site, rule, key):
         tv, tj = self.policies[(site, rule)]
@@ -427,6 +556,21 @@ class RuleEngine:
         """(fired, detail) or (None, reason) when it cannot be evaluated."""
         spec, cols = EVALUABLE[(site, rule)], self.series[(site, rule)]
         cut = as_of or self.d["end"]
+        if spec["kind"] == "composite":
+            # latest reading of each quantity at or before the cut; several at that time: the most anomalous
+            def latest(series, pick_most):
+                at = [(ts[j - 1], vs[j - 1]) for ts, vs in series.values() if (j := bisect.bisect_right(ts, cut))]
+                if not at:
+                    return None
+                t = max(t for t, _ in at)
+                return pick_most(v for tt, v in at if tt == t), t
+            lt, lh = latest(cols, min), latest(self.series2[(site, rule)], max)
+            if lt is None or lh is None:
+                return None, "no readings of one of the two quantities"
+            t_thr, h_thr = (self.threshold(site, rule, k) for k in spec["keys"])
+            fired = lt[0] < t_thr and lh[0] > h_thr
+            return fired, (f"{rule}: latest temperature {fnum(lt[0])} at {ftime(lt[1])} (fires below {fnum(t_thr)}), "
+                           f"latest humidity {fnum(lh[0])} at {ftime(lh[1])} (fires above {fnum(h_thr)})")
         times = [ts[bisect.bisect_right(ts, cut) - 1] for ts, _ in cols.values() if bisect.bisect_right(ts, cut)]
         if not times:
             return None, "no readings"
@@ -452,16 +596,29 @@ class RuleEngine:
                 return None, "no readings in window"
             m, t = max(metrics), max(thrs)
             return m > t, f"{rule}: metric {fnum(m)} vs threshold {fnum(t)} (window ending {ftime(anchor)})"
-        if spec["kind"] == "max_abs_diff":
+        if spec["kind"] in ("max_abs_diff", "airflow_const"):
             w = window(spec["hours"])
             vals = [max(abs(v[i] - v[i - 1]) for i in range(1, len(v))) for v in w.values() if len(v) >= 2]
             if not vals:
                 return None, "fewer than 2 readings in window"
             t = self.threshold(site, rule, spec["key"])
-            return max(vals) > t, f"{rule}: max 1h change {fnum(max(vals))} vs threshold {fnum(t)} (ending {ftime(anchor)})"
+            if spec["kind"] == "airflow_const":
+                # suspiciously constant: the steadiest series' largest step is below half the threshold
+                return min(vals) < t / 2, (f"{rule}: largest step within {spec['hours']}h {fnum(min(vals))} (steadiest "
+                                           f"series) vs threshold/2 {fnum(t / 2)} (ending {ftime(anchor)})")
+            return max(vals) > t, (f"{rule}: max {spec['hours']}h change {fnum(max(vals))} vs threshold {fnum(t)} "
+                                   f"(ending {ftime(anchor)})")
+        if spec["kind"] == "peak_ratio":
+            w = window(spec["hours"])
+            vals = [v[-1] / (sum(v) / len(v) + 1e-9) for v in w.values()]
+            t = self.threshold(site, rule, spec["key"])
+            return max(vals) > t, (f"{rule}: latest reading / {spec['hours']}h mean {fnum(max(vals))} vs threshold "
+                                   f"{fnum(t)} (ending {ftime(anchor)})")
         if spec["kind"] == "direct":
             latest = [vs[ts.index(anchor)] for ts, vs in cols.values() if anchor in ts]
             t = self.threshold(site, rule, spec["key"])
+            if spec.get("direction") == "lt":
+                return min(latest) < t, f"{rule}: latest reading {fnum(min(latest))} at {ftime(anchor)} vs threshold {fnum(t)} (fires below)"
             return max(latest) > t, f"{rule}: latest reading {fnum(max(latest))} at {ftime(anchor)} vs threshold {fnum(t)}"
         if spec["kind"] == "zscore":
             zs = []
@@ -481,12 +638,18 @@ class RuleEngine:
         raise ValueError(spec["kind"])
 
     def verdict(self, site, rules, as_of):
+        key = (site, tuple(rules), as_of)
+        if key not in self.cache:
+            self.cache[key] = self._verdict(site, rules, as_of)
+        return self.cache[key]
+
+    def _verdict(self, site, rules, as_of):
         results = [(r, *self.evaluate(site, r, as_of)) for r in rules]
         details = [f"{r}: {detail}" if fired is None else detail for r, fired, detail in results]
-        evaluated = [fired for _, fired, _ in results if fired is not None]
-        if any(evaluated):
+        fired = [f for _, f, _ in results]
+        if any(f is True for f in fired):
             return "Yes", details
-        if evaluated:
+        if all(f is False for f in fired):   # every applicable rule evaluated, none fired
             return "No", details
         return "Cannot be determined", details
 
@@ -511,19 +674,20 @@ def gen_anomaly(b: Bench, d, eng: RuleEngine):
         # per verdict to keep the verdicts roughly balanced.
         cap = {"Yes": 10, "No": 4, "Cannot be determined": 5}
         for v, lst in pool.items():
-            for day, det in rng.sample(lst, min(len(lst), cap[v])):
-                tmpl = rng.choice(phr)
-                b.add("anomaly", "verdict_on_date", tmpl.format(q=phrase, S=SITE[site], D=day.isoformat()),
-                      f"{v}. " + "; ".join(det), v, rules=rules)
+            for day, det in pick(rng, lst, min(len(lst), cap[v])):
+                for tmpl in choices(rng, phr):
+                    b.add("anomaly", "verdict_on_date", tmpl.format(q=phrase, S=SITE[site], D=day.isoformat()),
+                          f"{v}. " + "; ".join(det), v, rules=rules)
         v, det = eng.verdict(site, rules, None)
         b.add("anomaly", "verdict_latest", f"Based on the latest data, is there a {phrase} anomaly at {SITE[site]} according to its AD-RT rules?",
               f"{v}. " + "; ".join(det), v, rules=rules)
-    for site, phrase in NO_DATA_GROUPS:
-        tmpl = rng.choice(phr)
-        day = rng.choice(days)
-        b.add("anomaly", "verdict_no_data", tmpl.format(q=phrase, S=SITE[site], D=day.isoformat()),
-              f"Cannot be determined: the snapshot has no {phrase} readings at {SITE[site]} for its AD-RT rule(s).",
-              "Cannot be determined")
+    for site, phrase, rules in NO_DATA_GROUPS:
+        for tmpl, day in ([(t, dd) for t in phr for dd in days] if FULL else [(rng.choice(phr), rng.choice(days))]):
+            b.add("anomaly", "verdict_no_data", tmpl.format(q=phrase, S=SITE[site], D=day.isoformat()),
+                  NO_DATA_REFERENCE.get((site, phrase),
+                                        f"Cannot be determined: the snapshot has no {phrase} readings at {SITE[site]} "
+                                        f"for its AD-RT rule(s)."),
+                  "Cannot be determined", rules=rules)
     for site, phrase in NO_RULE_GROUPS:
         b.add("anomaly", "verdict_no_rule", f"Has the {phrase} at {SITE[site]} exceeded its AD-RT threshold?",
               NO_RULE_REFERENCE.get((site, phrase),
@@ -542,9 +706,9 @@ def gen_anomaly(b: Bench, d, eng: RuleEngine):
 def gen_followup(b: Bench, d, eng: RuleEngine):
     rng = random.Random(SEED + 4)
 
-    def add(template, turns, question, reference, value, answerable=True):
+    def add(template, turns, question, reference, value, answerable=True, **extra):
         b.add("followup", template, question, reference, value, answerable=answerable,
-              history=[{"question": q, "answer": a} for q, a in turns])
+              history=[{"question": q, "answer": a} for q, a in turns], **extra)
 
     def stat_ref(s, p, key):
         st = d["stats"][(s, p)]
@@ -569,23 +733,27 @@ def gen_followup(b: Bench, d, eng: RuleEngine):
         top, bot = max(ns, key=lambda n: n[3]), min(ns, key=lambda n: n[3])
         add("and_the_lowest", [(f"Which sensor node at {SITE[s]} is at the highest altitude?", f"{top[0]}, at {fnum(top[3], 2)} m.")],
             "And which one is the lowest?", f"{bot[0]}, at {fnum(bot[3], 2)} m.", bot[0])
-    far = {}
+    far, far3 = {}, {}
     for s in SITES:
         ns = d["nodes"][s]
         far[s] = max((haversine(a[1:3], c[1:3]), a[0], c[0]) for a, c in itertools.combinations(ns, 2))
-    for a, c in rng.sample(list(itertools.permutations(SITES, 2)), 10):
+        far3[s] = max((straight_line(a, c), a[0], c[0]) for a, c in itertools.combinations(ns, 2))
+    for a, c in pick(rng, list(itertools.permutations(SITES, 2)), 10):
         add("what_about_site_spatial", [(f"How far apart are the two most distant sensor nodes at {SITE[a]}?", f"{fnum(far[a][0], 1)} m, between {far[a][1]} and {far[a][2]}.")],
-            f"What about at {SITE[c]}?", f"{fnum(far[c][0], 1)} m, between {far[c][1]} and {far[c][2]}.", round(far[c][0], 1))
+            f"What about at {SITE[c]}?", f"{fnum(far[c][0], 1)} m, between {far[c][1]} and {far[c][2]}." + alt_text(far[c], far3[c], pair=True),
+            round(far[c][0], 1), reference_value_alt=round(far3[c][0], 1))
     daily_temp = sorted(k for k, v in d["daily"].items() if k[1] == "temperature" and v["n"] >= 10)
-    for s, p, day in rng.sample(daily_temp, 40):
+    for s, p, day in pick(rng, daily_temp, 40):
         nxt = (s, p, day + timedelta(days=1))
         if nxt in d["daily"] and d["daily"][nxt]["n"] >= 10:
             add("next_day", [(f"What was the average temperature at {SITE[s]} on {day.isoformat()}?", f"{fnum(float(d['daily'][(s, p, day)]['avg']))}.")],
                 "And on the following day?", f"{fnum(float(d['daily'][nxt]['avg']))}.", float(d["daily"][nxt]["avg"]))
     for site, phrase, rules in DATA_GROUPS:
-        for _ in range(4):
-            d1 = date(2026, 5, 20) + timedelta(days=rng.randrange(80))
-            d2 = d1 + timedelta(days=rng.randrange(1, 10))
+        offsets = ([(i, j) for i in range(80) for j in range(1, 10)] if FULL
+                   else [(rng.randrange(80), rng.randrange(1, 10)) for _ in range(4)])
+        for i, j in offsets:
+            d1 = date(2026, 5, 20) + timedelta(days=i)
+            d2 = d1 + timedelta(days=j)
             if d2 > date(2026, 8, 12):
                 continue
             eod = lambda x: datetime.combine(x, datetime.max.time(), tzinfo=timezone.utc).replace(microsecond=0)
@@ -597,13 +765,18 @@ def gen_followup(b: Bench, d, eng: RuleEngine):
         for (y, m, mname), (y2, m2, mname2) in zip(MONTHS[:-1], MONTHS[1:]):
             add("next_month", [(f"How many readings were recorded at {SITE[s]} in {mname} {y}?", f"{d['monthly'].get((s, y, m), 0)} readings.")],
                 "And in the following month?", f"{d['monthly'].get((s, y2, m2), 0)} readings.", d["monthly"].get((s, y2, m2), 0))
-    for a, c in rng.sample(list(itertools.permutations(SITES, 2)), 12):
+    for a, c in pick(rng, list(itertools.permutations(SITES, 2)), 12):
         add("two_turn", [(f"What is the average temperature at {SITE[a]}?", f"{stat_ref(a, 'temperature', 'avg')}"),
                          ("What about " + SITE[c] + "?", f"{stat_ref(c, 'temperature', 'avg')}")],
             "And the maximum there?", stat_ref(c, "temperature", "mx"), float(d["stats"][(c, "temperature")]["mx"]))
     for s in ["baltanas", "lucretili", "delos"]:
-        add("unanswerable", [(f"What is the average temperature at {SITE[s]}?", f"{stat_ref(s, 'temperature', 'avg')}")],
-            "And the relative humidity?", f"Cannot be answered: no humidity data at {SITE[s]}.", None, answerable=False)
+        turns = [(f"What is the average temperature at {SITE[s]}?", f"{stat_ref(s, 'temperature', 'avg')}")]
+        if (s, "hum1") in d["stats"]:   # the LoRaWAN weather station's relative humidity (snapshot v2)
+            add("and_the_quantity", turns, "And the relative humidity?", stat_ref(s, "hum1", "avg"),
+                float(d["stats"][(s, "hum1")]["avg"]))
+        else:
+            add("unanswerable", turns, "And the relative humidity?", f"Cannot be answered: no humidity data at {SITE[s]}.",
+                None, answerable=False)
 
 
 # ── sampling and output ────────────────────────────────────────────────────
@@ -647,7 +820,50 @@ def sample(items, quotas, rng):
     return picked
 
 
+PREFIX = {"basic": "B", "spatial": "S", "temporal": "T", "anomaly": "A", "followup": "F"}
+
+
+def _key(it):
+    return it["question"], tuple(h["question"] for h in it.get("history") or [])
+
+
+def update_references(b: Bench) -> list[dict]:
+    """The questions of the current benchmark_500.json, with references recomputed from every candidate
+    question (FULL) on the current snapshot. Writes the differences to benchmark_500.changes.json."""
+    cand = {}
+    for lst in b.items.values():
+        for it in lst:
+            if _key(it) in cand and cand[_key(it)]["reference"] != it["reference"]:
+                raise ValueError(f"two candidates for one question: {it['question']}")
+            cand[_key(it)] = it
+    old = json.loads((OUT / "benchmark_500.json").read_text())
+    out, changes, missing = [], [], []
+    for it in old:
+        new = cand.get(_key(it))
+        if new is None:
+            missing.append(it["id"])
+            out.append(it)
+            continue
+        new = {"id": it["id"], **new}
+        diff = {k: {"old": it.get(k), "new": new.get(k)}
+                for k in ("template", "reference", "reference_value", "reference_value_alt", "answerable", "history", "unit")
+                if it.get(k) != new.get(k)}
+        if diff:
+            changes.append({"id": it["id"], "type": it["type"], "question": it["question"], **diff})
+        out.append(new)
+    (OUT / "benchmark_500.changes.json").write_text(json.dumps(changes, indent=1, ensure_ascii=False, default=str))
+    print(f"{len(changes)} of {len(old)} questions changed (benchmark_500.changes.json)")
+    for t in PREFIX:
+        print(f"  {t}: {sum(1 for c in changes if c['type'] == t)}")
+    if missing:
+        raise SystemExit(f"no candidate on the current snapshot for {len(missing)} questions: {missing}")
+    return out
+
+
 def main():
+    global FULL
+    update = "--update-references" in sys.argv[1:]
+    FULL = update
     random.seed(SEED)
     rng = random.Random(SEED)
     con = psycopg.connect(DSN)
@@ -661,14 +877,18 @@ def main():
     gen_anomaly(b, d, eng)
     gen_followup(b, d, eng)
 
-    out, prefix = [], {"basic": "B", "spatial": "S", "temporal": "T", "anomaly": "A", "followup": "F"}
-    for qtype in ["basic", "spatial", "temporal", "anomaly", "followup"]:
-        chosen = sample(b.items[qtype], QUOTAS[qtype], rng)
-        assert len(chosen) == PER_TYPE, (qtype, len(chosen))
-        chosen.sort(key=lambda it: (list(QUOTAS[qtype]).index(it["template"]) if it["template"] in QUOTAS[qtype] else 99,
-                                    it["question"]))
-        for i, it in enumerate(chosen, 1):
-            out.append({"id": f"{prefix[qtype]}{i:03d}", **it})
+    if update:
+        out = update_references(b)
+    else:
+        out = []
+        for qtype in ["basic", "spatial", "temporal", "anomaly", "followup"]:
+            chosen = sample(b.items[qtype], QUOTAS[qtype], rng)
+            assert len(chosen) == PER_TYPE, (qtype, len(chosen))
+            chosen.sort(key=lambda it: (list(QUOTAS[qtype]).index(it["template"]) if it["template"] in QUOTAS[qtype] else 99,
+                                        it["question"]))
+            for i, it in enumerate(chosen, 1):
+                out.append({"id": f"{PREFIX[qtype]}{i:03d}", **it})
+    prefix = PREFIX
 
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / "benchmark_500.json").write_text(json.dumps(out, indent=1, ensure_ascii=False, default=str))
@@ -678,9 +898,14 @@ def main():
         for it in out:
             hist = " || ".join(f"Q: {h['question']} A: {h['answer']}" for h in it.get("history") or [])
             w.writerow([it["id"], it["type"], it["template"], it["answerable"], hist, it["question"], it["reference"], ""])
+    (n_readings,), = b.q("SELECT count(*) FROM readings")
+    (n_obs,), = b.q("SELECT count(*) FROM observations")
     meta = {
-        "snapshot": "argus_postgres_20261001_180439.dump (argus_snapshot, 1,316 epoch-timestamp rows removed)",
-        "observations": 3737747, "data_start": ftime(min(d["span"][s][0] for s in SITES)), "data_end": ftime(d["end"]),
+        "snapshot": "argus_postgres_20261001_180439.dump (argus_snapshot, 1,316 epoch-timestamp rows removed), "
+                    "v2: with the LoRaWAN measurements up to the data end and every reading at its pilot site "
+                    "(scripts/snapshot_add_lorawan.py)",
+        "readings": n_readings, "observations": n_obs,
+        "data_start": ftime(min(d["span"][s][0] for s in SITES)), "data_end": ftime(d["end"]),
         "seed": SEED, "counts": {t: sum(1 for it in out if it["type"] == t) for t in prefix},
         "unanswerable": sum(1 for it in out if not it["answerable"]),
         "conventions": __doc__.split("Conventions (also written to benchmark_500.meta.json):")[1].strip(),

@@ -1,6 +1,7 @@
 {
- "snapshot": "argus_postgres_20261001_180439.dump (argus_snapshot, 1,316 epoch-timestamp rows removed)",
- "observations": 3737747,
+ "snapshot": "argus_postgres_20261001_180439.dump (argus_snapshot, 1,316 epoch-timestamp rows removed), v2: with the LoRaWAN measurements up to the data end and every reading at its pilot site (scripts/snapshot_add_lorawan.py)",
+ "readings": 1677556,
+ "observations": 5227617,
  "data_start": "2026-05-13 00:50 UTC",
  "data_end": "2026-08-12 09:15 UTC",
  "seed": 20260813,
@@ -11,7 +12,7 @@
   "anomaly": 100,
   "followup": 100
  },
- "unanswerable": 15,
- "conventions": "- all times UTC; \"on <date>\" = that UTC calendar day;\n  - relative times (\"last 24 hours\") end at the snapshot's last reading;\n  - distances are haversine on a 6,371,000 m sphere; a centroid is the mean\n    latitude/longitude of the nodes; only nodes with coordinates count;\n  - AD-RT verdicts follow each rule's definition: windows end at the latest\n    matching reading at or before the end of the named day (or the snapshot\n    end), every (sensor, quantity) series is evaluated separately and a rule\n    fires if any series crosses its threshold; a question's verdict is Yes if\n    any applicable rule fires, No if at least one was evaluated and none fired,\n    Cannot be determined if none could be evaluated.",
- "built_at": "2026-10-10T11:20:22.971847+00:00"
+ "unanswerable": 7,
+ "conventions": "- all times UTC; \"on <date>\" = that UTC calendar day;\n  - relative times (\"last 24 hours\") end at the snapshot's last reading;\n  - distances are haversine on a 6,371,000 m sphere; a centroid is the mean\n    latitude/longitude of the nodes; only nodes with coordinates count; a\n    distance between nodes is also accepted as the straight-line distance, the\n    haversine distance combined with the altitude difference\n    (reference_value_alt), since the questions do not say which is meant;\n  - AD-RT verdicts follow each rule's definition: windows end at the latest\n    matching reading at or before the end of the named day (or the snapshot\n    end), every (sensor, quantity) series is evaluated separately and a rule\n    fires if any series crosses its threshold; the LoRaWAN running totals\n    (rain_acc, counter_acc_*) and rainfall intensity (rain_1, mm/h) are never a\n    rule's quantity; a question's verdict is Yes if\n    any applicable rule fires, No if every applicable rule was evaluated and\n    none fired, Cannot be determined otherwise.",
+ "built_at": "2026-10-30T15:21:31.322335+00:00"
 }

@@ -99,6 +99,17 @@ class RuleSpec:
     shape: str = "direct"  # human label for the "not evaluated" message
     note: str = ""
 
+    def __post_init__(self):
+        self.excludes = self.excludes + tuple(c for c in NON_RULE_CHANNELS
+                                              if not any(e in c for e in self.excludes))
+
+
+# LoRaWAN station channels that are never a rule's quantity, excluded from every rule's matcher: the
+# running totals rain_acc (rain since installation, mm) and counter_acc_in/out (visitors since
+# installation), which a matcher like "rain", "counter" or "acc" would otherwise take, and rain_1, a
+# rainfall intensity (mm/h) where the rainfall rules' thresholds are amounts (mm per window).
+NON_RULE_CHANNELS = ("rain_acc", "counter_acc", "rain_1")
+
 
 # (site, ruleId) -> RuleSpec. ruleId is the Policy's argus:ruleId, taken
 # straight from the /policies API records (37 total as of 2026-08-21).

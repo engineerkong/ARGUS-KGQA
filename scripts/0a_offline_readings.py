@@ -50,6 +50,14 @@ KEEP_RAW_JSON_IN_GRAPH = os.environ.get("ARGUS_KEEP_RAW_JSON", "") == "1"
 # latitude,longitude,altitude), one row per node across all sites.
 MATERIAL_DIR = Path(__file__).resolve().parent.parent / "material"
 NODES_CSV = MATERIAL_DIR / "ARGUS_nodes.csv"
+# Readings that arrive under a partner channel instead of a site ("lorawan", "eurecat") are stored at the
+# pilot site of their device, and LoRaWAN payload keys carry no unit: both looked up from the device
+# registry (material/lut.xlsx, see scripts/build_lookups.py). The reading's id keeps the channel name.
+SITE_LOOKUP_CSV = MATERIAL_DIR / "site_lookup.csv"
+CHANNEL_UNITS_CSV = MATERIAL_DIR / "lorawan_channels.csv"
+PARTNER_CHANNELS = {"lorawan", "eurecat"}
+# LoRaWAN radio metadata in the payload (frequency, spreading factor, coding rate): not measurements
+RADIO_KEY_PREFIX = "lora_"
 
 _node_coords: Dict[str, Dict[str, float]] | None = None
 
@@ -450,7 +458,38 @@ def reading_stable_id(reading: Dict[str, Any]) -> str:
     return _make_hash(key)
 
 
+_site_lookup: Optional[Dict[str, str]] = None
+_channel_units: Optional[Dict[str, str]] = None
+
+
+def _lookup(path: Path, key: str, value: str) -> Dict[str, str]:
+    return {r[key].strip(): r[value].strip() for r in _read_csv_rows(path) if r.get(key)} if path.exists() else {}
+
+
+def reading_site(reading: Dict[str, Any]) -> Optional[str]:
+    """The pilot site a reading belongs to: its own site, or for a partner channel the site of its device."""
+    global _site_lookup
+    site = reading.get("site")
+    if site in PARTNER_CHANNELS:
+        if _site_lookup is None:
+            _site_lookup = _lookup(SITE_LOOKUP_CSV, "device", "site")
+        for dev in (reading.get("sensor_id"), reading.get("node_id")):
+            if dev and dev in _site_lookup:
+                return _site_lookup[dev]
+    return site
+
+
+def _first(item: Dict[str, Any], *keys: str) -> Any:
+    # by presence, not truthiness: a value of 0 is a value
+    return next((item[k] for k in keys if k in item and item[k] is not None), None)
+
+
 def _extract_observations(payload: Any) -> Iterable[Dict[str, Any]]:
+    """Observations of a payload: a flat {quantity: value} dict, or a list of items naming the
+    quantity as n / name / quantity (SenML-like) or as key (the LoRaWAN payloads), with v / value
+    and an optional u / unit. LoRaWAN radio metadata (lora_*) is not an observation; a LoRaWAN key
+    without a unit gets the unit of material/lorawan_channels.csv."""
+    global _channel_units
     if payload is None:
         return []
 
@@ -467,11 +506,15 @@ def _extract_observations(payload: Any) -> Iterable[Dict[str, Any]]:
         for item in payload:
             if not isinstance(item, dict):
                 continue
-            observations.append({
-                "quantity": item.get("n") or item.get("name") or item.get("quantity"),
-                "value": item.get("v") or item.get("value"),
-                "unit": item.get("u") or item.get("unit"),
-            })
+            quantity = _first(item, "n", "name", "quantity", "key")
+            if isinstance(quantity, str) and quantity.startswith(RADIO_KEY_PREFIX):
+                continue
+            unit = _first(item, "u", "unit")
+            if unit is None and "key" in item:
+                if _channel_units is None:
+                    _channel_units = _lookup(CHANNEL_UNITS_CSV, "key", "unit")
+                unit = _channel_units.get(str(quantity)) or None
+            observations.append({"quantity": quantity, "value": _first(item, "v", "value"), "unit": unit})
         return observations
 
     return []
@@ -505,7 +548,7 @@ def _add_observation_value(g: Graph, obs_uri: URIRef, value: Any) -> None:
 def add_reading_to_graph(g: Graph, reading: Dict[str, Any]) -> str:
     rid = reading_stable_id(reading)
 
-    site_name = _safe_text(reading.get("site"), "unknown_site")
+    site_name = _safe_text(reading_site(reading), "unknown_site")
     sensor_id = _safe_text(reading.get("sensor_id"), "unknown_sensor")
     node_id = _safe_text(reading.get("node_id"), "unknown_node")
     reading_type = _safe_text(reading.get("reading_type"), "unknown_reading_type")
