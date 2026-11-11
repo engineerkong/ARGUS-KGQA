@@ -1,3 +1,5 @@
 __pycache__/
 tmp/
-data*/
+data_multitq/
+material/verify/data/
+data/argus_snapshot_v2.dump
